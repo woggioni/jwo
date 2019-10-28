@@ -1,0 +1,1 @@
+This is a ${adjective} test made by ${author} on ${date}. It's really ${adjective}!
