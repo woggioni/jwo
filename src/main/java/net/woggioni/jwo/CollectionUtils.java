@@ -10,10 +10,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
@@ -124,12 +126,27 @@ public class CollectionUtils {
         };
     }
 
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableMap(Function<T, K> keyExtractor, Function<T, V> valueExtractor) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableHashMap(
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor) {
+        return toUnmodifiableMap(HashMap::new, keyExtractor, valueExtractor);
+    }
+
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableTreeMap(
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor) {
+        return toUnmodifiableMap(TreeMap::new, keyExtractor, valueExtractor);
+    }
+
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableMap(
+            Supplier<Map<K, V>> constructor,
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor) {
         BiConsumer<Map<K, V>, T> accumulator = (map, streamElement) -> {
             map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
         };
         return Collector.of(
-                HashMap::new,
+                constructor,
                 accumulator,
                 mapMerger(throwingMerger()),
                 Collections::unmodifiableMap

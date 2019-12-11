@@ -338,4 +338,17 @@ public class JWO {
             return Optional.empty();
         }
     }
+
+    public static <T extends Enum> Map<String, T> enumReverseMap(Class<T> cls) {
+        return Arrays.stream(cls.getEnumConstants())
+                .collect(CollectionUtils.toUnmodifiableTreeMap(Object::toString, Function.identity()));
+    }
+
+    public static <T extends Enum> T enumFromString(Class<T> cls, Map<String, T> reverseMap, String value) {
+        T result = reverseMap.get(value);
+        if (result == null)
+            throw newThrowable(IllegalArgumentException.class,
+                    "Unknown value '%s' for enum %s", value, cls.getName());
+        return result;
+    }
 }
