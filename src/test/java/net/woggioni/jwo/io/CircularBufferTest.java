@@ -1,4 +1,4 @@
-package net.woggioni.jwo.utils.io;
+package net.woggioni.jwo.io;
 
 import lombok.SneakyThrows;
 import net.woggioni.jwo.io.CircularBuffer;

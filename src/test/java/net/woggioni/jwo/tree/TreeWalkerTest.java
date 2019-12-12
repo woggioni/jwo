@@ -1,11 +1,7 @@
-package net.woggioni.jwo.utils.tree;
+package net.woggioni.jwo.tree;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.woggioni.jwo.tree.StackContext;
-import net.woggioni.jwo.tree.TreeNode;
-import net.woggioni.jwo.tree.TreeNodeVisitor;
-import net.woggioni.jwo.tree.TreeWalker;
 import net.woggioni.jwo.tuple.Tuple2;
 import org.junit.Assert;
 import org.junit.Test;

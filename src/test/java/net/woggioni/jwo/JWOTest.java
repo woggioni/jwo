@@ -1,14 +1,10 @@
-package net.woggioni.jwo.utils;
+package net.woggioni.jwo;
 
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import net.woggioni.jwo.Chronometer;
-import net.woggioni.jwo.JWO;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.*;
-import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
