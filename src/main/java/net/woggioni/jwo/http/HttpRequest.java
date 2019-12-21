@@ -2,7 +2,6 @@ package net.woggioni.jwo.http;
 
 import lombok.AccessLevel;
 import lombok.Builder;
-import net.woggioni.jwo.http.HttpMethod;
 
 import java.io.InputStream;
 import java.net.URL;

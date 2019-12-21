@@ -1,0 +1,60 @@
+package net.woggioni.jwo.compression;
+
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import net.woggioni.jwo.JWO;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.*;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+@RequiredArgsConstructor
+@RunWith(Parameterized.class)
+public class CompressionOutputStreamTest {
+
+    @Parameterized.Parameters(name = "Format {0}, level {1}")
+    public static Iterable<Object[]> data() {
+        return Arrays.stream(CompressionFormat.values())
+            .filter(format -> JWO.which(format.executable).isPresent())
+            .flatMap(v -> IntStream.of(1, 3, 5, 7, 9).mapToObj(l -> new Object[]{v, l}))
+            .collect(Collectors.toList());
+    }
+
+    private final CompressionFormat compressionFormat;
+    private final int level;
+
+    @Test
+    @SneakyThrows
+    public void test() {
+        MessageDigest inputDigest = MessageDigest.getInstance("MD5");
+        byte[] compressed;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try(InputStream is = new BufferedInputStream(new DigestInputStream(
+                getClass().getResourceAsStream("/cracklib-small"), inputDigest));
+            CompressionOutputStream compressionOutputStream =
+                new CompressionOutputStream(new BufferedOutputStream(byteArrayOutputStream), compressionFormat, level)
+        ) {
+            int read;
+            byte[] buffer = new byte[1024];
+            while((read = is.read(buffer, 0, buffer.length)) >= 0) {
+                compressionOutputStream.write(buffer, 0, read);
+            }
+        }
+        compressed = byteArrayOutputStream.toByteArray();
+
+        MessageDigest outputDigest = MessageDigest.getInstance("MD5");
+        try(InputStream is = new DigestInputStream(new CompressionInputStream(
+            new ByteArrayInputStream(compressed), compressionFormat, StreamMode.DECOMPRESSION), outputDigest)) {
+            byte[] buffer = new byte[1024];
+            while(is.read(buffer, 0, buffer.length) >= 0) {}
+        }
+        Assert.assertArrayEquals(inputDigest.digest(), outputDigest.digest());
+    }
+}

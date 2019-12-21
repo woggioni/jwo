@@ -13,6 +13,7 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -350,5 +351,13 @@ public class JWO {
             throw newThrowable(IllegalArgumentException.class,
                     "Unknown value '%s' for enum %s", value, cls.getName());
         return result;
+    }
+
+    public static Optional<Path> which(String command) {
+        return Stream.of(System.getenv("PATH").split(Pattern.quote(File.pathSeparator)))
+            .map(path -> Paths.get(path, command))
+            .filter(Files::exists)
+            .filter(Files::isExecutable)
+            .findFirst();
     }
 }
