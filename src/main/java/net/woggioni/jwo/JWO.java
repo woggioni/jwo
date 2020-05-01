@@ -2,6 +2,7 @@ package net.woggioni.jwo;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.woggioni.jwo.tuple.Tuple2;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -214,9 +215,9 @@ public class JWO {
      *
      * @param list the input list
      * @param <T>  the type parameter of the {@link List}
+     * @return the input list
      * @throws IndexOutOfBoundsException     if the list is empty
      * @throws UnsupportedOperationException if the remove operation is not supported by this list
-     * @return the input list
      */
     public static <T> T pop(List<T> list) {
         return list.remove(list.size() - 1);
@@ -272,9 +273,9 @@ public class JWO {
     }
 
     /**
-     * @param reader the reader reading the template text
+     * @param reader    the reader reading the template text
      * @param valuesMap a map containing the values to replace in the template
-     * {@link #renderTemplate(String, Map)}
+     *                  {@link #renderTemplate(String, Map)}
      */
     @SneakyThrows
     public static String renderTemplate(Reader reader, Map<String, Object> valuesMap) {
@@ -333,7 +334,7 @@ public class JWO {
     }
 
     public static <T, U extends T> Optional<U> cast(T value, Class<U> cls) {
-        if(cls.isInstance(value)) {
+        if (cls.isInstance(value)) {
             return Optional.of((U) value);
         } else {
             return Optional.empty();
@@ -355,9 +356,20 @@ public class JWO {
 
     public static Optional<Path> which(String command) {
         return Stream.of(System.getenv("PATH").split(Pattern.quote(File.pathSeparator)))
-            .map(path -> Paths.get(path, command))
-            .filter(Files::exists)
-            .filter(Files::isExecutable)
-            .findFirst();
+                .map(path -> Paths.get(path, command))
+                .filter(Files::exists)
+                .filter(Files::isExecutable)
+                .findFirst();
+    }
+
+    public static Optional<Tuple2<String, String>> splitExtension(Path file) {
+        String fileName = file.getFileName().toString();
+        int index = fileName.lastIndexOf('.');
+        if (index == -1) {
+            return Optional.empty();
+        } else {
+            return Optional.of(
+                    new Tuple2<>(fileName.substring(0, index), fileName.substring(index)));
+        }
     }
 }
