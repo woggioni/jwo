@@ -22,6 +22,9 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.12.1
 
 javacOptions in (Compile, compile) ++= Seq("-source", "1.8", "-target", "1.8")
 
+Compile / packageBin / packageOptions +=
+  Package.ManifestAttributes("Automatic-Module-Name" -> "net.woggioni.jwo")
+
 enablePlugins(Delombok)
 enablePlugins(DelombokJavadoc)
 lazy val benchmark = (project in file("benchmark")).dependsOn(LocalRootProject)
