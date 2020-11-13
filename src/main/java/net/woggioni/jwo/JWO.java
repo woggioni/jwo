@@ -20,8 +20,20 @@ import java.util.stream.StreamSupport;
 
 @Slf4j
 public class JWO {
-    public static <T> Stream<T> iterable2stream(Iterable<T> iterable) {
+    public static <T> Stream<T> iterable2Stream(Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false);
+    }
+
+    public static <T> Stream<T> iterable2ParallelStream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), true);
+    }
+
+    public static <T> Stream<T> iterator2Stream(Iterator<T> it) {
+        return iterable2Stream(() -> it);
+    }
+
+    public static <T> Stream<T> iterator2ParallelStream(Iterator<T> it) {
+        return iterable2ParallelStream(() -> it);
     }
 
     @SneakyThrows
