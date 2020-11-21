@@ -384,4 +384,13 @@ public class JWO {
                     new Tuple2<>(fileName.substring(0, index), fileName.substring(index)));
         }
     }
+
+    public static <T, U> T dynamicCast(U obj, Class<T> cls) {
+        if(obj == null) return null;
+        else if(cls.isInstance(obj.getClass())) {
+            return (T) obj;
+        } else {
+            return null;
+        }
+    }
 }

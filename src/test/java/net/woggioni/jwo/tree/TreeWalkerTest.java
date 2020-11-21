@@ -3,8 +3,8 @@ package net.woggioni.jwo.tree;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.woggioni.jwo.tuple.Tuple2;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.function.Function;
@@ -60,24 +60,24 @@ public class TreeWalkerTest {
         TreeNodeVisitor<Node, Void> nodeVisitor = new TreeNodeVisitor<Node, Void>() {
             @Override
             public VisitOutcome visitPre(List<StackContext<Node, Void>> stackContextList) {
-                Assert.assertTrue(it_pre.hasNext());
-                Assert.assertEquals(it_pre.next(),
+                Assertions.assertTrue(it_pre.hasNext());
+                Assertions.assertEquals(it_pre.next(),
                         stackContextList.get(stackContextList.size() - 1).getNode().getId());
                 return VisitOutcome.CONTINUE;
             }
 
             @Override
             public void visitPost(List<StackContext<Node, Void>> stackContextList) {
-                Assert.assertTrue(it_post.hasNext());
-                Assert.assertEquals(it_post.next(),
+                Assertions.assertTrue(it_post.hasNext());
+                Assertions.assertEquals(it_post.next(),
                         stackContextList.get(stackContextList.size() - 1).getNode().getId());
             }
         };
         TreeWalker<Node, Void> walker =
                 new TreeWalker<>(nodeVisitor);
         walker.walk(testNodeMap.get(1));
-        Assert.assertFalse(it_pre.hasNext());
-        Assert.assertFalse(it_post.hasNext());
+        Assertions.assertFalse(it_pre.hasNext());
+        Assertions.assertFalse(it_post.hasNext());
     }
 
     @Test
@@ -88,9 +88,9 @@ public class TreeWalkerTest {
         TreeNodeVisitor<Node, Void> linkVisitor = new TreeNodeVisitor<Node, Void>() {
             @Override
             public VisitOutcome visitPre(List<StackContext<Node, Void>> nodePath) {
-                Assert.assertTrue(it.hasNext());
+                Assertions.assertTrue(it.hasNext());
                 Integer id = nodePath.get(nodePath.size() - 1).getNode().getId();
-                Assert.assertEquals(it.next(), id);
+                Assertions.assertEquals(it.next(), id);
                 if(Objects.equals(4, nodePath.get(nodePath.size() - 1).getNode().getId())) {
                     return VisitOutcome.SKIP;
                 } else {
@@ -101,6 +101,6 @@ public class TreeWalkerTest {
         TreeWalker<Node, Void> walker =
                 new TreeWalker<>(linkVisitor);
         walker.walk(testNodeMap.get(1));
-        Assert.assertFalse(it.hasNext());
+        Assertions.assertFalse(it.hasNext());
     }
 }

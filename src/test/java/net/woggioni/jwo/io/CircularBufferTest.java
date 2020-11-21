@@ -1,9 +1,8 @@
 package net.woggioni.jwo.io;
 
 import lombok.SneakyThrows;
-import net.woggioni.jwo.io.CircularBuffer;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,10 +27,8 @@ public class CircularBufferTest {
             } else {
                 char c = (char) b;
                 outputDigest.update((byte) b);
-                System.out.print(c);
             }
         }
-        System.out.println();
-        Assert.assertArrayEquals(streamDigest.digest(), outputDigest.digest());
+        Assertions.assertArrayEquals(streamDigest.digest(), outputDigest.digest());
     }
 }

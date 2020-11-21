@@ -1,8 +1,9 @@
 package net.woggioni.jwo;
 
 import lombok.SneakyThrows;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.*;
@@ -20,22 +21,24 @@ public class JWOTest {
             if (n > 3) return Optional.of(n);
             else return Optional.empty();
         }).collect(Collectors.toList());
-        Assert.assertEquals(Collections.singletonList(4), l);
+        Assertions.assertEquals(Collections.singletonList(4), l);
     }
 
     @Test
     public void optional2StreamTest() {
         Integer integer = 3;
         Optional<Integer> s = Optional.of(integer);
-        JWO.optional2Stream(s).forEach(n -> Assert.assertEquals(integer, n));
+        JWO.optional2Stream(s).forEach(n -> Assertions.assertEquals(integer, n));
         s = Optional.empty();
-        JWO.optional2Stream(s).forEach(n -> Assert.fail());
+        JWO.optional2Stream(s).forEach(n -> Assertions.fail(
+            "Stream should have been empty and this piece of code never executed")
+        );
     }
 
     @Test
     @SneakyThrows
     public void testRenderTemplate() {
-        Map valuesMap = new HashMap<String, String>();
+        Map<String, Object> valuesMap = new HashMap<>();
         valuesMap.put("author", "John Doe");
         valuesMap.put("date", "2020-03-25 16:22");
         valuesMap.put("adjective", "simple");
@@ -43,18 +46,18 @@ public class JWOTest {
         try (Reader reader = new InputStreamReader(
                 JWOTest.class.getResourceAsStream("/render_template_test.txt"))) {
             String rendered = JWO.renderTemplate(reader, valuesMap);
-            Assert.assertEquals(expected, rendered);
+            Assertions.assertEquals(expected, rendered);
         }
         try (Reader reader = new InputStreamReader(
                 JWOTest.class.getResourceAsStream("/render_template_test.txt"))) {
             String rendered = JWO.renderTemplate(JWO.readAll(reader), valuesMap);
-            Assert.assertEquals(expected, rendered);
+            Assertions.assertEquals(expected, rendered);
         }
     }
 
 
     public static String renderTemplateNaive(String template, Map<String, Object> valuesMap){
-        StringBuffer formatter = new StringBuffer(template);
+        StringBuilder formatter = new StringBuilder(template);
         Object absent = new Object();
 
         Matcher matcher = Pattern.compile("\\$\\{(\\w+)}").matcher(template);

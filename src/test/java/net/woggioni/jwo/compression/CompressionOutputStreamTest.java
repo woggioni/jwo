@@ -1,38 +1,31 @@
 package net.woggioni.jwo.compression;
 
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.woggioni.jwo.JWO;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.*;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-@RequiredArgsConstructor
-@RunWith(Parameterized.class)
 public class CompressionOutputStreamTest {
 
-    @Parameterized.Parameters(name = "Format {0}, level {1}")
-    public static Iterable<Object[]> data() {
+    private static Stream<Arguments> testParameters() {
         return Arrays.stream(CompressionFormat.values())
             .filter(format -> JWO.which(format.executable).isPresent())
-            .flatMap(v -> IntStream.of(1, 3, 5, 7, 9).mapToObj(l -> new Object[]{v, l}))
-            .collect(Collectors.toList());
+            .flatMap(v -> IntStream.of(1, 3, 5, 7, 9).mapToObj(l -> Arguments.of(v, l)));
     }
 
-    private final CompressionFormat compressionFormat;
-    private final int level;
-
-    @Test
     @SneakyThrows
-    public void test() {
+    @ParameterizedTest
+    @MethodSource("testParameters")
+    public void test(CompressionFormat compressionFormat, int level) {
         MessageDigest inputDigest = MessageDigest.getInstance("MD5");
         byte[] compressed;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -55,6 +48,6 @@ public class CompressionOutputStreamTest {
             byte[] buffer = new byte[1024];
             while(is.read(buffer, 0, buffer.length) >= 0) {}
         }
-        Assert.assertArrayEquals(inputDigest.digest(), outputDigest.digest());
+        Assertions.assertArrayEquals(inputDigest.digest(), outputDigest.digest());
     }
 }

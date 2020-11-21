@@ -1,8 +1,8 @@
 package net.woggioni.jwo;
 
 import lombok.SneakyThrows;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,7 +21,7 @@ public class Leb128Test {
         byte[] bytes = baos.toByteArray();
 
         Leb128.Leb128Decoder decoder = new Leb128.Leb128Decoder(new ByteArrayInputStream(bytes));
-        numbers.forEach(n -> Assert.assertEquals((long) n, decoder.decode()));
+        numbers.forEach(n -> Assertions.assertEquals((long) n, decoder.decode()));
     }
 
     @Test
@@ -36,14 +36,14 @@ public class Leb128Test {
         byte[] bytes = baos.toByteArray();
 
         Leb128.Leb128Decoder decoder = new Leb128.Leb128Decoder(new ByteArrayInputStream(bytes));
-        numbers.forEach(n -> Assert.assertEquals(n, decoder.decodeDouble(), 0.0));
+        numbers.forEach(n -> Assertions.assertEquals(n, decoder.decodeDouble(), 0.0));
     }
 
 
     @Test
     public void reverseTest() {
         long n = 101325;
-        Assert.assertEquals(n, Leb128.reverse(Leb128.reverse(n)));
+        Assertions.assertEquals(n, Leb128.reverse(Leb128.reverse(n)));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class Leb128Test {
         try(ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             Leb128.encode(os, reverse);
             byte[] bytes = os.toByteArray();
-            Assert.assertEquals(3, bytes.length);
+            Assertions.assertEquals(3, bytes.length);
         }
     }
 }
