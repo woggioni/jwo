@@ -14,9 +14,13 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import java.util.zip.CRC32;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Slf4j
 public class JWO {
@@ -392,5 +396,84 @@ public class JWO {
         } else {
             return null;
         }
+    }
+
+
+    @SneakyThrows
+    private static void computeSizeAndCrc32(
+            ZipEntry zipEntry,
+            InputStream inputStream,
+            byte[] buffer) {
+        CRC32 crc32 = new CRC32();
+        long sz = 0L;
+        while (true) {
+            int read = inputStream.read(buffer);
+            if (read < 0) break;
+            sz += read;
+            crc32.update(buffer, 0, read);
+        }
+        zipEntry.setSize(sz);
+        zipEntry.setCompressedSize(sz);
+        zipEntry.setCrc(crc32.getValue());
+    }
+
+    @SneakyThrows
+    public static void write2Stream(OutputStream os,
+                           InputStream inputStream,
+                           byte[] buffer) {
+        while (true) {
+            int read = inputStream.read(buffer);
+            if (read < 0) break;
+            os.write(buffer, 0, read);
+        }
+    }
+
+    public static void write2Stream(OutputStream os,
+                                    InputStream inputStream) {
+        write2Stream(os, inputStream, new byte[0x10000]);
+    }
+
+    @SneakyThrows
+    public void writeZipEntry(
+        ZipOutputStream zip,
+        Supplier<InputStream> source,
+        String destinationFileName,
+        int compressionMethod,
+        byte[] buffer) {
+        ZipEntry zipEntry = new ZipEntry(destinationFileName);
+        switch(compressionMethod) {
+            case ZipEntry.STORED:
+                // A stored ZipEntry requires computing the size and CRC32 in advance
+                try(InputStream is = source.get()) {
+                    computeSizeAndCrc32(zipEntry, is, buffer);
+                }
+                break;
+            case ZipEntry.DEFLATED:
+                break;
+            default:
+                throw newThrowable(IllegalArgumentException.class,
+                        "Unsupported zip entry compression method value: %s", compressionMethod);
+        }
+        zipEntry.setMethod(compressionMethod);
+        zip.putNextEntry(zipEntry);
+        try(InputStream is = source.get()) {
+            write2Stream(zip, is, buffer);
+        }
+        zip.closeEntry();
+    }
+
+    public void writeZipEntry(
+            ZipOutputStream zip,
+            Supplier<InputStream> source,
+            String destinationFileName,
+            int compressionMethod) {
+        writeZipEntry(zip, source, destinationFileName, compressionMethod, new byte[0x10000]);
+    }
+
+    public void writeZipEntry(
+            ZipOutputStream zip,
+            Supplier<InputStream> source,
+            String destinationFileName) {
+        writeZipEntry(zip, source, destinationFileName, ZipEntry.DEFLATED);
     }
 }
