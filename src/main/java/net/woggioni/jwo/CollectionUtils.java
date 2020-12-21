@@ -1,17 +1,6 @@
 package net.woggioni.jwo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -132,10 +121,58 @@ public class CollectionUtils {
         return toUnmodifiableMap(HashMap::new, keyExtractor, valueExtractor);
     }
 
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableTreeMap(
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toUnmodifiableTreeMap(
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor) {
-        return toUnmodifiableMap(TreeMap::new, keyExtractor, valueExtractor);
+        return toUnmodifiableNavigableMap(TreeMap::new, keyExtractor, valueExtractor);
+    }
+
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toUnmodifiableTreeMap(
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor,
+            Comparator<K> comparator) {
+        return toUnmodifiableNavigableMap(() -> new TreeMap<>(comparator), keyExtractor, valueExtractor);
+    }
+
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toTreeMap(
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor) {
+        return toNavigableMap(TreeMap::new, keyExtractor, valueExtractor);
+    }
+
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toTreeMap(
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor,
+            Comparator<K> comparator) {
+        return toNavigableMap(() -> new TreeMap<>(comparator), keyExtractor, valueExtractor);
+    }
+
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toNavigableMap(
+            Supplier<NavigableMap<K, V>> constructor,
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor) {
+        BiConsumer<NavigableMap<K, V>, T> accumulator = (map, streamElement) -> {
+            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
+        };
+        return Collector.of(
+                constructor,
+                accumulator,
+                mapMerger(throwingMerger())
+        );
+    }
+
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(
+            Supplier<Map<K, V>> constructor,
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor) {
+        BiConsumer<Map<K, V>, T> accumulator = (map, streamElement) -> {
+            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
+        };
+        return Collector.of(
+                constructor,
+                accumulator,
+                mapMerger(throwingMerger())
+        );
     }
 
     public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableMap(
@@ -150,6 +187,21 @@ public class CollectionUtils {
                 accumulator,
                 mapMerger(throwingMerger()),
                 Collections::unmodifiableMap
+        );
+    }
+
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toUnmodifiableNavigableMap(
+            Supplier<NavigableMap<K, V>> constructor,
+            Function<T, K> keyExtractor,
+            Function<T, V> valueExtractor) {
+        BiConsumer<NavigableMap<K, V>, T> accumulator = (map, streamElement) -> {
+            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
+        };
+        return Collector.of(
+                constructor,
+                accumulator,
+                mapMerger(throwingMerger()),
+                Collections::unmodifiableNavigableMap
         );
     }
 }

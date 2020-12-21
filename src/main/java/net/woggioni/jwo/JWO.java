@@ -10,8 +10,10 @@ import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -20,6 +22,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 @Slf4j
@@ -434,7 +437,7 @@ public class JWO {
     }
 
     @SneakyThrows
-    public void writeZipEntry(
+    public static void writeZipEntry(
         ZipOutputStream zip,
         Supplier<InputStream> source,
         String destinationFileName,
@@ -462,7 +465,7 @@ public class JWO {
         zip.closeEntry();
     }
 
-    public void writeZipEntry(
+    public static void writeZipEntry(
             ZipOutputStream zip,
             Supplier<InputStream> source,
             String destinationFileName,
@@ -470,10 +473,71 @@ public class JWO {
         writeZipEntry(zip, source, destinationFileName, compressionMethod, new byte[0x10000]);
     }
 
-    public void writeZipEntry(
+    public static void writeZipEntry(
             ZipOutputStream zip,
             Supplier<InputStream> source,
             String destinationFileName) {
         writeZipEntry(zip, source, destinationFileName, ZipEntry.DEFLATED);
+    }
+
+    @SneakyThrows
+    public static void extractZip(Path sourceArchive, Path destinationFolder) {
+        byte[] buffer = new byte[0x10000];
+        expandZip(sourceArchive, new BiConsumer<ZipInputStream, ZipEntry>() {
+            @Override
+            @SneakyThrows
+            public void accept(ZipInputStream zipInputStream, ZipEntry zipEntry) {
+                Path newFile = destinationFolder.resolve(zipEntry.getName());
+                Files.createDirectories(newFile.getParent());
+                try(OutputStream outputStream = Files.newOutputStream(newFile)) {
+                    while (true) {
+                        int read = zipInputStream.read(buffer);
+                        if (read < 0) break;
+                        outputStream.write(buffer, 0, read);
+                    }
+                }
+            }
+        });
+    }
+
+    @SneakyThrows
+    public static void expandZip(Path sourceArchive, BiConsumer<ZipInputStream, ZipEntry> consumer) {
+        try(ZipInputStream zis = new ZipInputStream(Files.newInputStream(sourceArchive))) {
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+                consumer.accept(zis, zipEntry);
+                zipEntry = zis.getNextEntry();
+            }
+            zis.closeEntry();
+        }
+    }
+
+    @SneakyThrows
+    public static void installResource(String resourceName, Path destination, Class<?> cls) {
+        Path outputFile;
+        if (Files.isSymbolicLink(destination)) {
+            destination = destination.toRealPath();
+        }
+        if(!Files.exists(destination)) {
+            Files.createDirectories(destination.getParent());
+            outputFile = destination;
+        } else if(Files.isDirectory(destination)) {
+            outputFile = destination.resolve(resourceName.substring(1 + resourceName.lastIndexOf('/')));
+        } else if(Files.isRegularFile(destination)) {
+            outputFile = destination;
+        } else {
+            throw newThrowable(IllegalStateException.class,
+                    "Path '%s' is neither a file nor a directory",
+                    destination
+            );
+        }
+        InputStream is = cls.getResourceAsStream(resourceName);
+        if(is == null) is = cls.getClassLoader().getResourceAsStream(resourceName);
+        if(is == null) throw new FileNotFoundException(resourceName);
+        try {
+            Files.copy(is, outputFile, StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            is.close();
+        }
     }
 }
