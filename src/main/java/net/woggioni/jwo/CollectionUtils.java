@@ -47,52 +47,53 @@ public class CollectionUtils {
         return Stream.of(elements).collect(toUnmodifiableSet());
     }
 
-    private static <T> Collector<T, ?, Set<T>> createTreeSetCollector(Function<Set<T>, Set<T>> finalizer, Comparator<? super T> comparator) {
+    private static <T> Collector<T, ?, NavigableSet<T>>
+    createTreeSetCollector(Function<NavigableSet<T>, NavigableSet<T>> finalizer, Comparator<? super T> comparator) {
         return Collector.of(
                 () -> new TreeSet<>(comparator),
                 Set::add,
-                (Set<T> s1, Set<T> s2) -> {
+                (NavigableSet<T> s1, NavigableSet<T> s2) -> {
                     s1.addAll(s2);
                     return s1;
                 },
                 finalizer);
     }
 
-    private static <T extends Comparable<T>> Collector<T, ?, Set<T>>
-    createTreeSetCollector(Function<Set<T>, Set<T>> finalizer) {
+    private static <T extends Comparable<T>> Collector<T, ?, NavigableSet<T>>
+    createTreeSetCollector(Function<NavigableSet<T>, NavigableSet<T>> finalizer) {
         return Collector.of(
                 TreeSet::new,
                 Set::add,
-                (Set<T> s1, Set<T> s2) -> {
+                (NavigableSet<T> s1, NavigableSet<T> s2) -> {
                     s1.addAll(s2);
                     return s1;
                 },
                 finalizer);
     }
 
-    public static <T extends Comparable<T>> Collector<T, ?, Set<T>> toTreeSet() {
+    public static <T extends Comparable<T>> Collector<T, ?, NavigableSet<T>> toTreeSet() {
         return createTreeSetCollector(Function.identity());
     }
 
-    public static <T> Collector<T, ?, Set<T>> toTreeSet(Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, NavigableSet<T>> toTreeSet(Comparator<? super T> comparator) {
         return createTreeSetCollector(Function.identity(), comparator);
     }
 
-    public static <T> Collector<T, ?, Set<T>> toUnmodifiableTreeSet(Comparator<? super T> comparator) {
-        return createTreeSetCollector(Collections::unmodifiableSet, comparator);
+    public static <T> Collector<T, ?, NavigableSet<T>> toUnmodifiableTreeSet(Comparator<? super T> comparator) {
+        return createTreeSetCollector(Collections::unmodifiableNavigableSet, comparator);
     }
 
-    public static <T extends Comparable<T>> Collector<T, ?, Set<T>> toUnmodifiableTreeSet() {
-        return createTreeSetCollector(Collections::unmodifiableSet);
+    public static <T extends Comparable<T>> Collector<T, ?, NavigableSet<T>> toUnmodifiableTreeSet() {
+        return createTreeSetCollector(Collections::unmodifiableNavigableSet);
     }
 
     @SafeVarargs
-    public static <T> Set<T> immutableTreeSet(Comparator<? super T> comparator, T... elements) {
+    public static <T> NavigableSet<T> immutableTreeSet(Comparator<? super T> comparator, T... elements) {
         return Stream.of(elements).collect(toUnmodifiableTreeSet(comparator));
     }
 
     @SafeVarargs
-    public static <T extends Comparable<T>> Set<T> immutableTreeSet(T... elements) {
+    public static <T extends Comparable<T>> NavigableSet<T> immutableTreeSet(T... elements) {
         return Stream.of(elements).collect(toUnmodifiableTreeSet());
     }
 
@@ -147,11 +148,11 @@ public class CollectionUtils {
         return toNavigableMap(() -> new TreeMap<>(comparator), keyExtractor, valueExtractor);
     }
 
-    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toNavigableMap(
-            Supplier<NavigableMap<K, V>> constructor,
+    public static <T, K, V, MAP_TYPE extends NavigableMap<K, V>> Collector<T, ?, MAP_TYPE> toNavigableMap(
+            Supplier<MAP_TYPE> constructor,
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor) {
-        BiConsumer<NavigableMap<K, V>, T> accumulator = (map, streamElement) -> {
+        BiConsumer<MAP_TYPE, T> accumulator = (map, streamElement) -> {
             map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
         };
         return Collector.of(
