@@ -540,4 +540,51 @@ public class JWO {
             is.close();
         }
     }
+
+    public static <T> Iterator<T> iterator(T[] array) {
+        return new Iterator<T>() {
+            private int i = 0;
+            @Override
+            public boolean hasNext() {
+                return i < array.length;
+            }
+
+            @Override
+            public T next() {
+                return array[i++];
+            }
+        };
+    }
+
+    public static String decapitalize(String s, Locale locale) {
+        if (!s.isEmpty() && !Character.isLowerCase(s.charAt(0)))
+            return s.substring(0, 1).toLowerCase(locale) + s.substring(1);
+        else return s;
+    }
+
+    public static String decapitalize(String s) {
+        return decapitalize(s, Locale.getDefault());
+    }
+
+    public static String capitalize(String s) {
+        return capitalize(s, Locale.getDefault());
+    }
+
+    public static String capitalize(String s, Locale locale) {
+        if (!s.isEmpty()) {
+            char firstChar = s.charAt(0);
+            if (Character.isLowerCase(firstChar)) {
+                StringBuilder sb = new StringBuilder();
+                char titleChar = Character.toTitleCase(firstChar);
+                if (titleChar != Character.toUpperCase(firstChar)) {
+                    sb.append(titleChar);
+                } else {
+                    sb.append(s.substring(0, 1).toUpperCase(locale));
+                }
+                sb.append(s.substring(1));
+                return  sb.toString();
+            }
+        }
+        return s;
+    }
 }
