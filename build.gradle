@@ -1,0 +1,44 @@
+allprojects {
+    apply plugin: 'java-library'
+    group = "net.woggioni"
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        ['', 'test'].each {sourceSetName ->
+            ['compileOnly', 'annotationProcessor'].each { configurationSuffix ->
+                String configurationName
+                if(sourceSetName) configurationName = sourceSetName + configurationSuffix.capitalize()
+                else configurationName = configurationSuffix
+                add(configurationName,  [group: "org.projectlombok", name: "lombok", version: lombokVersion])
+            }
+        }
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitJupiterVersion
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
+    }
+
+}
+
+dependencies {
+    implementation group: "org.slf4j", name: "slf4j-api", version: slf4jVersion
+}
+
+compileJava {
+    options.compilerArgs << '--release' << '8'
+}
+
+jar {
+    manifest{
+        attributes([
+            "Automatic-Module-Name": "net.woggioni.jwo"
+        ])
+    }
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.BIN
+    gradleVersion = "6.8.2"
+}
