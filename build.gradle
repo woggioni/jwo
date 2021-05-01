@@ -1,10 +1,15 @@
+plugins {
+    id 'maven-publish'
+}
+
 allprojects {
     apply plugin: 'java-library'
     group = "net.woggioni"
+    version = jwoVersion
+
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
     }
     dependencies {
         ['', 'test'].each {sourceSetName ->
@@ -19,7 +24,6 @@ allprojects {
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitJupiterVersion
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
     }
-
 }
 
 dependencies {
@@ -27,7 +31,7 @@ dependencies {
 }
 
 compileJava {
-    options.compilerArgs << '--release' << '8'
+    options.release = 8
 }
 
 jar {
@@ -40,5 +44,5 @@ jar {
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = "6.8.2"
+    gradleVersion = "7.0"
 }

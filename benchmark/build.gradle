@@ -9,3 +9,8 @@ repositories {
 dependencies {
     implementation project(':')
 }
+
+application {
+    mainClass = 'net.woggioni.jwo.benchmark.Main'
+}
+
