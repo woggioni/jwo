@@ -46,3 +46,13 @@ wrapper {
     distributionType = Wrapper.DistributionType.BIN
     gradleVersion = "7.0"
 }
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components["java"])
+        }
+    }
+}
+
+
