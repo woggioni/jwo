@@ -46,7 +46,7 @@ jar {
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = "7.0"
+    gradleVersion = "7.0.2"
 }
 
 publishing {
