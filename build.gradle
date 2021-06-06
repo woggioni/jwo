@@ -8,7 +8,9 @@ allprojects {
     version = jwoVersion
 
     repositories {
-        mavenLocal()
+        maven {
+            url = woggioniMavenRepositoryUrl
+        }
         mavenCentral()
     }
     dependencies {
@@ -48,6 +50,11 @@ wrapper {
 }
 
 publishing {
+    repositories {
+        maven {
+            url = woggioniMavenRepositoryUrl
+        }
+    }
     publications {
         maven(MavenPublication) {
             from(components["java"])
