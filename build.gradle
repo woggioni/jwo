@@ -9,7 +9,7 @@ allprojects {
 
     repositories {
         maven {
-            url = woggioniMavenRepositoryUrl
+            url = 'https://woggioni.net/mvn/'
         }
         mavenCentral()
     }
@@ -52,7 +52,7 @@ wrapper {
 publishing {
     repositories {
         maven {
-            url = woggioniMavenRepositoryUrl
+            url = 'https://mvn.woggioni.net/'
         }
     }
     publications {
