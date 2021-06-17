@@ -295,6 +295,10 @@ public class JWO {
      * @param reader    the reader reading the template text
      * @param valuesMap a map containing the values to replace in the template
      *                  {@link #renderTemplate(String, Map)}
+     * @return The template text (String) with the variable names replaced by the values passed in the map. <br>
+     * If any of the variable names is not contained in the map it will be replaced by an empty string. <br>
+     * Example: <br>
+     * "This template was created by John Doe."
      */
     @SneakyThrows
     public static String renderTemplate(Reader reader, Map<String, Object> valuesMap) {
