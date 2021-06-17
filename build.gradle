@@ -1,9 +1,11 @@
 plugins {
     id 'maven-publish'
+    id 'net.woggioni.gradle.lombok' apply false
 }
 
 allprojects {
     apply plugin: 'java-library'
+    apply plugin: 'net.woggioni.gradle.lombok'
     group = "net.woggioni"
     version = jwoVersion
 
@@ -14,17 +16,12 @@ allprojects {
         mavenCentral()
     }
     dependencies {
-        ['', 'test'].each {sourceSetName ->
-            ['compileOnly', 'annotationProcessor'].each { configurationSuffix ->
-                String configurationName
-                if(sourceSetName) configurationName = sourceSetName + configurationSuffix.capitalize()
-                else configurationName = configurationSuffix
-                add(configurationName,  [group: "org.projectlombok", name: "lombok", version: lombokVersion])
-            }
-        }
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitJupiterVersion
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
+    }
+    lombok {
+        version = lombokVersion
     }
 }
 
