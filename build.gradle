@@ -6,8 +6,9 @@ plugins {
 allprojects {
     apply plugin: 'java-library'
     apply plugin: 'net.woggioni.gradle.lombok'
+
     group = "net.woggioni"
-    version = jwoVersion
+    version = getProperty('jwo.version')
 
     repositories {
         maven {
@@ -16,17 +17,17 @@ allprojects {
         mavenCentral()
     }
     dependencies {
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitJupiterVersion
-        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: getProperty('junitJupiter.version')
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: getProperty('junitJupiter.version')
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: getProperty('junitJupiter.version')
     }
     lombok {
-        version = lombokVersion
+        version = getProperty('lombok.version')
     }
 }
 
 dependencies {
-    implementation group: "org.slf4j", name: "slf4j-api", version: slf4jVersion
+    implementation group: "org.slf4j", name: "slf4j-api", version: getProperty('slf4j.version')
 }
 
 compileJava {
@@ -41,9 +42,30 @@ jar {
     }
 }
 
+test {
+    useJUnitPlatform()
+    Dependency junitJupiterEngineDependency =
+            dependencies.create(
+                    group: 'org.junit.jupiter',
+                    name: 'junit-jupiter-engine',
+                    version: project.getProperty('junitJupiter.version')
+    )
+
+    File junitJupiterEngineJar = configurations.getByName(JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+            .resolvedConfiguration.resolvedArtifacts.grep { ResolvedArtifact resolvedArtifact ->
+        ModuleVersionIdentifier id = resolvedArtifact.moduleVersion.id
+        id.group == 'org.junit.jupiter' && id.name == 'junit-jupiter-engine'
+    }.collect {
+        ResolvedArtifact resolvedArtifact -> resolvedArtifact.file
+    }.first()
+    systemProperties([
+        'junit.jupiter.engine.jar' : junitJupiterEngineJar.toString()
+    ])
+}
+
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = "7.0.2"
+    gradleVersion = getProperty('gradle.version')
 }
 
 publishing {
