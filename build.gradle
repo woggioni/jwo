@@ -26,8 +26,14 @@ allprojects {
     }
 }
 
+
+configurations {
+    pathClassloaderTest
+}
+
 dependencies {
     implementation group: "org.slf4j", name: "slf4j-api", version: getProperty('slf4j.version')
+    pathClassloaderTest group: 'com.google.inject', name: 'guice', version: getProperty('guice.version')
 }
 
 compileJava {
@@ -41,8 +47,13 @@ jar {
         ])
     }
 }
+TaskProvider<Zip> pathClassLoaderTestBundleTask = tasks.register("pathClassLoaderTestBundle", Zip) {
+    from(configurations.pathClassloaderTest)
+    archiveBaseName = "pathClassLoaderTestBundle"
+}
 
 test {
+    inputs.files(pathClassLoaderTestBundleTask)
     useJUnitPlatform()
     Dependency junitJupiterEngineDependency =
             dependencies.create(
@@ -59,7 +70,8 @@ test {
         ResolvedArtifact resolvedArtifact -> resolvedArtifact.file
     }.first()
     systemProperties([
-        'junit.jupiter.engine.jar' : junitJupiterEngineJar.toString()
+        'junit.jupiter.engine.jar' : junitJupiterEngineJar.toString(),
+        'path.classloader.test.bundle' : pathClassLoaderTestBundleTask.get().outputs.files.singleFile
     ])
 }
 
@@ -80,5 +92,6 @@ publishing {
         }
     }
 }
+
 
 
