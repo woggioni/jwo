@@ -36,8 +36,11 @@ dependencies {
     pathClassloaderTest group: 'com.google.inject', name: 'guice', version: getProperty('guice.version')
 }
 
-compileJava {
-    options.release = 8
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    withJavadocJar()
+    withSourcesJar()
 }
 
 jar {
@@ -47,6 +50,7 @@ jar {
         ])
     }
 }
+
 TaskProvider<Zip> pathClassLoaderTestBundleTask = tasks.register("pathClassLoaderTestBundle", Zip) {
     from(configurations.pathClassloaderTest)
     archiveBaseName = "pathClassLoaderTestBundle"
