@@ -1,12 +1,14 @@
 package net.woggioni.jwo.hash;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.io.InputStream;
 import java.security.MessageDigest;
-import java.util.Arrays;
 
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class Hash {
 
@@ -22,26 +24,11 @@ public class Hash {
         private final String key;
     }
 
-    final Algorithm algorithm;
-    final byte[] bytes;
+    @Getter
+    private final Algorithm algorithm;
 
-    @Override
-    public boolean equals(Object other) {
-        if(other == null) return false;
-        else if(getClass() != other.getClass()) return false;
-        Hash otherHash = (Hash) other;
-        if(algorithm != otherHash.algorithm) return false;
-        return Arrays.equals(bytes, otherHash.bytes);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = algorithm.hashCode();
-        for(byte b : bytes) {
-            result ^= b;
-        }
-        return result;
-    }
+    @Getter
+    private final byte[] bytes;
 
     @SneakyThrows
     public static Hash hash(Algorithm algo, InputStream is, byte[] buffer) {
@@ -82,5 +69,10 @@ public class Hash {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    @Override
+    public String toString() {
+        return bytesToHex(bytes);
     }
 }
