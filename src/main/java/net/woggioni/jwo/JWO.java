@@ -2,7 +2,6 @@ package net.woggioni.jwo;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.woggioni.jwo.tuple.Tuple2;
 
 import javax.net.ssl.*;
 import java.io.*;

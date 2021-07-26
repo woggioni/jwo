@@ -4,8 +4,8 @@ import lombok.SneakyThrows;
 import net.woggioni.jwo.Chronometer;
 import net.woggioni.jwo.CollectionUtils;
 import net.woggioni.jwo.JWO;
-import net.woggioni.jwo.io.CircularInputStream;
-import net.woggioni.jwo.tuple.Tuple2;
+import net.woggioni.jwo.CircularInputStream;
+import net.woggioni.jwo.Tuple2;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
