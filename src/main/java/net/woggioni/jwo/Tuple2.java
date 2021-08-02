@@ -1,25 +1,27 @@
 package net.woggioni.jwo;
 
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Comparator;
+import java.util.function.Function;
+import net.woggioni.jwo.internal.Tuple2Impl;
 
-@EqualsAndHashCode
-@RequiredArgsConstructor
-public class Tuple2<T, U> {
-    public final T _1;
-    public final U _2;
+public interface Tuple2<T, U> {
+    T get_1();
+    U get_2();
 
-    public static <X extends Comparable<X>, Y extends Comparable<Y>> Comparator<Tuple2<X, Y>> getComparator(Class<X> cls1, Class<Y> cls2) {
-        return Comparator
-            .comparing((Tuple2<X, Y> t) -> t._1)
-            .thenComparing((Tuple2<X, Y> t) -> t._2);
+    static <T,U> Tuple2<T, U> newInstance(T x, U y) {
+        return new Tuple2Impl<>(x, y);
     }
 
-    public static <X extends Comparable<X>, Y extends Comparable<Y>> Comparator<Tuple2<X, Y>> getComparator(Tuple2<X, Y> tuple) {
+    static <X extends Comparable<X>, Y extends Comparable<Y>> Comparator<Tuple2<X, Y>> getComparator(Class<X> cls1, Class<Y> cls2) {
         return Comparator
-                .comparing((Tuple2<X, Y> t) -> t._1)
-                .thenComparing((Tuple2<X, Y> t) -> t._2);
+                .comparing((Function<Tuple2<X, Y>, X>) Tuple2::get_1)
+                .thenComparing(Tuple2::get_2);
+    }
+
+    static <X extends Comparable<X>, Y extends Comparable<Y>> Comparator<Tuple2<X, Y>> getComparator(Tuple2<X, Y> tuple) {
+        return Comparator
+                .comparing((Function<Tuple2<X, Y>, X>) Tuple2::get_1)
+                .thenComparing(Tuple2::get_2);
     }
 }
+

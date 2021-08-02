@@ -1,29 +1,12 @@
 package net.woggioni.jwo;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import net.woggioni.jwo.internal.MutableTuple2Impl;
 
-import java.util.Comparator;
+public interface MutableTuple2<T, U> extends Tuple2<T, U> {
+    void set_1(T value);
+    void set_2(U value);
 
-@EqualsAndHashCode
-@NoArgsConstructor
-@AllArgsConstructor
-public class MutableTuple2<T, U> {
-    public T _1;
-    public U _2;
-
-    public static <X extends Comparable<X>, Y extends Comparable<Y>>
-    Comparator<MutableTuple2<X, Y>> getComparator(Class<X> cls1, Class<Y> cls2) {
-        return Comparator
-                .comparing((MutableTuple2<X, Y> t) -> t._1)
-                .thenComparing((MutableTuple2<X, Y> t) -> t._2);
-    }
-
-    public static <X extends Comparable<X>, Y extends Comparable<Y>>
-    Comparator<MutableTuple2<X, Y>> getComparator(MutableTuple2<X, Y> tuple) {
-        return Comparator
-                .comparing((MutableTuple2<X, Y> t) -> t._1)
-                .thenComparing((MutableTuple2<X, Y> t) -> t._2);
+    static <T,U> MutableTuple2<T, U> newInstance(T x, U y) {
+        return new MutableTuple2Impl<T, U>(x, y);
     }
 }

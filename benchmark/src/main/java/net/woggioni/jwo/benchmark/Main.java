@@ -29,10 +29,10 @@ public class Main {
 
     public static void main(String... args)  {
         Map<String, Object> valuesMap = Stream.of(
-                new Tuple2<>("author", "John Doe"),
-                new Tuple2<>("date", "2020-03-25 16:22"),
-                new Tuple2<>("adjective", "simple"))
-            .collect(CollectionUtils.toUnmodifiableTreeMap(it -> it._1, it -> it._2));
+                Tuple2.newInstance("author", "John Doe"),
+                Tuple2.newInstance("date", "2020-03-25 16:22"),
+                Tuple2.newInstance("adjective", "simple"))
+            .collect(CollectionUtils.toUnmodifiableTreeMap(it -> it.get_1(), it -> it.get_2()));
         withBenchmarkReader(
                 reader -> {
                 Chronometer chronometer = new Chronometer();

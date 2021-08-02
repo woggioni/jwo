@@ -27,14 +27,14 @@ public class TreeWalkerTest {
 
     private Map<Integer, List<Integer>> parentChildRelationshipMap =
             Stream.of(
-                    new Tuple2<>(1, Collections.singletonList(2)),
-                    new Tuple2<>(2, Collections.singletonList(3)),
-                    new Tuple2<>(3, Arrays.asList(4, 5)),
-                    new Tuple2<>(4, Arrays.asList(6, 7)),
-                    new Tuple2<>(5, Collections.singletonList(8))
-            ).collect(Collectors.toMap(t -> t._1, t -> t._2));
+                    Tuple2.newInstance(1, Collections.singletonList(2)),
+                    Tuple2.newInstance(2, Collections.singletonList(3)),
+                    Tuple2.newInstance(3, Arrays.asList(4, 5)),
+                    Tuple2.newInstance(4, Arrays.asList(6, 7)),
+                    Tuple2.newInstance(5, Collections.singletonList(8))
+            ).collect(Collectors.toMap(Tuple2::get_1, Tuple2::get_2));
 
-    private Map<Integer, Node> testNodeMap = parentChildRelationshipMap.entrySet().stream()
+    private final Map<Integer, Node> testNodeMap = parentChildRelationshipMap.entrySet().stream()
             .map(entry -> newNode(entry.getKey(), entry.getValue()))
             .collect(Collectors.toMap(Node::getId, Function.identity()));
 

@@ -391,7 +391,7 @@ public class JWO {
             return Optional.empty();
         } else {
             return Optional.of(
-                    new Tuple2<>(fileName.substring(0, index), fileName.substring(index)));
+                    Tuple2.newInstance(fileName.substring(0, index), fileName.substring(index)));
         }
     }
 
