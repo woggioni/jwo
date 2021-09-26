@@ -8,7 +8,7 @@ pipeline {
             steps {
                 sh "./gradlew clean build"
                 junit testResults: "build/test-results/test/*.xml"
-                javadoc javadocDir: "build/docs/javadoc"
+                javadoc javadocDir: "build/docs/javadoc", keepAll: true
                 archiveArtifacts artifacts: 'build/libs/*.jar,benchmark/build/libs/*.jar',
                                  allowEmptyArchive: true,
                                  fingerprint: true,
