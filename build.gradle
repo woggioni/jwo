@@ -42,10 +42,13 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
     withJavadocJar()
     withSourcesJar()
+}
+
+compileJava {
+    options.release = 8
+    options.compilerArgs << '-parameters'
 }
 
 TaskProvider<Zip> pathClassLoaderTestBundleTask = tasks.register("pathClassLoaderTestBundle", Zip) {
