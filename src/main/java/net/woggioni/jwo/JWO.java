@@ -12,10 +12,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -162,12 +160,12 @@ public class JWO {
         }
     }
 
-    public static <T> Predicate<T> not(Predicate<T> p) {
+    public static <T> Predicate<T> not(Pre<T> p) {
         return p.negate();
     }
 
     public static <V, T> Stream<V> flatMap(Stream<T> stream,
-                                           Function<? super T, Optional<? extends V>> mappingFunction) {
+                                           Fun<? super T, Optional<? extends V>> mappingFunction) {
         return stream.map(mappingFunction).filter(Optional::isPresent).map(Optional::get);
     }
 
@@ -442,7 +440,7 @@ public class JWO {
     @SneakyThrows
     public static void writeZipEntry(
         ZipOutputStream zip,
-        Supplier<InputStream> source,
+        Sup<InputStream> source,
         String destinationFileName,
         int compressionMethod,
         byte[] buffer) {
@@ -470,7 +468,7 @@ public class JWO {
 
     public static void writeZipEntry(
             ZipOutputStream zip,
-            Supplier<InputStream> source,
+            Sup<InputStream> source,
             String destinationFileName,
             int compressionMethod) {
         writeZipEntry(zip, source, destinationFileName, compressionMethod, new byte[0x10000]);
@@ -478,7 +476,7 @@ public class JWO {
 
     public static void writeZipEntry(
             ZipOutputStream zip,
-            Supplier<InputStream> source,
+            Sup<InputStream> source,
             String destinationFileName) {
         writeZipEntry(zip, source, destinationFileName, ZipEntry.DEFLATED);
     }
@@ -486,25 +484,22 @@ public class JWO {
     @SneakyThrows
     public static void extractZip(Path sourceArchive, Path destinationFolder) {
         byte[] buffer = new byte[0x10000];
-        expandZip(sourceArchive, new BiConsumer<ZipInputStream, ZipEntry>() {
-            @Override
-            @SneakyThrows
-            public void accept(ZipInputStream zipInputStream, ZipEntry zipEntry) {
-                Path newFile = destinationFolder.resolve(zipEntry.getName());
-                Files.createDirectories(newFile.getParent());
-                try(OutputStream outputStream = Files.newOutputStream(newFile)) {
-                    while (true) {
-                        int read = zipInputStream.read(buffer);
-                        if (read < 0) break;
-                        outputStream.write(buffer, 0, read);
-                    }
+        expandZip(sourceArchive, (BiCon<ZipInputStream, ZipEntry>)
+                (ZipInputStream zipInputStream, ZipEntry zipEntry) -> {
+            Path newFile = destinationFolder.resolve(zipEntry.getName());
+            Files.createDirectories(newFile.getParent());
+            try(OutputStream outputStream = Files.newOutputStream(newFile)) {
+                while (true) {
+                    int read = zipInputStream.read(buffer);
+                    if (read < 0) break;
+                    outputStream.write(buffer, 0, read);
                 }
             }
         });
     }
 
     @SneakyThrows
-    public static void expandZip(Path sourceArchive, BiConsumer<ZipInputStream, ZipEntry> consumer) {
+    public static void expandZip(Path sourceArchive, BiCon<ZipInputStream, ZipEntry> consumer) {
         try(ZipInputStream zis = new ZipInputStream(Files.newInputStream(sourceArchive))) {
             ZipEntry zipEntry = zis.getNextEntry();
             while (zipEntry != null) {
