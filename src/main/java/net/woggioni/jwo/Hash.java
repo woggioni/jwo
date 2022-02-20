@@ -13,7 +13,7 @@ import java.security.MessageDigest;
 public class Hash {
 
     @RequiredArgsConstructor
-    enum Algorithm {
+    public enum Algorithm {
         MD2("MD2"),
         MD5("MD5"),
         SHA1("SHA-1"),
