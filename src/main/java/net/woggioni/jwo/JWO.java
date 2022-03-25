@@ -585,4 +585,23 @@ public class JWO {
         }
         return s;
     }
+
+    @SneakyThrows
+    public static void copy(InputStream is, OutputStream os, byte[] buffer) {
+        while(true) {
+            int read = is.read(buffer);
+            if(read < 0) break;
+            os.write(buffer, 0, read);
+        }
+    }
+
+    public static void copy(InputStream is, OutputStream os, int bufferSize) {
+        byte[] buffer = new byte[bufferSize];
+        copy(is, os, buffer);
+    }
+
+    public static void copy(InputStream is, OutputStream os) {
+        byte[] buffer = new byte[0x10000];
+        copy(is, os, buffer);
+    }
 }
