@@ -554,6 +554,15 @@ public class JWO {
         };
     }
 
+    @SafeVarargs
+    public static <T> Stream<T> optional2Stream(Optional<T>...opts) {
+        return Arrays.stream(opts).filter(Optional::isPresent).map(Optional::get);
+    }
+
+    public static <T> Stream<T> optional2Stream(Iterable<Optional<T>> opts) {
+        return iterable2Stream(opts).filter(Optional::isPresent).map(Optional::get);
+    }
+
     public static String decapitalize(String s, Locale locale) {
         if (!s.isEmpty() && !Character.isLowerCase(s.charAt(0)))
             return s.substring(0, 1).toLowerCase(locale) + s.substring(1);
