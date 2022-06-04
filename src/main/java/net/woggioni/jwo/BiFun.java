@@ -12,5 +12,5 @@ public interface BiFun<T, U, V> extends BiFunction<T, U, V> {
         return exec(t, u);
     }
 
-    V exec(T t, U u) throws Exception;
+    V exec(T t, U u) throws Throwable;
 }

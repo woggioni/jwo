@@ -12,5 +12,5 @@ public interface Sup<T> extends Supplier<T> {
         return exec();
     }
 
-    T exec() throws Exception;
+    T exec() throws Throwable;
 }

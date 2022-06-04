@@ -12,5 +12,5 @@ public interface Con<T> extends Consumer<T> {
         exec(t);
     }
 
-    void exec(T t) throws Exception;
+    void exec(T t) throws Throwable;
 }

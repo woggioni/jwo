@@ -12,5 +12,5 @@ public interface Fun<T, U> extends Function<T, U> {
         return exec(t);
     }
 
-    U exec(T t) throws Exception;
+    U exec(T t) throws Throwable;
 }

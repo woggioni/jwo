@@ -12,5 +12,5 @@ public interface BiCon<T, U> extends BiConsumer<T, U> {
         exec(t, u);
     }
 
-    void exec(T t, U u) throws Exception;
+    void exec(T t, U u) throws Throwable;
 }

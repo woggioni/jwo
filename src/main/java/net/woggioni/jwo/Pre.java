@@ -12,5 +12,5 @@ public interface Pre<T> extends Predicate<T> {
         return exec(t);
     }
 
-    boolean exec(T t) throws Exception;
+    boolean exec(T t) throws Throwable;
 }
