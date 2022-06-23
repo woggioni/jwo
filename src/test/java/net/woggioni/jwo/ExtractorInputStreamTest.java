@@ -37,7 +37,7 @@ public class ExtractorInputStreamTest {
 
     @SneakyThrows
     private static void referenceUnzipMethod(Path source, Path destination) {
-        try(FileSystem fs = FileSystems.newFileSystem(source, null)) {
+        try(FileSystem fs = FileSystems.newFileSystem(source, (ClassLoader) null)) {
             for(Path root : fs.getRootDirectories()) {
                 Files.walk(root)
                         .filter(it -> !Files.isDirectory(it)).forEach(new Consumer<Path>() {

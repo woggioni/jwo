@@ -18,10 +18,13 @@ allprojects {
         mavenCentral()
     }
     dependencies {
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: getProperty('junitJupiter.version')
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: getProperty('junitJupiter.version')
-        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: getProperty('junitJupiter.version')
+        implementation platform(group: 'com.lys', name: 'lys-dependencies', version: getProperty('lys.version'))
+
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
     }
+
     lombok {
         version = getProperty('lombok.version')
     }
@@ -37,7 +40,7 @@ configurations {
 }
 
 dependencies {
-    implementation group: "org.slf4j", name: "slf4j-api", version: getProperty('slf4j.version')
+    implementation group: "org.slf4j", name: "slf4j-api"
     pathClassloaderTest group: 'com.google.inject', name: 'guice', version: getProperty('guice.version')
 }
 
@@ -59,13 +62,6 @@ TaskProvider<Zip> pathClassLoaderTestBundleTask = tasks.register("pathClassLoade
 test {
     inputs.files(pathClassLoaderTestBundleTask)
     useJUnitPlatform()
-    Dependency junitJupiterEngineDependency =
-            dependencies.create(
-                    group: 'org.junit.jupiter',
-                    name: 'junit-jupiter-engine',
-                    version: project.getProperty('junitJupiter.version')
-    )
-
     File junitJupiterEngineJar = configurations.getByName(JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME)
             .resolvedConfiguration.resolvedArtifacts.grep { ResolvedArtifact resolvedArtifact ->
         ModuleVersionIdentifier id = resolvedArtifact.moduleVersion.id
