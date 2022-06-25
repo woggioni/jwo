@@ -18,8 +18,7 @@ allprojects {
         mavenCentral()
     }
     dependencies {
-        implementation platform(group: 'com.lys', name: 'lys-dependencies', version: getProperty('lys.version'))
-
+        testImplementation platform(group: 'com.lys', name: 'lys-dependencies', version: getProperty('lys.version'))
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
@@ -40,7 +39,7 @@ configurations {
 }
 
 dependencies {
-    implementation group: "org.slf4j", name: "slf4j-api"
+    implementation group: "org.slf4j", name: "slf4j-api", version: getProperty('slf4j.version')
     pathClassloaderTest group: 'com.google.inject', name: 'guice', version: getProperty('guice.version')
 }
 
