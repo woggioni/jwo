@@ -1,5 +1,5 @@
 plugins {
-    id 'application'
+    alias(catalog.plugins.envelope)
 }
 
 repositories {
@@ -10,7 +10,7 @@ dependencies {
     implementation project(':')
 }
 
-application {
+envelopeJar {
     mainClass = 'net.woggioni.jwo.benchmark.Main'
 }
 

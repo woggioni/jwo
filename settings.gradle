@@ -6,9 +6,25 @@ pluginManagement {
         gradlePluginPortal()
     }
 
-    plugins {
-        id "net.woggioni.gradle.lombok" version "0.1"
-        id "net.woggioni.gradle.multi-release-jar" version "0.1"
+//    plugins {
+//        id "net.woggioni.gradle.lombok" version "0.1"
+//        id "net.woggioni.gradle.multi-release-jar" version "0.1"
+//    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            url = 'https://woggioni.net/mvn/'
+            content {
+                includeGroup 'com.lys'
+            }
+        }
+    }
+    versionCatalogs {
+        catalog {
+            from group: 'com.lys', name: 'lys-catalog', version: getProperty('lys.version')
+        }
     }
 }
 
