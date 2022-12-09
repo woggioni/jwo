@@ -72,6 +72,8 @@ test {
         'junit.jupiter.engine.jar' : junitJupiterEngineJar.toString(),
         'path.classloader.test.bundle' : pathClassLoaderTestBundleTask.get().outputs.files.singleFile
     ])
+
+    jvmArgs(['--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED'])
 }
 
 publishing {

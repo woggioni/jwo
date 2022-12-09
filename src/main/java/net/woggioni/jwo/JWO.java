@@ -2,19 +2,58 @@ package net.woggioni.jwo;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.woggioni.jwo.exception.ChildProcessException;
+import net.woggioni.jwo.internal.CharFilterReader;
 
-import javax.net.ssl.*;
-import java.io.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.MissingFormatArgumentException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.zip.CRC32;
@@ -169,10 +208,6 @@ public class JWO {
         return stream.map(mappingFunction).filter(Optional::isPresent).map(Optional::get);
     }
 
-    public static <T> Stream<T> optional2Stream(Optional<T> optional) {
-        return optional.map(Stream::of).orElse(Stream.empty());
-    }
-
     public static void setSystemPropertyIfNotDefined(String key, String value) {
         if (System.getProperty(key) == null) {
             System.setProperty(key, value);
@@ -240,11 +275,7 @@ public class JWO {
     }
 
     public static <T> Stream<T> streamCat(Stream<T>... streams) {
-        Stream<T> result = Stream.empty();
-        for (Stream<T> s : streams) {
-            result = Stream.concat(result, s);
-        }
-        return result;
+        return Stream.of(streams).flatMap(Function.identity());
     }
 
     /**
@@ -562,6 +593,9 @@ public class JWO {
     public static <T> Stream<T> optional2Stream(Iterable<Optional<T>> opts) {
         return iterable2Stream(opts).filter(Optional::isPresent).map(Optional::get);
     }
+    public static <T> Stream<T> optional2Stream(Optional<T> optional) {
+        return optional.map(Stream::of).orElse(Stream.empty());
+    }
 
     public static String decapitalize(String s, Locale locale) {
         if (!s.isEmpty() && !Character.isLowerCase(s.charAt(0)))
@@ -612,5 +646,229 @@ public class JWO {
     public static void copy(InputStream is, OutputStream os) {
         byte[] buffer = new byte[0x10000];
         copy(is, os, buffer);
+    }
+
+    @SneakyThrows
+    public static void copy(Reader reader, Writer writer, char[] buffer) {
+        while (true) {
+            int read = reader.read(buffer);
+            if (read < 0) break;
+            writer.write(buffer, 0, read);
+        }
+    }
+
+    public static void copy(Reader reader, Writer writer, int bufferSize) {
+        char[] buffer = new char[bufferSize];
+        copy(reader, writer, buffer);
+    }
+
+    public static void copy(Reader reader, Writer writer) {
+        char[] buffer = new char[0x10000];
+        copy(reader, writer, buffer);
+    }
+
+
+    public static void waitProcess(
+            List<String> cmd,
+            Path cwd,
+            Map<String, String> env) {
+        waitProcess(cmd, cwd, env, 0, null);
+    }
+
+    @SneakyThrows
+    public static Process startProcess(
+            List<String> cmd,
+            Path cwd, Map<String, String> env) {
+        ProcessBuilder pb = new ProcessBuilder();
+        pb.command(cmd);
+        pb.inheritIO();
+        pb.directory(cwd.toFile());
+        pb.environment().putAll(env);
+        if (log.isTraceEnabled()) {
+            String cmdLineListString = '[' + cmd.stream().map(s -> '\'' + s + '\'').collect(Collectors.joining(", ")) + ']';
+            log.trace("Starting child java process with command line: {}", cmdLineListString);
+        }
+        return pb.start();
+    }
+
+    @SneakyThrows
+    public static void waitProcess(
+            List<String> cmd,
+            Path workingDirectory,
+            Map<String, String> env,
+            long tout,
+            TimeUnit tunit) {
+        Process process = startProcess(cmd, workingDirectory, env);
+        int rc;
+        if (tout > 0) {
+            boolean finished = process.waitFor(tout, tunit);
+            if (finished)
+                rc = process.exitValue();
+            else
+                throw newThrowable(TimeoutException.class, "Timeout waiting for process [%s]", "");
+
+        } else {
+            rc = process.waitFor();
+        }
+        if (rc != 0) {
+            throw new ChildProcessException(cmd, rc);
+        }
+    }
+
+    public static <T> Iterator<T> enumeration2Iterator(Enumeration<T> enumeration) {
+        return new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return enumeration.hasMoreElements();
+            }
+
+            @Override
+            public T next() {
+                return enumeration.nextElement();
+            }
+        };
+    }
+
+    public static <T> Optional<T> or(Optional<T> ...opts) {
+        for(Optional<T> opt : opts) {
+            if(opt.isPresent()) return opt;
+        }
+        return Optional.empty();
+    }
+
+    @SneakyThrows
+    public static String sh(String... cmdLine) {
+        ProcessBuilder pb = new ProcessBuilder();
+        pb.command(cmdLine);
+        pb.redirectInput(ProcessBuilder.Redirect.PIPE);
+        Process process = pb.start();
+        int rc = process.waitFor();
+        if (rc == 0) {
+            try (Reader reader = new CharFilterReader(new InputStreamReader(process.getInputStream()), '\n')) {
+                return readAll(reader);
+            }
+        } else {
+            try (Reader reader = new InputStreamReader(process.getErrorStream())) {
+                throw new RuntimeException(readAll(reader));
+            }
+        }
+    }
+
+    @SneakyThrows
+    public static long uid() {
+        return Long.parseLong(sh("id", "-u"));
+    }
+
+    @SneakyThrows
+    public static void replaceFileIfDifferent(Supplier<InputStream> inputStreamSupplier, Path destination, FileAttribute<?>... attrs) {
+        Hash hash;
+        try (InputStream inputStream = inputStreamSupplier.get()) {
+            hash = Hash.md5(inputStream);
+        }
+        replaceFileIfDifferent(inputStreamSupplier, destination, hash, attrs);
+    }
+
+    public static void replaceFileIfDifferent(InputStream inputStream, Path destination, FileAttribute<?>... attrs) {
+        replaceFileIfDifferent(() -> inputStream, destination, attrs);
+    }
+
+    @SneakyThrows
+    private static void replaceFileIfDifferent(
+            Supplier<InputStream> inputStreamSupplier,
+            Path destination,
+            Hash newFileHash,
+            FileAttribute<?>... attrs) {
+        if (Files.exists(destination)) {
+            Hash existingFileHash;
+            try (InputStream existingFileStream = Files.newInputStream(destination)) {
+                existingFileHash = Hash.md5(existingFileStream);
+            }
+            if (newFileHash == null) {
+                MessageDigest md = MessageDigest.getInstance(Hash.Algorithm.MD5.name());
+                Path tmpFile = Files.createTempFile(destination.getParent(), destination.getFileName().toString(), ".tmp", attrs);
+                try {
+                    try (InputStream inputStream = inputStreamSupplier.get();
+                         OutputStream outputStream = new DigestOutputStream(Files.newOutputStream(tmpFile), md)) {
+                        copy(inputStream, outputStream);
+                    }
+                    newFileHash = new Hash(Hash.Algorithm.MD5, md.digest());
+                    if (!Objects.equals(existingFileHash, newFileHash)) {
+                        Files.move(tmpFile, destination, StandardCopyOption.ATOMIC_MOVE);
+                    }
+                } finally {
+                    if (Files.exists(tmpFile)) {
+                        Files.delete(tmpFile);
+                    }
+                }
+            } else {
+                if (!Objects.equals(existingFileHash, newFileHash)) {
+                    EnumSet<StandardOpenOption> opts = EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+                    try (InputStream inputStream = inputStreamSupplier.get();
+                         OutputStream outputStream = Channels.newOutputStream(Files.newByteChannel(destination, opts, attrs))) {
+                        copy(inputStream, outputStream);
+                    }
+                    if (log.isTraceEnabled()) {
+                        log.trace("File '{}' rewritten", destination);
+                    }
+                } else {
+                    if (log.isTraceEnabled()) {
+                        log.trace("File '{}' unchanged", destination);
+                    }
+                }
+            }
+        } else {
+            if (log.isTraceEnabled()) {
+                log.trace("Creating file '{}'", destination);
+            }
+            EnumSet<StandardOpenOption> opts = EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            try (InputStream inputStream = inputStreamSupplier.get();
+                 OutputStream outputStream = Channels.newOutputStream(Files.newByteChannel(destination, opts, attrs))) {
+                copy(inputStream, outputStream);
+            }
+        }
+    }
+
+    public static <T, U, V> Fun<U, V> curry1(BiFun<T, U, V> original, T arg) {
+        return u -> original.apply(arg, u);
+    }
+
+    public static <T, U, V> Fun<T, V> curry2(BiFun<T, U, V> original, U arg) {
+        return t -> original.apply(t, arg);
+    }
+
+    public static <T, U, V> Fun<U, V> curry1(BiFun<T, U, V> original, Supplier<T> sup) {
+        return u -> original.apply(sup.get(), u);
+    }
+
+    public static <T, U, V> Fun<T, V> curry2(BiFun<T, U, V> original, Supplier<U> sup) {
+        return t -> original.apply(t, sup.get());
+    }
+
+    public static <T> Stream<T> lazyValue(Supplier<T> valueSupplier) {
+        return Stream.generate(valueSupplier).limit(1);
+    }
+
+    public static <T, U> Supplier<U> compose(Supplier<T> sup, Function<T, U> fun) {
+        return () -> fun.apply(sup.get());
+    }
+
+    public static <T, U, V> Function<T, V> compose(Function<T, U> fun1, Function<U, V> fun2) {
+        return param -> fun2.apply(fun1.apply(param));
+    }
+
+    public static <T, U> Consumer<T> compose(Function<T, U> fun, Consumer<U> con) {
+        return param -> con.accept(fun.apply(param));
+    }
+
+    public static <T, U> Predicate<T> compose(Function<T, U> fun, Predicate<U> pred) {
+        return param -> pred.test(fun.apply(param));
+    }
+
+    public static <T> Supplier<Boolean> compose(Supplier<T> fun, Predicate<T> pred) {
+        return () -> pred.test(fun.get());
+    }
+
+    public static <T> Runnable compose(Supplier<T> sup, Consumer<T> con) {
+        return () -> con.accept(sup.get());
     }
 }

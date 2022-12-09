@@ -21,23 +21,24 @@ public enum OS {
         this.value = value;
     }
 
-    public static final OS current;
-    public static final boolean isUnix;
-    public static final boolean isWindows;
-    public static final boolean isMac;
+    public static OS current;
+    public static boolean isUnix;
+    public static boolean isWindows;
+    public static boolean isMac;
+
+    public static boolean isLinux;
 
     static {
-        OS currentOs = null;
         String osName = System.getProperty("os.name").toLowerCase();
         for(OS os : values()) {
             if(osName.startsWith(os.value)) {
-                currentOs = os;
+                current = os;
             }
         }
-        if(currentOs == null) throw new IllegalArgumentException(String.format("Unrecognized OS '%s'", osName));
-        current = currentOs;
-        isUnix = Stream.of(LINUX, SOLARIS, BSD, AIX, HP_UX).collect(Collectors.toSet()).contains(current);
+        if(current == null) throw new IllegalArgumentException(String.format("Unrecognized OS '%s'", osName));
+        isUnix = Stream.of(LINUX, SOLARIS, BSD, AIX, HP_UX, MACOS).collect(Collectors.toSet()).contains(current);
         isWindows = current == WINDOWS;
         isMac = current == MACOS;
+        isLinux = current == LINUX;
     }
 }

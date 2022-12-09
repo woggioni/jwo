@@ -4,8 +4,16 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.*;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,5 +89,19 @@ public class JWOTest {
             }
         }
         return formatter.toString();
+    }
+
+    @Test
+    @SneakyThrows
+    @EnabledOnOs(OS.LINUX)
+    public void uidTest(@TempDir Path testDir) {
+        PosixFileAttributes pfa = Files.readAttributes(testDir, PosixFileAttributes.class);
+        UserPrincipal expectedUser = pfa.owner();
+        Class<? extends UserPrincipal> userClass = expectedUser.getClass();
+        Method m = userClass.getDeclaredMethod("uid");
+        m.setAccessible(true);
+        int expectedUserId = (Integer) m.invoke(expectedUser);
+        int uid = (int) JWO.uid();
+        Assertions.assertEquals(expectedUserId, uid);
     }
 }

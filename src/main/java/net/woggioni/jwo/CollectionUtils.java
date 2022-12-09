@@ -205,4 +205,10 @@ public class CollectionUtils {
                 Collections::unmodifiableNavigableMap
         );
     }
+    public static <K, V, U> Stream<Map.Entry<K, U>> mapValues(Map<K, V> map, Fun<V, U> xform) {
+        return map
+                .entrySet()
+                .stream()
+                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), xform.apply(entry.getValue())));
+    }
 }

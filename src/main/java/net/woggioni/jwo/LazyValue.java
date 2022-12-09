@@ -1,50 +1,48 @@
 package net.woggioni.jwo;
 
-import lombok.RequiredArgsConstructor;
+import net.woggioni.jwo.internal.SynchronizedLazyValue;
+import net.woggioni.jwo.internal.UnsynchronizedLazyValue;
 
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-@RequiredArgsConstructor
-public class LazyValue<T> {
-    private final Supplier<T> valueSupplier;
+public interface LazyValue<T> {
 
-    private final Consumer<T> finalizer;
-    private final MutableTuple2<T, Boolean> instance = MutableTuple2.newInstance(null, false);
-
-    public LazyValue(Supplier<T> valueSupplier) {
-        this(valueSupplier, null);
+    enum ThreadSafetyMode {
+        SYNCHRONIZED, NONE
     }
 
-    public T get() {
-        if(instance.get_2()) return instance.get_1();
-        synchronized (instance) {
-            if(instance.get_2()) return instance.get_1();
-            else {
-                T value = valueSupplier.get();
-                instance.set_1(value);
-                instance.set_2(true);
-                return value;
-            }
-        }
-    }
+    T get();
+
+    <U> LazyValue<U> handle(BiFunction<T, Throwable, U> bifun);
+
+    <U> LazyValue<U> map(Function<T, U> fun);
+
+    Stream<T> stream();
 
     /**
-     * Execute the finalized on the wrapped object, if it has been initialized, and then returns it.
+     * Execute the finalizer on the wrapped object, if it has been initialized, and then returns it.
      * It does nothing if {@link LazyValue#get()} has never been invoked.
      * @return the wrapped value if initialized, otherwise an empty {@link Optional}
      */
-    public Optional<T> close() {
-        T result = null;
-        synchronized (instance) {
-            if(instance.get_2()) {
-                instance.set_2(false);
-                result = instance.get_1();
-                instance.set_1(null);
-            }
+    Optional<T> close();
+
+
+    static <T> LazyValue<T> of(Supplier<T> supplier, ThreadSafetyMode locking) {
+        LazyValue<T> result;
+        switch (locking) {
+            case SYNCHRONIZED:
+                result = new SynchronizedLazyValue<>(supplier);
+                break;
+            case NONE:
+                result = new UnsynchronizedLazyValue<>(supplier);
+                break;
+            default:
+                throw new RuntimeException("This should never happen");
         }
-        if(result != null) finalizer.accept(result);
-        return Optional.ofNullable(result);
+        return result;
     }
 }
