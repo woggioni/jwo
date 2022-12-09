@@ -6,8 +6,22 @@ pipeline {
     stages {
         stage("Build") {
             steps {
-                sh "./gradlew clean build"
-                junit testResults: "build/test-results/test/*.xml"
+                sh "./gradlew assemble"
+            }
+        }
+        stage("Check") {
+            steps {
+                sh "./gradlew test"
+            }
+            post {
+                always {
+                    junit 'build/test-results/test/*.xml'
+                }
+            }
+        }
+        stage("Archive") {
+            steps {
+                sh "./gradlew build"
                 javadoc javadocDir: "build/docs/javadoc", keepAll: true
                 archiveArtifacts artifacts: 'build/libs/*.jar,benchmark/build/libs/*.jar',
                                  allowEmptyArchive: true,
