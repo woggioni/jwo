@@ -34,7 +34,6 @@ import java.nio.file.attribute.FileAttribute;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -46,6 +45,8 @@ import java.util.Map;
 import java.util.MissingFormatArgumentException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -293,27 +294,96 @@ public class JWO {
      * "This template was created by John Doe."
      */
     public static String renderTemplate(String template, Map<String, Object> valuesMap) {
+        return renderTemplate(template, valuesMap, null);
+    }
+
+    public static int indexOfWithEscape(String haystack, char needle, char escape, int begin, int end) {
+        int result = -1;
+        int cursor = begin;
+        if(end == 0) {
+            end = haystack.length();
+        }
+        int escapeCount = 0;
+        while(cursor < end) {
+            char c = haystack.charAt(cursor);
+            if(escapeCount > 0) {
+                --escapeCount;
+                if(c == escape) {
+                    result = -1;
+                }
+            } else if(escapeCount == 0) {
+                if (c == escape) {
+                    ++escapeCount;
+                }
+                if (c == needle) {
+                    result = cursor;
+                }
+            }
+            if(result >= 0 && escapeCount == 0) {
+                break;
+            }
+            ++cursor;
+        }
+        return result;
+    }
+
+    public static String renderTemplate(
+            String template,
+            Map<String, Object> valuesMap,
+            Map<String, Map<String, Object>> dictMap) {
         StringBuilder sb = new StringBuilder();
         Object absent = new Object();
 
         int cursor = 0;
-        while (cursor < template.length()) {
-            String key;
-            char ch = template.charAt(cursor);
-            if (ch != '$' || (cursor > 0 && template.charAt(cursor - 1) == '\\')) {
-                sb.append(template.charAt(cursor++));
-            } else if (cursor + 1 < template.length() && template.charAt(cursor + 1) == '{') {
+        while(cursor < template.length()) {
+            int nextPlaceHolder = indexOfWithEscape(template, '$', '$', cursor, template.length());
+            if (nextPlaceHolder < 0) {
+                nextPlaceHolder = template.length();
+            }
+            while (cursor < nextPlaceHolder) {
+                char ch = template.charAt(cursor++);
+                sb.append(ch);
+            }
+            if (cursor + 1 < template.length() && template.charAt(cursor + 1) == '{') {
+                String key;
+                String context = null;
+                String defaultValue = null;
+                Object value;
                 int end = template.indexOf('}', cursor + 1);
-                key = template.substring(cursor + 2, end);
-                Object value = valuesMap.getOrDefault(key, absent);
+                int colon;
+                if (dictMap == null)
+                    colon = -1;
+                else {
+                    colon = indexOfWithEscape(template, ':', '\\', cursor + 1, template.length());
+                    if (colon >= end) colon = -1;
+                }
+                if (colon < 0) {
+                    key = template.substring(cursor + 2, end);
+                    value = valuesMap.getOrDefault(key, absent);
+                } else {
+                    context = template.substring(cursor + 2, colon);
+                    int secondColon = indexOfWithEscape(template, ':', '\\', colon + 1, end);
+                    if(secondColon < 0) {
+                        key = template.substring(colon + 1, end);
+                    } else {
+                        key = template.substring(colon + 1, secondColon);
+                        defaultValue = template.substring(secondColon + 1, end);
+                    }
+                    value = Optional.ofNullable(dictMap.get(context))
+                            .map(m -> m.get(key))
+                            .orElse(absent);
+                }
                 if (value != absent) {
                     sb.append(value.toString());
                 } else {
-                    raise(MissingFormatArgumentException.class, "Missing value for placeholder '%s'", key);
+                    if (defaultValue != null) {
+                        sb.append(defaultValue);
+                    } else {
+                        raise(MissingFormatArgumentException.class, "Missing value for placeholder '%s'",
+                                context == null ? key : context + ':' + key);
+                    }
                 }
                 cursor = end + 1;
-            } else {
-                sb.append(template.charAt(cursor++));
             }
         }
         return sb.toString();
@@ -329,14 +399,20 @@ public class JWO {
      * "This template was created by John Doe."
      */
     @SneakyThrows
-    public static String renderTemplate(Reader reader, Map<String, Object> valuesMap) {
+    public static String renderTemplate(Reader reader,
+                                        Map<String, Object> valuesMap,
+                                        Map<String, Map<String, Object>> dictMap) {
         StringBuilder sb = new StringBuilder();
         char[] buf = new char[1024];
         int read;
         while (!((read = reader.read(buf)) < 0)) {
             sb.append(buf, 0, read);
         }
-        return renderTemplate(sb.toString(), valuesMap);
+        return renderTemplate(sb.toString(), valuesMap, dictMap);
+    }
+    public static String renderTemplate(Reader reader,
+                                        Map<String, Object> valuesMap) {
+        return renderTemplate(reader, valuesMap, null);
     }
 
     @SneakyThrows
@@ -870,5 +946,20 @@ public class JWO {
 
     public static <T> Runnable compose(Supplier<T> sup, Consumer<T> con) {
         return () -> con.accept(sup.get());
+    }
+
+    public static <T> T loadService(Class<T> serviceClass) {
+        return StreamSupport.stream(ServiceLoader.load(serviceClass).spliterator(), false)
+                .findFirst()
+                .orElseThrow(
+                        () -> newThrowable(
+                                ServiceConfigurationError.class,
+                                "Unable to find a valid implementation of '%s'",
+                                serviceClass.getName()));
+    }
+
+    public static <T, U, R> Optional<R> zip(Optional<T> opt1, Optional<U> opt2, BiFun<T, U, R> cb) {
+        if (!opt1.isPresent() || !opt2.isPresent()) return Optional.empty();
+        else return Optional.ofNullable(cb.apply(opt1.get(), opt2.get()));
     }
 }

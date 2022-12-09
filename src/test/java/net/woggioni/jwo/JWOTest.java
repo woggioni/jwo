@@ -1,5 +1,6 @@
 package net.woggioni.jwo;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -7,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -19,6 +22,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static net.woggioni.jwo.CollectionUtils.immutableList;
+import static net.woggioni.jwo.CollectionUtils.newArrayList;
 
 public class JWOTest {
 
@@ -43,6 +49,47 @@ public class JWOTest {
         );
     }
 
+
+    @RequiredArgsConstructor
+    enum IndexOfWithEscapeTestCase {
+        SIMPLE(" dsds $sdsa \\$dfivbdsf \\\\$sdgsga", '$', '\\',
+                immutableList(6, 25)),
+        SIMPLE2("asdasd$$vdfv$", '$', '$',
+                immutableList(12)),
+        NO_NEEDLE("asdasd$$vdfv$", '#', '\\',
+                immutableList()),
+        ESCAPED_NEEDLE("asdasd$$vdfv$#sdfs", '#', '$',
+                immutableList()),
+        NOT_ESCAPED_NEEDLE("asdasd$$#vdfv$#sdfs", '#', '$',
+                immutableList(8)),
+
+        SDFSD("\n${sys:user.home}${env:HOME}", ':', '\\',
+                immutableList(6, 22))
+
+        ;
+        final String haystack;
+        final Character needle;
+
+        final Character escape;
+
+        final List<Integer> solution;
+    }
+
+    @ParameterizedTest
+    @EnumSource(IndexOfWithEscapeTestCase.class)
+    public void testIndexOfWithEscape(IndexOfWithEscapeTestCase testCase) {
+        String haystack = testCase.haystack;
+        List<Integer> solution = newArrayList();
+        int i = 0;
+        while(true) {
+            i = JWO.indexOfWithEscape(haystack, testCase.needle, testCase.escape, i, haystack.length());
+            if(i < 0) break;
+            solution.add(i);
+            ++i;
+        }
+        Assertions.assertEquals(testCase.solution, solution);
+    }
+
     @Test
     @SneakyThrows
     public void testRenderTemplate() {
@@ -50,15 +97,30 @@ public class JWOTest {
         valuesMap.put("author", "John Doe");
         valuesMap.put("date", "2020-03-25 16:22");
         valuesMap.put("adjective", "simple");
-        String expected = "This is a simple test made by John Doe on 2020-03-25 16:22. It's really simple!\n";
+        String expected = """
+                This is a simple test made by John Doe on 2020-03-25 16:22. It's really simple!
+                /home/user
+                /home/user
+                defaultValue
+                """;
+        Map<String, Map<String, Object>> contextMap = new MapBuilder<String, Map<String, Object>>()
+                .entry("env",
+                    new MapBuilder<String, String>()
+                        .entry("HOME", "/home/user")
+                        .build(TreeMap::new, Collections::unmodifiableMap)
+                )
+                .entry("sys",
+                    new MapBuilder<String, String>()
+                        .entry("user.home", "/home/user")
+                        .build(TreeMap::new, Collections::unmodifiableMap)                ).build(TreeMap::new, Collections::unmodifiableMap);
         try (Reader reader = new InputStreamReader(
                 JWOTest.class.getResourceAsStream("/render_template_test.txt"))) {
-            String rendered = JWO.renderTemplate(reader, valuesMap);
+            String rendered = JWO.renderTemplate(reader, valuesMap, contextMap);
             Assertions.assertEquals(expected, rendered);
         }
         try (Reader reader = new InputStreamReader(
                 JWOTest.class.getResourceAsStream("/render_template_test.txt"))) {
-            String rendered = JWO.renderTemplate(JWO.readAll(reader), valuesMap);
+            String rendered = JWO.renderTemplate(JWO.readAll(reader), valuesMap, contextMap);
             Assertions.assertEquals(expected, rendered);
         }
     }
