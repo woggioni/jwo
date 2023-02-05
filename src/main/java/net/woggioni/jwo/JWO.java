@@ -426,40 +426,6 @@ public class JWO {
         return sb.toString();
     }
 
-    @SneakyThrows
-    public static Path computeCacheDirectory(String appName) {
-        return Stream.of(
-                Optional.ofNullable(System.getProperty("user.home"))
-                        .map(prefix -> Paths.get(prefix, ".cache", appName)),
-                Optional.ofNullable(System.getProperty("java.io.tmpdir")).map(Paths::get).map(p -> p.resolve(appName)),
-                Optional.of(Paths.get("/tmp", appName)))
-                .flatMap(JWO::optional2Stream)
-                .filter(JWO::validateCacheDirectory)
-                .findFirst()
-                .orElseThrow(() -> newThrowable(FileNotFoundException.class, "Unable to find a usable cache directory"));
-    }
-
-    private static boolean validateCacheDirectory(Path candidate) {
-        try {
-            if (!Files.exists(candidate)) {
-                Files.createDirectories(candidate);
-                return true;
-            } else if (!Files.isDirectory(candidate)) {
-                log.debug("Cache directory '{}' discarded because it is not a directory", candidate.toString());
-                return false;
-            } else if (!Files.isWritable(candidate)) {
-                log.debug("Cache directory '{}' discarded because it is not writable", candidate.toString());
-                return false;
-            } else {
-                log.info("Using cache directory '{}'", candidate.toString());
-                return true;
-            }
-        } catch (Exception ioe) {
-            log.debug(String.format("Cache directory '%s' discarded: %s", candidate.toString(), ioe.getMessage()), ioe);
-            return false;
-        }
-    }
-
     public static <T, U extends T> Optional<U> cast(T value, Class<U> cls) {
         if (cls.isInstance(value)) {
             return Optional.of((U) value);
