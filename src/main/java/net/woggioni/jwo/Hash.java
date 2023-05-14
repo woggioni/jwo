@@ -22,6 +22,11 @@ public class Hash {
         SHA512("SHA-512");
 
         private final String key;
+
+        @SneakyThrows
+        public MessageDigest newMessageDigest() {
+            return MessageDigest.getInstance(key);
+        }
     }
 
     @Getter

@@ -1,4 +1,6 @@
 plugins {
+    id 'java-library'
+    alias(catalog.plugins.lombok)
     alias(catalog.plugins.envelope)
 }
 

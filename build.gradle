@@ -1,13 +1,11 @@
 plugins {
+    id 'java-library'
     id 'maven-publish'
     alias(catalog.plugins.multi.release.jar)
-    alias(catalog.plugins.lombok) apply false
+    alias(catalog.plugins.lombok)
 }
 
 allprojects {
-    apply plugin: 'java-library'
-    apply plugin: catalog.plugins.lombok.get().pluginId
-
     group = "net.woggioni"
     version = getProperty('jwo.version')
 
@@ -17,16 +15,45 @@ allprojects {
         }
         mavenCentral()
     }
-    
-    dependencies {
-        testImplementation catalog.junit.jupiter.api
-        testImplementation catalog.junit.jupiter.params
-        testRuntimeOnly catalog.junit.jupiter.engine
+
+    pluginManager.withPlugin('java-library') {
+
+        dependencies {
+            testImplementation catalog.junit.jupiter.api
+            testImplementation catalog.junit.jupiter.params
+            testRuntimeOnly catalog.junit.jupiter.engine
+        }
+
+        test {
+            useJUnitPlatform()
+        }
     }
 
-    lombok {
-        version = catalog.versions.lombok.get()
+    pluginManager.withPlugin(catalog.plugins.lombok.get().pluginId) {
+        lombok {
+            version = catalog.versions.lombok.get()
+        }
     }
+
+    pluginManager.withPlugin('maven-publish') {
+        publishing {
+            repositories {
+                maven {
+                    url = 'https://mvn.woggioni.net/'
+                }
+            }
+            publications {
+                maven(MavenPublication) {
+                    from(components["java"])
+                }
+            }
+        }
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 ext {
@@ -76,18 +103,6 @@ test {
     jvmArgs(['--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED'])
 }
 
-publishing {
-    repositories {
-        maven {
-            url = 'https://mvn.woggioni.net/'
-        }
-    }
-    publications {
-        maven(MavenPublication) {
-            from(components["java"])
-        }
-    }
-}
 
 
 

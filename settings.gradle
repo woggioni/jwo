@@ -31,3 +31,4 @@ dependencyResolutionManagement {
 rootProject.name = 'jwo'
 
 include('benchmark')
+include('jmath')

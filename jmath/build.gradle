@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+    alias(catalog.plugins.lombok)
+    id 'maven-publish'
+}
+
+dependencies {
+    implementation project(':')
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
