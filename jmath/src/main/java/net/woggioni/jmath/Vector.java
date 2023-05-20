@@ -1,15 +1,19 @@
 package net.woggioni.jmath;
 
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 
 import static net.woggioni.jwo.Requirement.require;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class Vector<T extends NumericType<T>> {
+public class Vector<T extends NumericType<T>> implements Iterable<Vector.Element<T>> {
     private final NumericTypeFactory<T> numericTypeFactory;
     private final T[] values;
 
@@ -37,6 +41,35 @@ public class Vector<T extends NumericType<T>> {
 
     private void requireSameSize(Vector<T> other) {
         require(() -> other.size() == size()).otherwise(SizeException.class, "Vectors must be of same size");
+    }
+
+    public Vector<T> map(Vector<T> other, BiFunction<T, T, T> op) {
+        requireSameSize(other);
+        return of(numericTypeFactory, size(), (i) -> op.apply(get(i), other.get(i)));
+    }
+
+    public <U extends NumericType<U>> Vector<U> map(NumericTypeFactory<U> numericTypeFactory, Function<T, U> op) {
+        return of(numericTypeFactory, size(), (i) -> op.apply(get(i)));
+    }
+
+    public Vector<T> map(Function<T, T> op) {
+        return of(numericTypeFactory, size(), (i) -> op.apply(get(i)));
+    }
+
+    public Vector<T> sum(T f) {
+        return new Vector<>(numericTypeFactory, size(), index -> get(index).add(f));
+    }
+
+    public Vector<T> sub(T f) {
+        return new Vector<>(numericTypeFactory, size(), index -> get(index).sub(f));
+    }
+
+    public Vector<T> div(T f) {
+        return new Vector<>(numericTypeFactory, size(), index -> get(index).div(f));
+    }
+
+    public Vector<T> mul(T f) {
+        return new Vector<>(numericTypeFactory, size(), index -> get(index).mul(f));
     }
 
     public Vector<T> sum(Vector<T> other) {
@@ -126,6 +159,24 @@ public class Vector<T extends NumericType<T>> {
         return sb.toString();
     }
 
+    @Override
+    public Iterator<Element<T>> iterator() {
+        return new Iterator<Element<T>>() {
+            private int i = 0;
+            @Override
+            public boolean hasNext() {
+                return i < size();
+            }
+
+            @Override
+            public Element<T> next() {
+                Element<T> result = new Element<>(i, get(i));
+                i++;
+                return  result;
+            }
+        };
+    }
+
     public static <T extends NumericType<T>> Vector<T> of(NumericTypeFactory<T> numericTypeFactory, T... values) {
         return new Vector<>(numericTypeFactory, values);
     }
@@ -138,5 +189,11 @@ public class Vector<T extends NumericType<T>> {
                                                           int size,
                                                           IntFunction<T> generator) {
         return new Vector<>(numericTypeFactory, size, generator);
+    }
+
+    @Data
+    public static class Element<T> {
+        private final int index;
+        private final T value;
     }
 }

@@ -68,7 +68,12 @@ public class Rational implements NumericType<Rational> {
     public static Rational of(long n) {
         return new Rational(n, 1);
     }
-
+    public static Rational of(BigInteger num) {
+        return new Rational(num, BigInteger.ONE);
+    }
+    public static Rational of(BigInteger num, BigInteger den) {
+        return new Rational(num, den);
+    }
     private Rational simplify() {
         BigInteger gcd = BigIntegerExt.gcd(num.abs(), den.abs());
         num = num.divide(gcd);

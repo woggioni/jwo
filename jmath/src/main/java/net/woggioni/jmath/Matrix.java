@@ -1,17 +1,19 @@
 package net.woggioni.jmath;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static net.woggioni.jwo.Requirement.require;
 
-public class Matrix<T extends NumericType<T>> {
+public class Matrix<T extends NumericType<T>> implements Iterable<Matrix.Element<T>> {
 
     public interface Pivot {
         <U extends NumericType<U>> Matrix<U> mul(Matrix<U> m);
@@ -557,5 +559,36 @@ public class Matrix<T extends NumericType<T>> {
 
     public T norm2() {
         return squaredNorm2().sqrt();
+    }
+
+    @Override
+    public Iterator<Element<T>> iterator() {
+        return new Iterator<>() {
+            int i = 0;
+            int j = 0;
+
+            @Override
+            public boolean hasNext() {
+                return i * getColumns() + j < getRows() * getColumns();
+            }
+
+            @Override
+            public Element<T> next() {
+                Element<T> result = new Element<>(i, j, get(i, j));
+                ++j;
+                if (j == getColumns()) {
+                    j = 0;
+                    ++i;
+                }
+                return result;
+            }
+        };
+    }
+
+    @Data
+    public static class Element<T> {
+        private final int row;
+        private final int column;
+        private final T value;
     }
 }
