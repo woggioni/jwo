@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 public class MatrixTest {
@@ -201,6 +204,23 @@ public class MatrixTest {
         Assertions.assertEquals(expectedSolution, solution);
         Matrix<Rational> inverse = testMatrix.invert();
         Assertions.assertEquals(expectedSolution, inverse.mmul(b));
+    }
+
+    @Test
+    public void randomLinearSystemTest() {
+        int size = 10;
+        Random rnd = new Random(101325);
+        NumericTypeFactory<Rational> numericTypeFactory = RationalFactory.getInstance();
+        Matrix.ValueGenerator<Rational> init = (i, j) ->
+                Rational.of(rnd.nextInt(-1000 * size, 1000 * size), (long) 1000 * size);
+        Matrix<Rational> mtx  = Matrix.of(numericTypeFactory, size, size, init);
+        Matrix<Rational> lu = mtx.clone();
+        Matrix.Pivot pivot = lu.lup();
+        IntFunction<Rational> initVector = (i) -> Rational.of(rnd.nextInt(0, size), size);
+        Vector<Rational> b = Vector.of(numericTypeFactory, size, initVector);
+        Vector<Rational> x = lu.luSolve(b, pivot);
+        Vector<Rational> error  = mtx.mmul(x).sub(b);
+        Assertions.assertEquals(Rational.ZERO, error.norm());
     }
 
 }
