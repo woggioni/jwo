@@ -32,3 +32,4 @@ rootProject.name = 'jwo'
 
 include('benchmark')
 include('jmath')
+include('jmath-benchmark')

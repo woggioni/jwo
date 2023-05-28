@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+    alias(catalog.plugins.lombok)
+    alias(catalog.plugins.envelope)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':jmath')
+}
+
+envelopeJar {
+    mainClass = 'net.woggioni.jmath.benchmark.Main'
+}
+
