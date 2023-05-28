@@ -6,20 +6,20 @@ public class Chronometer {
 
     public enum UnitOfMeasure {
         NANOSECONDS(1),
-        MICROSECONDS(NANOSECONDS.nanoseconds_size * 1000),
-        MILLISECONDS(MICROSECONDS.nanoseconds_size * 1000),
-        SECONDS(MILLISECONDS.nanoseconds_size * 1000),
-        MINUTES(SECONDS.nanoseconds_size * 60),
-        HOURS(MINUTES.nanoseconds_size * 60),
-        DAYS(HOURS.nanoseconds_size * 24),
-        WEEKS(DAYS.nanoseconds_size * 7),
-        MONTHS(DAYS.nanoseconds_size * 30),
-        YEARS(DAYS.nanoseconds_size * 365);
+        MICROSECONDS(NANOSECONDS.nanoseconds * 1000),
+        MILLISECONDS(MICROSECONDS.nanoseconds * 1000),
+        SECONDS(MILLISECONDS.nanoseconds * 1000),
+        MINUTES(SECONDS.nanoseconds * 60),
+        HOURS(MINUTES.nanoseconds * 60),
+        DAYS(HOURS.nanoseconds * 24),
+        WEEKS(DAYS.nanoseconds * 7),
+        MONTHS(DAYS.nanoseconds * 30),
+        YEARS(DAYS.nanoseconds * 365);
 
-        public long nanoseconds_size;
+        public final long nanoseconds;
 
-        UnitOfMeasure(long nanoseconds_size) {
-            this.nanoseconds_size = nanoseconds_size;
+        UnitOfMeasure(long nanoseconds) {
+            this.nanoseconds = nanoseconds;
         }
     }
 
@@ -39,6 +39,6 @@ public class Chronometer {
     }
 
     public double elapsed(UnitOfMeasure unitOfMeasure) {
-        return ((double) (System.nanoTime() - start)) / unitOfMeasure.nanoseconds_size;
+        return ((double) (System.nanoTime() - start)) / unitOfMeasure.nanoseconds;
     }
 }

@@ -54,11 +54,11 @@ public class Rational implements NumericType<Rational> {
     public Rational(BigInteger num, BigInteger den) {
         this.num = num;
         this.den = den;
+        simplify();
     }
 
     public Rational(long num, long den) {
-        this.num = BigInteger.valueOf(num);
-        this.den = BigInteger.valueOf(den);
+        this(BigInteger.valueOf(num), BigInteger.valueOf(den));
     }
 
     public static Rational of(long num, long den) {

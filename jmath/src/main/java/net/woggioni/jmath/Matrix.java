@@ -417,9 +417,8 @@ public class Matrix<T extends NumericType<T>> implements Iterable<Matrix.Element
         int[] pivotValues = pivotImpl.getValues();
         int size = getRows();
         if (pivotValues.length != size) throw new SizeException(
-                String.format("Pivot length is %d must be %d instead", pivotValues.length, size));
+                String.format("Pivot length is %d, it must be %d instead", pivotValues.length, size));
 
-        for (int i = 0; i < pivotValues.length; i++) pivotValues[i] = i;
         Vector<T> x = Vector.of(numericTypeFactory, size);
 
         for (int i = 0; i < size; i++) {

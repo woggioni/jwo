@@ -277,11 +277,11 @@ public class LruCache<K, V> implements Map<K, V> {
         }
 
         public float getAverageLoadingTime(Chronometer.UnitOfMeasure unitOfMeasure) {
-            return (float) stats.loadingTime / calls / unitOfMeasure.nanoseconds_size;
+            return (float) stats.loadingTime / calls / unitOfMeasure.nanoseconds;
         }
 
         public float getTotalLoadingTime(Chronometer.UnitOfMeasure unitOfMeasure) {
-            return (float) stats.loadingTime / unitOfMeasure.nanoseconds_size;
+            return (float) stats.loadingTime / unitOfMeasure.nanoseconds;
         }
 
         public float getAverageLoadingTime() {
