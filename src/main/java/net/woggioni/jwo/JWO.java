@@ -47,6 +47,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -927,5 +931,57 @@ public class JWO {
     public static <T, U, R> Optional<R> zip(Optional<T> opt1, Optional<U> opt2, BiFun<T, U, R> cb) {
         if (!opt1.isPresent() || !opt2.isPresent()) return Optional.empty();
         else return Optional.ofNullable(cb.apply(opt1.get(), opt2.get()));
+    }
+
+
+    public static Executor delayedExecutor(long delay, TimeUnit unit,
+                                            Executor executor) {
+        if (unit == null || executor == null)
+            throw new NullPointerException();
+        return new DelayedExecutor(delay, unit, executor);
+    }
+    private static final class Delayer {
+        private static ScheduledFuture<?> delay(Runnable command, long delay,
+                                                TimeUnit unit) {
+            return delayer.schedule(command, delay, unit);
+        }
+
+        private static final class DaemonThreadFactory implements ThreadFactory {
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setDaemon(true);
+                t.setName("CompletableFutureDelayScheduler");
+                return t;
+            }
+        }
+
+        private static final ScheduledThreadPoolExecutor delayer;
+        static {
+            (delayer = new ScheduledThreadPoolExecutor(
+                1, new DaemonThreadFactory())).
+                setRemoveOnCancelPolicy(true);
+        }
+    }
+
+    private static final class DelayedExecutor implements Executor {
+        final long delay;
+        final TimeUnit unit;
+        final Executor executor;
+        private DelayedExecutor(long delay, TimeUnit unit, Executor executor) {
+            this.delay = delay; this.unit = unit; this.executor = executor;
+        }
+        public void execute(Runnable r) {
+            Delayer.delay(new TaskSubmitter(executor, r), delay, unit);
+        }
+    }
+
+    private static final class TaskSubmitter implements Runnable {
+        final Executor executor;
+        final Runnable action;
+        TaskSubmitter(Executor executor, Runnable action) {
+            this.executor = executor;
+            this.action = action;
+        }
+        public void run() { executor.execute(action); }
     }
 }
