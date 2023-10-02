@@ -472,7 +472,7 @@ public class JWO {
 
     public static <T, U> T dynamicCast(U obj, Class<T> cls) {
         if(obj == null) return null;
-        else if(cls.isInstance(obj.getClass())) {
+        else if(cls.isInstance(obj)) {
             return (T) obj;
         } else {
             return null;
