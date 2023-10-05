@@ -1,7 +1,8 @@
 package net.woggioni.jwo;
 
-import java.util.Comparator;
 import net.woggioni.jwo.internal.Tuple3Impl;
+
+import java.util.Comparator;
 
 public interface Tuple3<T, U, V> {
     T get_1();

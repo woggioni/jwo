@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     alias(catalog.plugins.multi.release.jar)
     alias(catalog.plugins.lombok)
+    alias(catalog.plugins.sambal)
 }
 
 allprojects {
@@ -17,6 +18,14 @@ allprojects {
     }
 
     pluginManager.withPlugin('java-library') {
+
+        java {
+
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(17)
+                vendor = JvmVendorSpec.GRAAL_VM
+            }
+        }
 
         dependencies {
             testImplementation catalog.junit.jupiter.api
@@ -36,6 +45,14 @@ allprojects {
     }
 
     pluginManager.withPlugin('maven-publish') {
+
+        pluginManager.withPlugin('java-library') {
+            java {
+                withJavadocJar()
+                withSourcesJar()
+            }
+        }
+
         publishing {
             repositories {
                 maven {
@@ -51,11 +68,6 @@ allprojects {
     }
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 ext {
     setProperty('jpms.module.name', 'net.woggioni.jwo')
 }
@@ -68,11 +80,6 @@ configurations {
 dependencies {
     implementation catalog.slf4j.api
     pathClassloaderTest group: 'com.google.inject', name: 'guice', version: getProperty('guice.version')
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
 }
 
 compileJava {
@@ -102,7 +109,5 @@ test {
 
     jvmArgs(['--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED'])
 }
-
-
 
 

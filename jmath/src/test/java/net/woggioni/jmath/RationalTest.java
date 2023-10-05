@@ -9,8 +9,9 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.math.BigInteger;
-import static java.math.BigInteger.valueOf;
 import java.util.stream.Stream;
+
+import static java.math.BigInteger.valueOf;
 
 public class RationalTest {
 

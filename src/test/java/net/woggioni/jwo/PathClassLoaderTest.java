@@ -1,7 +1,6 @@
 package net.woggioni.jwo;
 
 import lombok.SneakyThrows;
-import net.woggioni.jwo.PathClassLoader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

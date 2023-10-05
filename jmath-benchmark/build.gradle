@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     alias(catalog.plugins.lombok)
     alias(catalog.plugins.envelope)
+    alias(catalog.plugins.native.image)
 }
 
 repositories {
@@ -12,7 +13,10 @@ dependencies {
     implementation project(':jmath')
 }
 
-envelopeJar {
+application {
     mainClass = 'net.woggioni.jmath.benchmark.Main'
 }
 
+configureNativeImage {
+    args('20')
+}

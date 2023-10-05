@@ -2,7 +2,12 @@ package net.woggioni.jwo;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Objects;
 
 import static java.lang.Math.min;
 

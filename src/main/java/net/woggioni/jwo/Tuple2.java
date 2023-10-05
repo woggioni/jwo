@@ -1,8 +1,9 @@
 package net.woggioni.jwo;
 
+import net.woggioni.jwo.internal.Tuple2Impl;
+
 import java.util.Comparator;
 import java.util.function.Function;
-import net.woggioni.jwo.internal.Tuple2Impl;
 
 public interface Tuple2<T, U> {
     T get_1();

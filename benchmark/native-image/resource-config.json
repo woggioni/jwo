@@ -1,0 +1,7 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\Qrender_template_test.txt\\E"
+  }]},
+  "bundles":[]
+}
