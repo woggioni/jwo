@@ -6,27 +6,25 @@ pipeline {
     stages {
         stage("Build") {
             steps {
-                sh "./gradlew assemble"
-            }
-        }
-        stage("Check") {
-            steps {
-                sh "./gradlew test"
+                sh "./gradlew build"
             }
             post {
                 always {
                     junit 'build/test-results/test/*.xml'
+                    junit 'jmath/build/test-results/test/*.xml'
                 }
-            }
-        }
-        stage("Archive") {
-            steps {
-                sh "./gradlew build"
-                javadoc javadocDir: "build/docs/javadoc", keepAll: true
-                archiveArtifacts artifacts: 'build/libs/*.jar,benchmark/build/libs/*.jar',
-                                 allowEmptyArchive: true,
-                                 fingerprint: true,
-                                 onlyIfSuccessful: true
+                success {
+                    jacoco(
+                        execPattern: '**/build/jacoco/*.exec',
+                        classPattern: '**/build/classes/java/main',
+                        sourcePattern: '**/src/main'
+                    )
+                    javadoc javadocDir: "build/docs/javadoc", keepAll: true
+                    archiveArtifacts artifacts: '**/build/libs/*.jar',
+                                     allowEmptyArchive: false,
+                                     fingerprint: true,
+                                     onlyIfSuccessful: true
+                }
             }
         }
         stage("Publish") {
