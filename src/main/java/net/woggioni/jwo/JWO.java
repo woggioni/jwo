@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.nio.channels.Channels;
@@ -104,23 +105,19 @@ public class JWO {
 
     @SneakyThrows
     public static void writeBytes2File(Path file, byte[] bytes) {
-        try (OutputStream os = new FileOutputStream(file.toString())) {
+        try (OutputStream os = Files.newOutputStream(file)) {
             os.write(bytes);
         }
     }
 
     @SneakyThrows
     public static String readFile2String(File file) {
-        StringBuilder builder = new StringBuilder();
-        try (Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(file.getPath())))) {
+        StringWriter writer = new StringWriter();
+        try (Reader reader = Files.newBufferedReader(file.toPath())) {
             char[] buffer = new char[1024];
-            while (true) {
-                int read = reader.read(buffer);
-                builder.append(buffer, 0, read);
-                if (read < buffer.length) break;
-            }
+            JWO.copy(reader, writer, buffer);
         }
-        return builder.toString();
+        return writer.toString();
     }
 
     @SneakyThrows
@@ -138,6 +135,13 @@ public class JWO {
     }
 
     @SneakyThrows
+    public static <T extends Throwable> T newThrowable(Class<T> cls) {
+        Constructor<T> constructor = cls.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        return constructor.newInstance();
+    }
+
+    @SneakyThrows
     public static <T extends Throwable> T newThrowable(Class<T> cls, String format, Object... args) {
         Constructor<T> constructor = cls.getDeclaredConstructor(String.class);
         constructor.setAccessible(true);
@@ -151,6 +155,11 @@ public class JWO {
     }
 
     @SneakyThrows
+    public static <T extends Throwable> T raise(Class<T> cls) {
+        throw newThrowable(cls);
+    }
+
+    @SneakyThrows
     public static <T extends Throwable> void raise(Class<T> cls, Throwable throwable, String format, Object... args) {
         throw newThrowable(cls, throwable, format, args);
     }
@@ -159,7 +168,6 @@ public class JWO {
     public static <T extends Throwable> void raise(Class<T> cls, String format, Object... args) {
         throw newThrowable(cls, format, args);
     }
-
 
     private static SSLSocketFactory defaultSSLSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
     private static HostnameVerifier defaultHostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
@@ -563,13 +571,13 @@ public class JWO {
         byte[] buffer = new byte[0x10000];
         expandZip(sourceArchive, (BiCon<ZipInputStream, ZipEntry>)
                 (ZipInputStream zipInputStream, ZipEntry zipEntry) -> {
-            Path newFile = destinationFolder.resolve(zipEntry.getName());
-            Files.createDirectories(newFile.getParent());
-            try(OutputStream outputStream = Files.newOutputStream(newFile)) {
-                while (true) {
-                    int read = zipInputStream.read(buffer);
-                    if (read < 0) break;
-                    outputStream.write(buffer, 0, read);
+            Path entryPath = destinationFolder.resolve(zipEntry.getName());
+            if(zipEntry.isDirectory()) {
+                Files.createDirectories(entryPath);
+            } else {
+                Files.createDirectories(entryPath.getParent());
+                try(OutputStream outputStream = Files.newOutputStream(entryPath)) {
+                    copy(zipInputStream, outputStream, buffer);
                 }
             }
         });
@@ -815,7 +823,7 @@ public class JWO {
     }
 
     public static void replaceFileIfDifferent(InputStream inputStream, Path destination, FileAttribute<?>... attrs) {
-        replaceFileIfDifferent(() -> inputStream, destination, attrs);
+        replaceFileIfDifferent(() -> inputStream, destination, null, attrs);
     }
 
     @SneakyThrows
@@ -874,6 +882,18 @@ public class JWO {
         }
     }
 
+    public static <T, U> Runnable curry(Consumer<T> original, Supplier<T> sup) {
+        return () -> original.accept(sup.get());
+    }
+
+    public static <T> Runnable curry(Consumer<T> original, T arg) {
+        return () -> original.accept(arg);
+    }
+
+    public static <T, U> Supplier<U> curry(Fun<T, U> original, T arg) {
+        return () -> original.apply(arg);
+    }
+
     public static <T, U, V> Fun<U, V> curry1(BiFun<T, U, V> original, T arg) {
         return u -> original.apply(arg, u);
     }
@@ -894,7 +914,7 @@ public class JWO {
         return Stream.generate(valueSupplier).limit(1);
     }
 
-    public static <T, U> Supplier<U> compose(Supplier<T> sup, Function<T, U> fun) {
+    public static <T, U> Supplier<U> compose(Supplier<T> sup, Function<? super T, ? extends U> fun) {
         return () -> fun.apply(sup.get());
     }
 

@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 
 @EqualsAndHashCode
@@ -26,6 +29,14 @@ public class Hash {
         @SneakyThrows
         public MessageDigest newMessageDigest() {
             return MessageDigest.getInstance(key);
+        }
+        @SneakyThrows
+        public DigestOutputStream newOutputStream(OutputStream delegate) {
+            return new DigestOutputStream(delegate, MessageDigest.getInstance(key));
+        }
+        @SneakyThrows
+        public DigestInputStream newInputStream(InputStream delegate) {
+            return new DigestInputStream(delegate, MessageDigest.getInstance(key));
         }
     }
 

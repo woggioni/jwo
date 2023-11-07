@@ -73,13 +73,21 @@ public enum JavaVersion {
     VERSION_20,
 
     /**
+     * Java 20 major version.
+     */
+    VERSION_21,
+
+    /**
      * Higher version of Java.
      */
     VERSION_HIGHER;
     // Since Java 9, version should be X instead of 1.X
     // However, to keep backward compatibility, we change from 11
     private static final int FIRST_MAJOR_VERSION_ORDINAL = 10;
-    private static JavaVersion currentJavaVersion;
+    private static LazyValue<JavaVersion> currentJavaVersion = LazyValue.of(
+        () -> toVersion(System.getProperty("java.version")),
+        LazyValue.ThreadSafetyMode.SYNCHRONIZED
+    );
     private final String versionName;
 
     JavaVersion() {
@@ -125,10 +133,7 @@ public enum JavaVersion {
      * @return The version of the current JVM.
      */
     public static JavaVersion current() {
-        if (currentJavaVersion == null) {
-            currentJavaVersion = toVersion(System.getProperty("java.version"));
-        }
-        return currentJavaVersion;
+        return currentJavaVersion.get();
     }
 
     static void resetCurrent() {
@@ -144,90 +149,6 @@ public enum JavaVersion {
             throw new IllegalArgumentException("Invalid class format. Should contain at least 8 bytes");
         }
         return forClassVersion(classData[7] & 0xFF);
-    }
-
-    public boolean isJava5() {
-        return this == VERSION_1_5;
-    }
-
-    public boolean isJava6() {
-        return this == VERSION_1_6;
-    }
-
-    public boolean isJava7() {
-        return this == VERSION_1_7;
-    }
-
-    public boolean isJava8() {
-        return this == VERSION_1_8;
-    }
-
-    public boolean isJava9() {
-        return this == VERSION_1_9;
-    }
-
-    public boolean isJava10() {
-        return this == VERSION_1_10;
-    }
-
-    /**
-     * Returns if the version is Java 11.
-     *
-     * @since 4.7
-     */
-    public boolean isJava11() {
-        return this == VERSION_11;
-    }
-
-    /**
-     * Returns if the version is Java 12.
-     *
-     * @since 5.0
-     */
-    public boolean isJava12() {
-        return this == VERSION_12;
-    }
-
-    public boolean isJava5Compatible() {
-        return isCompatibleWith(VERSION_1_5);
-    }
-
-    public boolean isJava6Compatible() {
-        return isCompatibleWith(VERSION_1_6);
-    }
-
-    public boolean isJava7Compatible() {
-        return isCompatibleWith(VERSION_1_7);
-    }
-
-    public boolean isJava8Compatible() {
-        return isCompatibleWith(VERSION_1_8);
-    }
-
-    public boolean isJava9Compatible() {
-        return isCompatibleWith(VERSION_1_9);
-    }
-
-    public boolean isJava10Compatible() {
-        return isCompatibleWith(VERSION_1_10);
-    }
-
-    /**
-     * Returns if the version is Java 11 compatible.
-     *
-     * @since 4.7
-     */
-    public boolean isJava11Compatible() {
-        return isCompatibleWith(VERSION_11);
-    }
-
-    /**
-     * Returns if the version is Java 12 compatible.
-     *
-     * @since 5.0
-     */
-    public boolean isJava12Compatible() {
-        return isCompatibleWith(VERSION_12);
     }
 
     /**

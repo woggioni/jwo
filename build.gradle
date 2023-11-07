@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'jacoco'
     alias(catalog.plugins.multi.release.jar)
     alias(catalog.plugins.lombok)
     alias(catalog.plugins.sambal)
@@ -20,7 +21,6 @@ allprojects {
     pluginManager.withPlugin('java-library') {
 
         java {
-
             toolchain {
                 languageVersion = JavaLanguageVersion.of(17)
                 vendor = JvmVendorSpec.GRAAL_VM
@@ -35,6 +35,21 @@ allprojects {
 
         test {
             useJUnitPlatform()
+
+            systemProperties([
+                'junit.jupiter.execution.parallel.enabled' : true,
+                'junit.jupiter.execution.parallel.mode.default' : 'concurrent',
+                'junit.jupiter.execution.parallel.mode.classes.default' : 'concurrent'
+            ])
+        }
+
+        pluginManager.withPlugin('jacoco') {
+            test {
+                finalizedBy jacocoTestReport
+            }
+            jacocoTestReport {
+                dependsOn test
+            }
         }
     }
 
@@ -75,11 +90,18 @@ ext {
 
 configurations {
     pathClassloaderTest
+    zipTestBundle {
+        transitive = false
+        canBeConsumed = false
+        visible = false
+        canBeResolved = true
+    }
 }
 
 dependencies {
     implementation catalog.slf4j.api
     pathClassloaderTest group: 'com.google.inject', name: 'guice', version: getProperty('guice.version')
+    zipTestBundle group: 'com.google.inject', name: 'guice', version: getProperty('guice.version')
 }
 
 compileJava {
@@ -104,7 +126,8 @@ test {
     }.first()
     systemProperties([
         'junit.jupiter.engine.jar' : junitJupiterEngineJar.toString(),
-        'path.classloader.test.bundle' : pathClassLoaderTestBundleTask.get().outputs.files.singleFile
+        'path.classloader.test.bundle' : pathClassLoaderTestBundleTask.get().outputs.files.singleFile,
+        'zip.test.bundle' : configurations.zipTestBundle.singleFile
     ])
 
     jvmArgs(['--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED'])

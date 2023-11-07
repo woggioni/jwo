@@ -35,39 +35,6 @@ public class Application {
         return new Builder().name(name);
     }
 
-    private static boolean validateConfigurationDirectory(Path candidate) {
-        try {
-            if (!Files.exists(candidate)) {
-                Files.createDirectories(candidate);
-                return true;
-            } else if (!Files.isDirectory(candidate)) {
-                log.debug("Configuration directory '{}' discarded because it is not a directory", candidate);
-                return false;
-            } else if (!Files.isWritable(candidate)) {
-                log.debug("Configuration directory '{}' discarded because it is not writable", candidate);
-                return false;
-            } else {
-                log.debug("Using configuration directory '{}'", candidate);
-                return true;
-            }
-        } catch (Exception ioe) {
-            log.debug(
-                    String.format("configuration directory '%s' discarded: %s", candidate.toString(), ioe.getMessage()),
-                    ioe
-            );
-            return false;
-        }
-    }
-
-    @SneakyThrows
-    private static Path selectCandidate(Stream<Path> candidates, String successMessage, String errorMessage) {
-        return candidates
-                .filter(Application::validateConfigurationDirectory)
-                .peek(p -> log.debug(successMessage, p))
-                .findFirst()
-                .orElseThrow((Sup<Throwable>) () -> new FileNotFoundException(errorMessage));
-    }
-
     private static boolean validateWritableDirectory(Path candidate) {
         try {
             if (!Files.exists(candidate)) {

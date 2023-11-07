@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
@@ -124,10 +125,16 @@ public class CollectionUtils {
         };
     }
 
-    private static <T> BinaryOperator<T> throwingMerger() {
-        return (v1, v2) -> {
-            throw new IllegalStateException(String.format("Duplicate key %s", v1));
-        };
+    public static <T> T throwingMerger(T v1, T v2) {
+        throw new IllegalStateException(String.format("Duplicate key %s", v1));
+    }
+
+    public static <T> T oldValueMerger(T oldValue, T newValue) {
+        return oldValue;
+    }
+
+    public static <T> T newValueMerger(T oldValue, T newValue) {
+        return newValue;
     }
 
     public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableHashMap(
@@ -163,66 +170,135 @@ public class CollectionUtils {
     }
 
     public static <T, K, V, MAP_TYPE extends NavigableMap<K, V>> Collector<T, ?, MAP_TYPE> toNavigableMap(
+        Supplier<MAP_TYPE> constructor,
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor) {
+        return toNavigableMap(
+            constructor,
+            keyExtractor,
+            valueExtractor,
+            CollectionUtils::throwingMerger
+        );
+    }
+
+    public static <T, K, V, MAP_TYPE extends NavigableMap<K, V>> Collector<T, ?, MAP_TYPE> toNavigableMap(
             Supplier<MAP_TYPE> constructor,
             Function<T, K> keyExtractor,
-            Function<T, V> valueExtractor) {
+            Function<T, V> valueExtractor,
+            BinaryOperator<V> valueMerger) {
         BiConsumer<MAP_TYPE, T> accumulator = (map, streamElement) -> {
-            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
+            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement),
+                valueMerger
+            );
         };
         return Collector.of(
                 constructor,
                 accumulator,
-                mapMerger(throwingMerger())
+                mapMerger(valueMerger)
         );
+    }
+
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(
+        Supplier<Map<K, V>> constructor,
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor) {
+        return toMap(constructor, keyExtractor, valueExtractor, CollectionUtils::throwingMerger);
     }
 
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(
             Supplier<Map<K, V>> constructor,
             Function<T, K> keyExtractor,
-            Function<T, V> valueExtractor) {
+            Function<T, V> valueExtractor,
+            BinaryOperator<V> valueMerger) {
         BiConsumer<Map<K, V>, T> accumulator = (map, streamElement) -> {
-            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
+            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement),
+                valueMerger
+            );
         };
         return Collector.of(
                 constructor,
                 accumulator,
-                mapMerger(throwingMerger())
+                mapMerger(valueMerger)
         );
     }
 
     public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableMap(
+        Supplier<Map<K, V>> constructor,
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor) {
+        return toUnmodifiableMap(constructor, keyExtractor, valueExtractor, CollectionUtils::throwingMerger);
+    }
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableMap(
             Supplier<Map<K, V>> constructor,
             Function<T, K> keyExtractor,
-            Function<T, V> valueExtractor) {
+            Function<T, V> valueExtractor,
+            BinaryOperator<V> valueMerger) {
         BiConsumer<Map<K, V>, T> accumulator = (map, streamElement) -> {
-            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
+            map.merge(keyExtractor.apply(streamElement),
+                valueExtractor.apply(streamElement),
+                valueMerger
+            );
         };
         return Collector.of(
                 constructor,
                 accumulator,
-                mapMerger(throwingMerger()),
+                mapMerger(valueMerger),
                 Collections::unmodifiableMap
         );
     }
 
     public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toUnmodifiableNavigableMap(
+        Supplier<NavigableMap<K, V>> constructor,
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor,
+        BinaryOperator<V> valueMerger
+    ) {
+        BiConsumer<NavigableMap<K, V>, T> accumulator = (map, streamElement) -> {
+            map.merge(
+                keyExtractor.apply(streamElement),
+                valueExtractor.apply(streamElement),
+                valueMerger
+            );
+        };
+        return Collector.of(
+            constructor,
+            accumulator,
+            mapMerger(valueMerger),
+            Collections::unmodifiableNavigableMap
+        );
+    }
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toUnmodifiableNavigableMap(
             Supplier<NavigableMap<K, V>> constructor,
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor) {
-        BiConsumer<NavigableMap<K, V>, T> accumulator = (map, streamElement) -> {
-            map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement), throwingMerger());
-        };
-        return Collector.of(
-                constructor,
-                accumulator,
-                mapMerger(throwingMerger()),
-                Collections::unmodifiableNavigableMap
-        );
+        return toUnmodifiableNavigableMap(constructor, keyExtractor, valueExtractor, CollectionUtils::throwingMerger);
     }
     public static <K, V, U> Stream<Map.Entry<K, U>> mapValues(Map<K, V> map, Fun<V, U> xform) {
         return map
                 .entrySet()
                 .stream()
                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), xform.apply(entry.getValue())));
+    }
+
+    public static <T> Iterator<T> reverseIterator(List<T> list) {
+        return new Iterator<T>() {
+            private final ListIterator<T> it = list.listIterator(list.size());
+            @Override
+            public boolean hasNext() {
+                return it.hasPrevious();
+            }
+
+            @Override
+            public T next() {
+                return it.previous();
+            }
+        };
+    }
+
+    public static <T> Iterator<T> reverseIterator(NavigableSet<T> set) {
+        return set.descendingIterator();
+    }
+    public static <K, V> Iterator<Map.Entry<K, V>> reverseIterator(NavigableMap<K, V> map) {
+        return map.descendingMap().entrySet().iterator();
     }
 }
