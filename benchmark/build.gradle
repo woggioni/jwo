@@ -1,8 +1,11 @@
+import net.woggioni.gradle.graalvm.NativeImageTask
+import net.woggioni.gradle.graalvm.NativeImagePlugin
+
 plugins {
     id 'java-library'
     alias(catalog.plugins.lombok)
     alias(catalog.plugins.envelope)
-    alias(catalog.plugins.native.image)
+    alias(catalog.plugins.graalvm.native.image)
 }
 
 repositories {
@@ -15,4 +18,9 @@ dependencies {
 
 application {
     mainClass = 'net.woggioni.jwo.benchmark.Main'
+}
+
+tasks.named(NativeImagePlugin.NATIVE_IMAGE_TASK_NAME, NativeImageTask) {
+    useMusl = true
+    buildStaticImage = true
 }
