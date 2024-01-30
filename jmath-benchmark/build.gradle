@@ -16,7 +16,7 @@ dependencies {
     implementation project(':jmath')
 }
 
-envelopeJar {
+application {
     mainClass = 'net.woggioni.jmath.benchmark.Main'
 }
 

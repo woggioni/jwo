@@ -10,5 +10,5 @@ public interface Run extends Runnable {
         exec();
     }
 
-    boolean exec() throws Throwable;
+    void exec() throws Throwable;
 }

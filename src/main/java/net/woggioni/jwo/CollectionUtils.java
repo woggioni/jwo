@@ -25,6 +25,10 @@ import java.util.stream.Stream;
 
 public class CollectionUtils {
 
+    public enum MapMergeStrategy {
+        THROW, REPLACE, KEEP
+    }
+
     @SafeVarargs
     public static <T> ArrayList<T> newArrayList(T... args) {
         return new ArrayList<>(Arrays.asList(args));
@@ -125,18 +129,43 @@ public class CollectionUtils {
         };
     }
 
-    public static <T> T throwingMerger(T v1, T v2) {
-        throw new IllegalStateException(String.format("Duplicate key %s", v1));
+    private static <T> BinaryOperator<T> throwingMerger() {
+        return (v1, v2) -> {
+            throw new IllegalStateException(String.format("Duplicate key %s", v1));
+        };
+    }
+    private static <T> BinaryOperator<T> updatingMerger() {
+        return (v1, v2) -> v2;
     }
 
-    public static <T> T oldValueMerger(T oldValue, T newValue) {
-        return oldValue;
+    private static <T> BinaryOperator<T> conservativeMerger() {
+        return (v1, v2) -> v1;
     }
 
-    public static <T> T newValueMerger(T oldValue, T newValue) {
-        return newValue;
+    private static <T> BinaryOperator<T> getMerger(MapMergeStrategy mapMergeStrategy) {
+        BinaryOperator<T> result;
+        switch (mapMergeStrategy) {
+            case KEEP:
+                result = conservativeMerger();
+                break;
+            case THROW:
+                result = throwingMerger();
+                break;
+            case REPLACE:
+                result = updatingMerger();
+                break;
+            default:
+                throw new NullPointerException();
+        }
+        return result;
     }
 
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableHashMap(
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor,
+        MapMergeStrategy mapMergeStrategy) {
+        return toUnmodifiableMap(HashMap::new, keyExtractor, valueExtractor, mapMergeStrategy);
+    }
     public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableHashMap(
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor) {
@@ -150,12 +179,31 @@ public class CollectionUtils {
     }
 
     public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toUnmodifiableTreeMap(
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor,
+        MapMergeStrategy mapMergeStrategy) {
+        return toUnmodifiableNavigableMap(TreeMap::new, keyExtractor, valueExtractor, mapMergeStrategy);
+    }
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toUnmodifiableTreeMap(
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor,
+        Comparator<K> comparator,
+        MapMergeStrategy mapMergeStrategy) {
+        return toUnmodifiableNavigableMap(() -> new TreeMap<>(comparator), keyExtractor, valueExtractor, mapMergeStrategy);
+    }
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toUnmodifiableTreeMap(
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor,
             Comparator<K> comparator) {
         return toUnmodifiableNavigableMap(() -> new TreeMap<>(comparator), keyExtractor, valueExtractor);
     }
 
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toTreeMap(
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor,
+        MapMergeStrategy mapMergeStrategy) {
+        return toNavigableMap(TreeMap::new, keyExtractor, valueExtractor, mapMergeStrategy);
+    }
     public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toTreeMap(
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor) {
@@ -169,6 +217,14 @@ public class CollectionUtils {
         return toNavigableMap(() -> new TreeMap<>(comparator), keyExtractor, valueExtractor);
     }
 
+    public static <T, K, V> Collector<T, ?, NavigableMap<K, V>> toTreeMap(
+        Function<T, K> keyExtractor,
+        Function<T, V> valueExtractor,
+        Comparator<K> comparator,
+        MapMergeStrategy mapMergeStrategy) {
+        return toNavigableMap(() -> new TreeMap<>(comparator), keyExtractor, valueExtractor, mapMergeStrategy);
+    }
+
     public static <T, K, V, MAP_TYPE extends NavigableMap<K, V>> Collector<T, ?, MAP_TYPE> toNavigableMap(
         Supplier<MAP_TYPE> constructor,
         Function<T, K> keyExtractor,
@@ -177,7 +233,7 @@ public class CollectionUtils {
             constructor,
             keyExtractor,
             valueExtractor,
-            CollectionUtils::throwingMerger
+            MapMergeStrategy.THROW
         );
     }
 
@@ -185,7 +241,8 @@ public class CollectionUtils {
             Supplier<MAP_TYPE> constructor,
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor,
-            BinaryOperator<V> valueMerger) {
+            MapMergeStrategy mapMergeStrategy) {
+        BinaryOperator<V> valueMerger = getMerger(mapMergeStrategy);
         BiConsumer<MAP_TYPE, T> accumulator = (map, streamElement) -> {
             map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement),
                 valueMerger
@@ -202,14 +259,15 @@ public class CollectionUtils {
         Supplier<Map<K, V>> constructor,
         Function<T, K> keyExtractor,
         Function<T, V> valueExtractor) {
-        return toMap(constructor, keyExtractor, valueExtractor, CollectionUtils::throwingMerger);
+        return toMap(constructor, keyExtractor, valueExtractor, MapMergeStrategy.THROW);
     }
 
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(
             Supplier<Map<K, V>> constructor,
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor,
-            BinaryOperator<V> valueMerger) {
+            MapMergeStrategy mapMergeStrategy) {
+        BinaryOperator<V> valueMerger = getMerger(mapMergeStrategy);
         BiConsumer<Map<K, V>, T> accumulator = (map, streamElement) -> {
             map.merge(keyExtractor.apply(streamElement), valueExtractor.apply(streamElement),
                 valueMerger
@@ -226,13 +284,14 @@ public class CollectionUtils {
         Supplier<Map<K, V>> constructor,
         Function<T, K> keyExtractor,
         Function<T, V> valueExtractor) {
-        return toUnmodifiableMap(constructor, keyExtractor, valueExtractor, CollectionUtils::throwingMerger);
+        return toUnmodifiableMap(constructor, keyExtractor, valueExtractor, MapMergeStrategy.THROW);
     }
     public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableMap(
             Supplier<Map<K, V>> constructor,
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor,
-            BinaryOperator<V> valueMerger) {
+            MapMergeStrategy mapMergeStrategy) {
+        BinaryOperator<V> valueMerger = getMerger(mapMergeStrategy);
         BiConsumer<Map<K, V>, T> accumulator = (map, streamElement) -> {
             map.merge(keyExtractor.apply(streamElement),
                 valueExtractor.apply(streamElement),
@@ -251,8 +310,9 @@ public class CollectionUtils {
         Supplier<NavigableMap<K, V>> constructor,
         Function<T, K> keyExtractor,
         Function<T, V> valueExtractor,
-        BinaryOperator<V> valueMerger
+        MapMergeStrategy mapMergeStrategy
     ) {
+        BinaryOperator<V> valueMerger = getMerger(mapMergeStrategy);
         BiConsumer<NavigableMap<K, V>, T> accumulator = (map, streamElement) -> {
             map.merge(
                 keyExtractor.apply(streamElement),
@@ -271,7 +331,7 @@ public class CollectionUtils {
             Supplier<NavigableMap<K, V>> constructor,
             Function<T, K> keyExtractor,
             Function<T, V> valueExtractor) {
-        return toUnmodifiableNavigableMap(constructor, keyExtractor, valueExtractor, CollectionUtils::throwingMerger);
+        return toUnmodifiableNavigableMap(constructor, keyExtractor, valueExtractor, MapMergeStrategy.THROW);
     }
     public static <K, V, U> Stream<Map.Entry<K, U>> mapValues(Map<K, V> map, Fun<V, U> xform) {
         return map

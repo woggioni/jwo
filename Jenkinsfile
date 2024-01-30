@@ -19,7 +19,7 @@ pipeline {
                         classPattern: '**/build/classes/java/main',
                         sourcePattern: '**/src/main'
                     )
-                    javadoc javadocDir: "build/docs/javadoc", keepAll: true
+                    //javadoc javadocDir: "build/docs/javadoc", keepAll: true
                     archiveArtifacts artifacts: '**/build/libs/*.jar',
                                      allowEmptyArchive: false,
                                      fingerprint: true,

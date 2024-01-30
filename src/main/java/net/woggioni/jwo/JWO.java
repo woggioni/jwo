@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.woggioni.jwo.exception.ChildProcessException;
 import net.woggioni.jwo.internal.CharFilterReader;
+import org.slf4j.Logger;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -12,9 +13,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -25,6 +24,8 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.net.URLStreamHandlerFactory;
 import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,6 +36,8 @@ import java.nio.file.attribute.FileAttribute;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -69,6 +72,10 @@ import java.util.zip.ZipOutputStream;
 
 @Slf4j
 public class JWO {
+
+    private static final String PROTOCOL_HANDLER = "java.protocol.handler.pkgs";
+    private static final String HANDLERS_PACKAGE = "net.woggioni.jwo.url";
+
     public static <T> Stream<T> iterable2Stream(Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false);
     }
@@ -1003,5 +1010,101 @@ public class JWO {
             this.action = action;
         }
         public void run() { executor.execute(action); }
+    }
+
+    public static String toUnixPath(Path path) {
+        String result;
+        if (OS.isUnix) {
+            result = path.toString();
+        } else {
+            result = (path.isAbsolute() ? "/" : "") +
+                iterable2Stream(path)
+                    .map(Path::toString)
+                    .collect(Collectors.joining("/"));
+        }
+        return result;
+    }
+
+    public static void registerUrlProtocolHandler() {
+        String handlers = System.getProperty(PROTOCOL_HANDLER, "");
+        System.setProperty(PROTOCOL_HANDLER,
+            ((handlers == null || handlers.isEmpty()) ? HANDLERS_PACKAGE : handlers + "|" + HANDLERS_PACKAGE));
+        resetCachedUrlHandlers();
+    }
+
+    /**
+     * Reset any cached handlers just in case a jar protocol has already been used. We
+     * reset the handler by trying to set a null {@link URLStreamHandlerFactory} which
+     * should have no effect other than clearing the handlers cache.
+     */
+    private static void resetCachedUrlHandlers() {
+        try {
+            URL.setURLStreamHandlerFactory(null);
+        } catch (Error ex) {
+            // Ignore
+        }
+    }
+
+    @SneakyThrows
+    public static void deletePath(Logger log, Path path) {
+        if (Files.exists(path)) {
+            if (log.isInfoEnabled()) {
+                log.info("Wiping '{}'", path);
+            }
+            deletePath(path);
+        }
+    }
+
+    public static <T, U extends T> U downCast(T param) {
+        return (U) param;
+    }
+
+    public static <T extends U, U> U upCast(T param) {
+        return param;
+    }
+
+    public static <T, U extends T> Optional<U> asInstance(T param, Class<U> cls) {
+        return Optional.ofNullable(param)
+            .filter(cls::isInstance)
+            .map(cls::cast);
+    }
+
+    public static <K, V, U> Stream<Map.Entry<K, U>> mapValues(Map<K, V> map, Fun<V, U> xform) {
+        return map
+            .entrySet()
+            .stream()
+            .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), xform.apply(entry.getValue())));
+    }
+
+    @SneakyThrows
+    public static Process startJavaProcess(
+        Logger log,
+        Path javaHome,
+        List<String> args,
+        Path cwd,
+        Map<String, String> env) {
+        Path javaExecutable = javaHome.resolve("bin/java" + (OS.isWindows ? ".exe" : ""));
+        ProcessBuilder pb = new ProcessBuilder();
+        List<String> cmd = new ArrayList<>();
+        cmd.add(javaExecutable.toString());
+        cmd.addAll(args);
+        pb.command(cmd);
+        pb.inheritIO();
+        pb.directory(cwd.toFile());
+        pb.environment().putAll(env);
+        if (log.isTraceEnabled()) {
+            String cmdLineListString = '[' + cmd.stream().map(s -> '\'' + s + '\'').collect(Collectors.joining(", ")) + ']';
+            log.trace("Starting child java process with command line: {}", cmdLineListString);
+        }
+        return pb.start();
+    }
+
+    public static <T, U> U let(T object, Function<T, U> cb) {
+        return cb.apply(object);
+    }
+
+    public static <T> T also(T object, Consumer<T> cb) {
+        cb.accept(object);
+        return object;
     }
 }

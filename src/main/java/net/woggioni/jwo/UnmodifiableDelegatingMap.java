@@ -100,7 +100,7 @@ public class UnmodifiableDelegatingMap<K, V> implements Map<K, V> {
                 mapFactory,
                 Map.Entry::getKey,
                 Map.Entry::getValue,
-                CollectionUtils::newValueMerger
+                CollectionUtils.MapMergeStrategy.REPLACE
             )
         );
     }

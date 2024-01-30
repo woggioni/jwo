@@ -17,12 +17,11 @@ allprojects {
         }
         mavenCentral()
     }
-
     pluginManager.withPlugin('java-library') {
 
         java {
             toolchain {
-                languageVersion = JavaLanguageVersion.of(17)
+                languageVersion = JavaLanguageVersion.of(21)
                 vendor = JvmVendorSpec.GRAAL_VM
             }
         }
@@ -63,7 +62,7 @@ allprojects {
 
         pluginManager.withPlugin('java-library') {
             java {
-                withJavadocJar()
+//                withJavadocJar()
                 withSourcesJar()
             }
         }

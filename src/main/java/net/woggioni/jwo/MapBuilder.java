@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class MapBuilder<K,V> {
     private final List<Map.Entry<K, V>> entries = new ArrayList<>();
@@ -22,7 +23,15 @@ public class MapBuilder<K,V> {
         return finalizer.apply(result);
     }
 
+    public Stream<Map.Entry<K,V>> stream() {
+        return entries.stream();
+    }
+
     public Map<K,V> build(Sup<Map<K,V>> factory) {
         return build(factory, Function.identity());
+    }
+
+    public static <K, V> MapBuilder<K, V> with(K key, V value) {
+        return new MapBuilder<K, V>().entry(key, value);
     }
 }

@@ -24,10 +24,15 @@ public class Main {
         Matrix<Rational> mtx  = Matrix.of(numericTypeFactory, size, size, init);
         Matrix<Rational> lu = mtx.clone();
         Matrix.Pivot pivot = lu.lup();
-        IntFunction<Rational> initVector = (i) -> Rational.of(rnd.nextInt(0, size), size);
-        Vector<Rational> b = Vector.of(numericTypeFactory, size, initVector);
-        Vector<Rational> x = lu.luSolve(b, pivot);
-        Vector<Rational> error  = mtx.mmul(x).sub(b);
-        System.out.println(error.norm());
+        for(int i = 0; i < size; i++) {
+            IntFunction<Rational> initVector = (j) -> Rational.of(rnd.nextInt(0, size), size);
+            Vector<Rational> b = Vector.of(numericTypeFactory, size, initVector);
+            Vector<Rational> x = lu.luSolve(b, pivot);
+            Vector<Rational> error = mtx.mmul(x).sub(b);
+            Rational norm = error.norm();
+            if(norm.compareTo(Rational.ZERO) != 0) {
+                throw new RuntimeException(String.format("Error is %s", norm));
+            }
+        }
     }
 }
