@@ -62,7 +62,7 @@ allprojects {
 
         pluginManager.withPlugin('java-library') {
             java {
-//                withJavadocJar()
+                withJavadocJar()
                 withSourcesJar()
             }
         }
