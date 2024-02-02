@@ -70,9 +70,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-@Slf4j
 public class JWO {
-
+    private static final Logger log = LoggerController.lazyLogger(JWO.class);
     private static final String PROTOCOL_HANDLER = "java.protocol.handler.pkgs";
     private static final String HANDLERS_PACKAGE = "net.woggioni.jwo.url";
 
