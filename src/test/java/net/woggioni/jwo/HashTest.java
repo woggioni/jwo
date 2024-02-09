@@ -3,9 +3,15 @@ package net.woggioni.jwo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.io.ByteArrayInputStream;
 import java.util.Random;
+import java.util.stream.Stream;
 
 public class HashTest {
 
@@ -41,5 +47,35 @@ public class HashTest {
         Assertions.assertNotEquals(hash1.hashCode(), hash2.hashCode());
         Assertions.assertNotEquals(hash1, hash2);
         Assertions.assertNotEquals(hash1.toString(), hash2.toString());
+    }
+
+
+    private static class HexTestArguments implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(
+            ExtensionContext extensionContext
+        ) {
+            return Stream.of(
+                Arguments.of("A41D767EEF6084823F250E954BDD48CF", null),
+                Arguments.of("A41D767eeF6084823f250E954bdD48CF", null),
+                Arguments.of("A41D767EEF6084823F250E954BDD48C", IllegalArgumentException.class),
+                Arguments.of("A41D767xEF6084823F250E954BDD48C", IllegalArgumentException.class),
+                Arguments.of("A41D767ZeF6084823f250E954bdD48C", IllegalArgumentException.class),
+                Arguments.of("A41D767eeF6084823f250E954bdD4x", IllegalArgumentException.class)
+            );
+        }
+    }
+    @ArgumentsSource(HexTestArguments.class)
+    @ParameterizedTest
+    public void hexTest(String sourceString, Class<? extends Throwable> t) {
+        if(t != null) {
+            Assertions.assertThrows(t, () ->
+                Hash.hexToBytes(sourceString)
+            );
+        } else {
+            byte[] bytes = Hash.hexToBytes(sourceString);
+            Assertions.assertEquals(sourceString.length() / 2, bytes.length);
+            Assertions.assertEquals(sourceString.toUpperCase(), Hash.bytesToHex(bytes));
+        }
     }
 }
