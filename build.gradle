@@ -13,7 +13,7 @@ allprojects {
 
     repositories {
         maven {
-            url = 'https://woggioni.net/mvn/'
+            url = getProperty('gitea.maven.url')
         }
         mavenCentral()
     }
@@ -62,7 +62,7 @@ allprojects {
 
         pluginManager.withPlugin('java-library') {
             java {
-//                withJavadocJar()
+                withJavadocJar()
                 withSourcesJar()
             }
         }
@@ -70,7 +70,18 @@ allprojects {
         publishing {
             repositories {
                 maven {
-                    url = 'https://mvn.woggioni.net/'
+                    name = "Gitea"
+                    url = uri(getProperty('gitea.maven.url'))
+
+                    credentials(HttpHeaderCredentials) {
+                        name = "Authorization"
+                        value = "token ${System.getenv()["PUBLISHER_TOKEN"]}"
+                    }
+
+                    authentication {
+                        header(HttpHeaderAuthentication)
+                    }
+
                 }
             }
             publications {
