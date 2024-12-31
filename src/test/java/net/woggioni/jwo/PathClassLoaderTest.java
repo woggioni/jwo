@@ -21,28 +21,29 @@ public class PathClassLoaderTest {
     @Test
     @SneakyThrows
     void test() {
-        FileSystem fs = FileSystems.newFileSystem(testBundle, (ClassLoader) null);
-        List<Path> paths = StreamSupport.stream(fs.getRootDirectories().spliterator(), false).flatMap(new Function<Path, Stream<Path>>() {
-            @Override
-            @SneakyThrows
-            public Stream<Path> apply(Path path) {
-                return Files.list(path)
-                        .filter(Files::isRegularFile)
-                        .filter(p -> p.getFileName().toString().endsWith(".jar"));
-            }
-        }).flatMap(new Function<Path, Stream<Path>>() {
-            @Override
-            @SneakyThrows
-            public Stream<Path> apply(Path path) {
-                System.out.println(path.getFileName().toString());
-                return StreamSupport.stream(FileSystems.newFileSystem(path, (ClassLoader) null).getRootDirectories().spliterator(), false);
-            }
-        }).collect(Collectors.toUnmodifiableList());
-        PathClassLoader classLoader = new PathClassLoader(paths);
-        Class<?>[] cls = new Class[1];
-        Assertions.assertDoesNotThrow(() -> {
-            cls[0] = classLoader.loadClass("com.google.common.collect.ImmutableMap");
-        });
-        Assertions.assertNotNull(cls[0]);
+        try(FileSystem fs = FileSystems.newFileSystem(testBundle, (ClassLoader) null)) {
+            List<Path> paths = StreamSupport.stream(fs.getRootDirectories().spliterator(), false).flatMap(new Function<Path, Stream<Path>>() {
+                @Override
+                @SneakyThrows
+                public Stream<Path> apply(Path path) {
+                    return Files.list(path)
+                            .filter(Files::isRegularFile)
+                            .filter(p -> p.getFileName().toString().endsWith(".jar"));
+                }
+            }).flatMap(new Function<Path, Stream<Path>>() {
+                @Override
+                @SneakyThrows
+                public Stream<Path> apply(Path path) {
+                    System.out.println(path.getFileName().toString());
+                    return StreamSupport.stream(FileSystems.newFileSystem(path, (ClassLoader) null).getRootDirectories().spliterator(), false);
+                }
+            }).collect(Collectors.toUnmodifiableList());
+            PathClassLoader classLoader = new PathClassLoader(paths);
+            Class<?>[] cls = new Class[1];
+            Assertions.assertDoesNotThrow(() -> {
+                cls[0] = classLoader.loadClass("com.google.common.collect.ImmutableMap");
+            });
+            Assertions.assertNotNull(cls[0]);
+        }
     }
 }

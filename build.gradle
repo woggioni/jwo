@@ -136,11 +136,13 @@ test {
     }.first()
     systemProperties([
         'junit.jupiter.engine.jar' : junitJupiterEngineJar.toString(),
-        'path.classloader.test.bundle' : pathClassLoaderTestBundleTask.get().outputs.files.singleFile,
+        'path.classloader.test.bundle' : pathClassLoaderTestBundleTask.flatMap { it.archiveFile }.get().asFile,
         'zip.test.bundle' : configurations.zipTestBundle.singleFile
     ])
 
-    jvmArgs(['--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED'])
+    jvmArgs([
+        '--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED',
+    ])
 }
 
 
