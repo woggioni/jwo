@@ -7,5 +7,6 @@ module net.woggioni.jwo {
     exports net.woggioni.jwo;
     exports net.woggioni.jwo.exception;
     exports net.woggioni.jwo.url.classpath;
+    exports net.woggioni.jwo.url.jpms;
     exports net.woggioni.jwo.xml;
 }

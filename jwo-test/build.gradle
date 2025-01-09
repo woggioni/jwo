@@ -1,0 +1,31 @@
+plugins {
+    id 'java-library'
+    alias(catalog.plugins.lombok)
+}
+
+import org.gradle.api.attributes.LibraryElements
+import static org.gradle.api.attributes.LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE
+import static org.gradle.api.attributes.LibraryElements.JAR
+
+configurations {
+    testImplementation {
+        attributes {
+            attribute(LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements.class, JAR))
+        }
+    }
+
+    testRuntimeClasspath {
+        attributes {
+            attribute(LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements.class, JAR))
+        }
+    }
+}
+
+java {
+    modularity.inferModulePath = true
+}
+
+dependencies {
+    testImplementation project(':jwo-test-module')
+    testImplementation project(':')
+}

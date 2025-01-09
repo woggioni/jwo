@@ -25,6 +25,8 @@ dependencyResolutionManagement {
 
 rootProject.name = 'jwo'
 
-include('benchmark')
-include('jmath')
-include('jmath-benchmark')
+include 'benchmark'
+include 'jmath'
+include 'jmath-benchmark'
+include 'jwo-test'
+include 'jwo-test-module'

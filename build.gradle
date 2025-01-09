@@ -27,6 +27,7 @@ allprojects {
         }
 
         dependencies {
+            testRuntimeOnly project(':jwo-test-module')
             testImplementation catalog.junit.jupiter.api
             testImplementation catalog.junit.jupiter.params
             testRuntimeOnly catalog.junit.jupiter.engine
@@ -97,7 +98,6 @@ ext {
     setProperty('jpms.module.name', 'net.woggioni.jwo')
 }
 
-
 configurations {
     pathClassloaderTest
     zipTestBundle {
@@ -144,5 +144,3 @@ test {
         '--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED',
     ])
 }
-
-

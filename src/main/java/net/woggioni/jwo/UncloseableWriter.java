@@ -10,5 +10,7 @@ public class UncloseableWriter extends FilterWriter {
     }
 
     @Override
-    public void close() throws IOException {}
+    public void close() throws IOException {
+        flush();
+    }
 }

@@ -1,6 +1,7 @@
 package net.woggioni.jwo;
 
 import java.io.FilterOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -14,6 +15,7 @@ public class UncloseableOutputStream extends FilterOutputStream {
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
+        flush();
     }
 }
