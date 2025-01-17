@@ -2,3 +2,4 @@ This is a ${adjective} test made by ${author} on ${date}. It's really ${adjectiv
 ${sys:user.home}
 ${env:HOME}
 ${env:SOME_STRANGE_VAR:defaultValue}
+;=%x$$!~L+LJr?50l.^{veaS'zLHo=!}wT

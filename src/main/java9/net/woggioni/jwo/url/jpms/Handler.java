@@ -9,15 +9,6 @@ import java.net.URLStreamHandler;
 import java.util.Optional;
 
 public class Handler extends URLStreamHandler {
-    private final ClassLoader classLoader;
-
-    public Handler() {
-        this.classLoader = getClass().getClassLoader();
-    }
-
-    public Handler(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
 
     @Override
     protected URLConnection openConnection(URL u) throws IOException {

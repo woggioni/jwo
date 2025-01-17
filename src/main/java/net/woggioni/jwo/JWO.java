@@ -346,13 +346,20 @@ public class JWO {
 
         int cursor = 0;
         while(cursor < template.length()) {
-            int nextPlaceHolder = indexOfWithEscape(template, '$', '$', cursor, template.length());
+            int nextPlaceHolder = template.indexOf('$', cursor);
             if (nextPlaceHolder < 0) {
                 nextPlaceHolder = template.length();
             }
-            while (cursor < nextPlaceHolder) {
-                char ch = template.charAt(cursor++);
-                sb.append(ch);
+            int nextPlaceHolderWithEscape = indexOfWithEscape(template, '$', '$', cursor, template.length());
+            if (nextPlaceHolderWithEscape < 0) {
+                nextPlaceHolderWithEscape = template.length();
+            }
+            while (cursor < nextPlaceHolderWithEscape) {
+                char ch = template.charAt(cursor);
+                if (nextPlaceHolder == nextPlaceHolderWithEscape || cursor != nextPlaceHolder) {
+                    sb.append(ch);
+                }
+                ++cursor;
             }
             if (cursor + 1 < template.length() && template.charAt(cursor + 1) == '{') {
                 String key;

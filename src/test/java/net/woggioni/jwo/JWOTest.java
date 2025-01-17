@@ -158,6 +158,7 @@ public class JWOTest {
             /home/user
             /home/user
             defaultValue
+            ;=%x$!~L+LJr?50l.^{veaS'zLHo=!}wT
             """;
         Map<String, Map<String, Object>> contextMap = new MapBuilder<String, Map<String, Object>>()
             .entry("env",
@@ -168,7 +169,8 @@ public class JWOTest {
             .entry("sys",
                 new MapBuilder<String, String>()
                     .entry("user.home", "/home/user")
-                    .build(TreeMap::new, Collections::unmodifiableMap)).build(TreeMap::new, Collections::unmodifiableMap);
+                    .build(TreeMap::new, Collections::unmodifiableMap)
+            ).build(TreeMap::new, Collections::unmodifiableMap);
         try (Reader reader = new InputStreamReader(
             JWOTest.class.getResourceAsStream("/render_template_test.txt"))) {
             String rendered = JWO.renderTemplate(reader, valuesMap, contextMap);
