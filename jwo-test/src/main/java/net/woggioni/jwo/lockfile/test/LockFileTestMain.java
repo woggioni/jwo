@@ -2,7 +2,6 @@ package net.woggioni.jwo.lockfile.test;
 
 import lombok.SneakyThrows;
 import net.woggioni.jwo.LockFile;
-import net.woggioni.jwo.Run;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,20 +15,11 @@ public class LockFileTestMain {
         boolean shared,
         boolean keep
     ) {
-        Thread t = new Thread((Run)() -> {
-            try (AutoCloseable lockfile = LockFile.acquire(lockfilePath, shared)) {
-                while (keep) {
-                    Thread.sleep(1000);
-                }
-            }
-        });
-        t.start();
         try (AutoCloseable lockfile = LockFile.acquire(lockfilePath, shared)) {
             while (keep) {
                 Thread.sleep(1000);
             }
         }
-        t.join();
     }
 
     @SneakyThrows
