@@ -1,11 +1,15 @@
 plugins {
     id 'java-library'
     alias(catalog.plugins.lombok)
+    alias(catalog.plugins.envelope)
 }
 
 import org.gradle.api.attributes.LibraryElements
 import static org.gradle.api.attributes.LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE
 import static org.gradle.api.attributes.LibraryElements.JAR
+import net.woggioni.gradle.envelope.EnvelopeJarTask
+import net.woggioni.gradle.envelope.EnvelopePlugin
+
 
 configurations {
     testImplementation {
@@ -25,7 +29,23 @@ java {
     modularity.inferModulePath = true
 }
 
+Provider<EnvelopeJarTask> envelopeJarTaskProvider = tasks.named(EnvelopePlugin.ENVELOPE_JAR_TASK_NAME, EnvelopeJarTask.class) {
+    mainModule = "net.woggioni.jwo.lockfile.test"
+    mainClass = "net.woggioni.jwo.lockfile.test.LockFileTestMain"
+}
+
 dependencies {
+    implementation rootProject
+
+    testImplementation catalog.slf4j.api
     testImplementation project(':jwo-test-module')
     testImplementation project(':')
+
+    testRuntimeOnly catalog.slf4j.simple
+}
+
+test {
+    dependsOn(envelopeJarTaskProvider)
+    systemProperty('lockFileTest.executable.jar', envelopeJarTaskProvider.flatMap {it.archiveFile}.get().getAsFile())
+    systemProperty('org.slf4j.simpleLogger.showDateTime', 'true')
 }
