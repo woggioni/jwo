@@ -35,12 +35,8 @@ public class LocalBucket implements Bucket {
         this.lastFill = new AtomicLong(currentTimestamp);
     }
 
-    long getTokenPrivate(long nTokens, long now) {
-        if(nTokens > maxCapacity) throw new IllegalArgumentException("The requested number of tokens exceeds the bucket max capacity");
+    private long getTokenPrivate(long nTokens, long now, long previousFillTime, long currentFillTime) {
         final LongBinaryOperator tickCalculator = (lf, currentTimestamp) -> (currentTimestamp - lf) / fillPeriod;
-        final LongBinaryOperator timestampCalculator = (lf, currentTimestamp) -> lf + tickCalculator.applyAsLong(lf, currentTimestamp) * fillPeriod;
-        final long previousFillTime = lastFill.getAndAccumulate(now, timestampCalculator);
-        final long currentFillTime = timestampCalculator.applyAsLong(previousFillTime, now);
         if (currentFillTime != previousFillTime) {
             final long ticks = tickCalculator.applyAsLong(previousFillTime, now);
             final LongUnaryOperator filledAmountCalculator = currentTokens -> Math.min(currentTokens + ticks * fillAmount, maxCapacity);
@@ -67,33 +63,40 @@ public class LocalBucket implements Bucket {
         }
     }
 
+
     @Override
     public boolean removeTokens(long nTokens) {
         return removeTokens(nTokens, System.nanoTime());
     }
 
     @Override
-    public boolean removeTokens(long nTokens, long currentTimestamp) {
-        return getTokenPrivate(nTokens, currentTimestamp) >= nTokens;
+    public boolean removeTokens(long nTokens, long now) {
+        if(nTokens > maxCapacity) throw new IllegalArgumentException("The requested number of tokens exceeds the bucket max capacity");
+        final LongBinaryOperator tickCalculator = (lf, currentTimestamp) -> (currentTimestamp - lf) / fillPeriod;
+        final LongBinaryOperator timestampCalculator = (lf, currentTimestamp) -> lf + tickCalculator.applyAsLong(lf, currentTimestamp) * fillPeriod;
+        final long previousFillTime = lastFill.getAndAccumulate(now, timestampCalculator);
+        final long currentFillTime = timestampCalculator.applyAsLong(previousFillTime, now);
+        long result = getTokenPrivate(nTokens, now, previousFillTime, currentFillTime);
+        return result >= nTokens;
     }
 
     @Override
     public long removeTokensWithEstimate(long nTokens) {
-        final long previousTokenAmount = getTokenPrivate(nTokens, System.nanoTime());
-        if(previousTokenAmount >= nTokens) {
-            return -1;
-        } else {
-            return ceilDiv((nTokens - previousTokenAmount) * fillPeriod, fillAmount);
-        }
+        return removeTokensWithEstimate(nTokens, System.nanoTime());
     }
 
     @Override
-    public long removeTokensWithEstimate(long nTokens, long currentTimestamp) {
-        final long previousTokenAmount = getTokenPrivate(nTokens, currentTimestamp);
+    public long removeTokensWithEstimate(long nTokens, long now) {
+        if(nTokens > maxCapacity) throw new IllegalArgumentException("The requested number of tokens exceeds the bucket max capacity");
+        final LongBinaryOperator tickCalculator = (lf, currentTimestamp) -> (currentTimestamp - lf) / fillPeriod;
+        final LongBinaryOperator timestampCalculator = (lf, currentTimestamp) -> lf + tickCalculator.applyAsLong(lf, currentTimestamp) * fillPeriod;
+        final long previousFillTime = lastFill.getAndAccumulate(now, timestampCalculator);
+        final long currentFillTime = timestampCalculator.applyAsLong(previousFillTime, now);
+        long previousTokenAmount = getTokenPrivate(nTokens, now, previousFillTime, currentFillTime);
         if(previousTokenAmount >= nTokens) {
             return -1;
         } else {
-            return ceilDiv((nTokens - previousTokenAmount) * fillPeriod, fillAmount);
+            return Math.max(ceilDiv((nTokens - previousTokenAmount) * fillPeriod, fillAmount), currentFillTime + fillPeriod - now);
         }
     }
 }
