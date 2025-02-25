@@ -73,7 +73,7 @@ public class Application {
     public Path computeCacheDirectory() {
         Stream<Path> commonCandidates = optional2Stream(
                 Optional.ofNullable(cacheDirectoryPropertyKey).map(System::getProperty).map(Paths::get),
-                Optional.ofNullable(cacheDirectoryEnvVar).map(System::getProperty).map(Paths::get)
+                Optional.ofNullable(cacheDirectoryEnvVar).map(System::getenv).map(Paths::get)
         );
         Stream<Path> osSpecificCandidates;
         if (OS.isMac) {
@@ -108,7 +108,7 @@ public class Application {
     public Path computeDataDirectory() {
         Stream<Path> commonCandidates = optional2Stream(
                 Optional.ofNullable(dataDirectoryPropertyKey).map(System::getProperty).map(Paths::get),
-                Optional.ofNullable(dataDirectoryEnvVar).map(System::getProperty).map(Paths::get)
+                Optional.ofNullable(dataDirectoryEnvVar).map(System::getenv).map(Paths::get)
         );
         Stream<Path> osSpecificCandidates;
         if (OS.isMac) {
@@ -143,7 +143,7 @@ public class Application {
     public Path computeConfigurationDirectory() {
         Stream<Path> commonCandidates = optional2Stream(
                 Optional.ofNullable(configurationDirectoryPropertyKey).map(System::getProperty).map(Paths::get),
-                Optional.ofNullable(configurationDirectoryEnvVar).map(System::getProperty).map(Paths::get)
+                Optional.ofNullable(configurationDirectoryEnvVar).map(System::getenv).map(Paths::get)
         );
         Stream<Path> osSpecificCandidates;
         if (OS.isMac) {

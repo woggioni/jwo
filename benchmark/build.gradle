@@ -16,11 +16,8 @@ dependencies {
     implementation project(':')
 }
 
-application {
+nativeImage {
     mainClass = 'net.woggioni.jwo.benchmark.Main'
-}
-
-tasks.named(NativeImagePlugin.NATIVE_IMAGE_TASK_NAME, NativeImageTask) {
     useMusl = true
     buildStaticImage = true
 }

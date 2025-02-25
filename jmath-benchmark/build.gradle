@@ -16,15 +16,13 @@ dependencies {
     implementation project(':jmath')
 }
 
-application {
+nativeImage {
     mainClass = 'net.woggioni.jmath.benchmark.Main'
+    useMusl = true
+    buildStaticImage = true
 }
 
 configureNativeImage {
     args('20')
 }
 
-tasks.named(NativeImagePlugin.NATIVE_IMAGE_TASK_NAME, NativeImageTask) {
-    useMusl = true
-    buildStaticImage = true
-}
