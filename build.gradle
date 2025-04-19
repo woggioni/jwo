@@ -2,7 +2,6 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'jacoco'
-    alias(catalog.plugins.multi.release.jar)
     alias(catalog.plugins.lombok)
     alias(catalog.plugins.sambal)
 }
@@ -24,6 +23,7 @@ allprojects {
                 languageVersion = JavaLanguageVersion.of(21)
                 vendor = JvmVendorSpec.ORACLE
             }
+            modularity.inferModulePath = true
         }
 
         dependencies {
@@ -63,7 +63,6 @@ allprojects {
 
         pluginManager.withPlugin('java-library') {
             java {
-                withJavadocJar()
                 withSourcesJar()
             }
         }
@@ -115,7 +114,7 @@ dependencies {
 }
 
 compileJava {
-    options.release = 8
+    options.release = 11
     options.compilerArgs << '-parameters'
 }
 

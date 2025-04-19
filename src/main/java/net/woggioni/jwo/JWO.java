@@ -237,6 +237,10 @@ public class JWO {
         return Hash.bytesToHex(bytes);
     }
 
+    public static byte[] hexToBytes(String hexStr) {
+        return Hash.hexToBytes(hexStr);
+    }
+
     @SneakyThrows
     public static void deletePath(Path path) {
         Files.walk(path)

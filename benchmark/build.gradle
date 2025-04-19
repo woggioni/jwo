@@ -1,3 +1,4 @@
+import net.woggioni.gradle.graalvm.NativeImageConfigurationTask
 import net.woggioni.gradle.graalvm.NativeImageTask
 import net.woggioni.gradle.graalvm.NativeImagePlugin
 
@@ -16,8 +17,17 @@ dependencies {
     implementation project(':')
 }
 
-nativeImage {
-    mainClass = 'net.woggioni.jwo.benchmark.Main'
+Property<String> mainModuleName = objects.property(String.class)
+mainModuleName.set('net.woggioni.jwo')
+Property<String> mainClassName = objects.property(String.class)
+mainClassName.set('net.woggioni.jwo.benchmark.Main')
+
+tasks.named(NativeImagePlugin.CONFIGURE_NATIVE_IMAGE_TASK_NAME, NativeImageConfigurationTask) {
+    mainClass = mainClassName
+}
+
+tasks.named(NativeImagePlugin.NATIVE_IMAGE_TASK_NAME, NativeImageTask) {
     useMusl = true
     buildStaticImage = true
+    mainClass = mainClassName
 }

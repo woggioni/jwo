@@ -65,6 +65,7 @@ public class HashTest {
             );
         }
     }
+
     @ArgumentsSource(HexTestArguments.class)
     @ParameterizedTest
     public void hexTest(String sourceString, Class<? extends Throwable> t) {
@@ -74,6 +75,20 @@ public class HashTest {
             );
         } else {
             byte[] bytes = Hash.hexToBytes(sourceString);
+            Assertions.assertEquals(sourceString.length() / 2, bytes.length);
+            Assertions.assertEquals(sourceString.toUpperCase(), Hash.bytesToHex(bytes));
+        }
+    }
+
+    @ArgumentsSource(HexTestArguments.class)
+    @ParameterizedTest
+    public void hexTest2(String sourceString, Class<? extends Throwable> t) {
+        if(t != null) {
+            Assertions.assertThrows(t, () ->
+                    Hash.hexToBytes2(sourceString)
+            );
+        } else {
+            byte[] bytes = Hash.hexToBytes2(sourceString);
             Assertions.assertEquals(sourceString.length() / 2, bytes.length);
             Assertions.assertEquals(sourceString.toUpperCase(), Hash.bytesToHex(bytes));
         }

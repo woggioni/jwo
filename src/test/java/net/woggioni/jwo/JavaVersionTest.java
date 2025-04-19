@@ -82,7 +82,7 @@ public class JavaVersionTest {
                 JWO.copy(is, baos);
             }
             final var jwoClassVersion = JavaVersion.forClass(baos.toByteArray());
-            assertEquals(JavaVersion.VERSION_1_8, jwoClassVersion);
+            assertEquals(JavaVersion.VERSION_11, jwoClassVersion);
         }
     }
 }

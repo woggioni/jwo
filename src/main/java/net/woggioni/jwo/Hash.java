@@ -90,7 +90,36 @@ public class Hash {
         return new String(hexChars);
     }
 
+    private static int charToInt(char c) {
+        if (c >= '0' && c <= '9') {
+            return c - '0';
+        } else if(c >= 'a' && c <= 'f') {
+            return 10 + c - 'a';
+        } else if(c >= 'A' && c <= 'F') {
+            return 10 + c - 'A';
+        } else {
+            throw newThrowable(IllegalArgumentException.class, "Illegal hex character '%c'", c);
+        }
+    }
+
     public static byte[] hexToBytes(String hexString) {
+        if (hexString.length() % 2 != 0) {
+            throw newThrowable(IllegalArgumentException.class, "Hex string length must be even," +
+                    " string has length '%d' instead", hexString.length());
+        }
+        byte[] result = new byte[hexString.length() / 2];
+        for(int i = 0; i < hexString.length(); i++) {
+            int value = charToInt(hexString.charAt(i));
+            if (i % 2 == 0) {
+                result[i / 2] += (byte) (value << 4);
+            } else {
+                result[i / 2] += (byte) value;
+            }
+        }
+        return result;
+    }
+
+    public static byte[] hexToBytes2(String hexString) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         if (hexString.length() % 2 != 0) {
             throw newThrowable(IllegalArgumentException.class, "Hex string length must be even," +

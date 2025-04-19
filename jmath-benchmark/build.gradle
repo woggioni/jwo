@@ -1,5 +1,6 @@
 import net.woggioni.gradle.graalvm.NativeImagePlugin
 import net.woggioni.gradle.graalvm.NativeImageTask
+import net.woggioni.gradle.graalvm.NativeImageConfigurationTask
 
 plugins {
     id 'java-library'
@@ -16,13 +17,17 @@ dependencies {
     implementation project(':jmath')
 }
 
-nativeImage {
-    mainClass = 'net.woggioni.jmath.benchmark.Main'
-    useMusl = true
-    buildStaticImage = true
-}
+Property<String> mainClassName = objects.property(String.class)
+mainClassName.set('net.woggioni.jmath.benchmark.Main')
 
-configureNativeImage {
+
+tasks.named(NativeImagePlugin.CONFIGURE_NATIVE_IMAGE_TASK_NAME, NativeImageConfigurationTask) {
+    mainClass = mainClassName
     args('20')
 }
 
+tasks.named(NativeImagePlugin.NATIVE_IMAGE_TASK_NAME, NativeImageTask) {
+    useMusl = true
+    buildStaticImage = true
+    mainClass = mainClassName
+}
