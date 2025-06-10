@@ -35,7 +35,7 @@ public class Application {
         return new Builder().name(name);
     }
 
-    private static boolean validateWritableDirectory(Path candidate) {
+    private static boolean validateDirectory(Path candidate, boolean writable) {
         try {
             if (!Files.exists(candidate)) {
                 Files.createDirectories(candidate);
@@ -44,7 +44,7 @@ public class Application {
             } else if (!Files.isDirectory(candidate)) {
                 log.trace("Directory '{}' discarded because it is not a directory", candidate);
                 return false;
-            } else if (!Files.isWritable(candidate)) {
+            } else if (writable && !Files.isWritable(candidate)) {
                 log.trace("Directory '{}' discarded because it is not writable", candidate);
                 return false;
             } else {
@@ -61,9 +61,9 @@ public class Application {
     }
 
     @SneakyThrows
-    private Path selectWritableDirectory(Stream<Path> candidates, String successMessage, String errorMessage) {
+    private Path selectDirectory(Stream<Path> candidates, boolean writable, String successMessage, String errorMessage) {
         return candidates
-                .filter(Application::validateWritableDirectory)
+                .filter(p -> validateDirectory(p, writable))
                 .peek(p -> log.debug(successMessage, p))
                 .findFirst()
                 .orElseThrow((Sup<Throwable>) () -> new FileNotFoundException(errorMessage));
@@ -99,7 +99,8 @@ public class Application {
                     Optional.ofNullable(System.getProperty("user.home"))
                             .map(prefix -> Paths.get(prefix, "." + name, "cache")));
         }
-        return selectWritableDirectory(streamCat(commonCandidates, osSpecificCandidates),
+        return selectDirectory(streamCat(commonCandidates, osSpecificCandidates),
+                true,
                 "Using cache directory '{}'",
                 "Unable to find a usable cache directory");
     }
@@ -134,13 +135,14 @@ public class Application {
                     Optional.ofNullable(System.getProperty("user.home"))
                             .map(prefix -> Paths.get(prefix, "." + name)));
         }
-        return selectWritableDirectory(streamCat(commonCandidates, osSpecificCandidates),
+        return selectDirectory(streamCat(commonCandidates, osSpecificCandidates),
+                true,
                 "Using data directory '{}'",
                 "Unable to find a usable data directory");
     }
 
     @SneakyThrows
-    public Path computeConfigurationDirectory() {
+    public Path computeConfigurationDirectory(boolean writable) {
         Stream<Path> commonCandidates = optional2Stream(
                 Optional.ofNullable(configurationDirectoryPropertyKey).map(System::getProperty).map(Paths::get),
                 Optional.ofNullable(configurationDirectoryEnvVar).map(System::getenv).map(Paths::get)
@@ -169,7 +171,8 @@ public class Application {
                     Optional.ofNullable(System.getProperty("user.home")
                     ).map(prefix -> Paths.get(prefix, "." + name, "config")));
         }
-        return selectWritableDirectory(streamCat(commonCandidates, osSpecificCandidates),
+        return selectDirectory(streamCat(commonCandidates, osSpecificCandidates),
+                writable,
                 "Using configuration directory '{}'",
                 "Unable to find a usable configuration directory");
     }

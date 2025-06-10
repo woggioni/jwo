@@ -14,7 +14,7 @@ public class ApplicationTest {
             .dataDirectoryEnvVar("APP_DATA_DIR")
             .configurationDirectoryEnvVar("APP_CONF_DIR")
             .build();
-        final var confDir = app.computeConfigurationDirectory();
+        final var confDir = app.computeConfigurationDirectory(true);
         final var cacheDir = app.computeCacheDirectory();
         final var dataDir = app.computeDataDirectory();
     }
