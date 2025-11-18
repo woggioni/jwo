@@ -35,11 +35,11 @@ public class TreeWalker<NODE extends TreeNodeVisitor.TreeNode<NODE>, T> {
      * {@link TreeNodeVisitor} instance
      * @param root the root node of the tree
      */
-    public void walk(NODE root) {
-        List<StackElement<NODE, T>> stack = new ArrayList<>();
-        StackElement<NODE, T> rootStackElement = new StackElement<>(root);
+    public void walk(final NODE root) {
+        final List<StackElement<NODE, T>> stack = new ArrayList<>();
+        final StackElement<NODE, T> rootStackElement = new StackElement<>(root);
         stack.add(rootStackElement);
-        List<TreeNodeVisitor.StackContext<NODE, T>> publicStack = Collections.unmodifiableList(stack);
+        final List<TreeNodeVisitor.StackContext<NODE, T>> publicStack = Collections.unmodifiableList(stack);
         switch (visitor.visitPre(publicStack)) {
             case CONTINUE:
                 rootStackElement.childrenIterator = root.children();
@@ -51,10 +51,10 @@ public class TreeWalker<NODE extends TreeNodeVisitor.TreeNode<NODE>, T> {
                 return;
         }
         while(!stack.isEmpty()) {
-            StackElement<NODE, T> lastElement = tail(stack);
+            final StackElement<NODE, T> lastElement = tail(stack);
             if(lastElement.childrenIterator != null  && lastElement.childrenIterator.hasNext()) {
-                NODE childNode = lastElement.childrenIterator.next();
-                StackElement<NODE, T> childStackElement =
+                final NODE childNode = lastElement.childrenIterator.next();
+                final StackElement<NODE, T> childStackElement =
                         new StackElement<>(childNode);
                 stack.add(childStackElement);
                 switch (visitor.visitPre(publicStack)) {

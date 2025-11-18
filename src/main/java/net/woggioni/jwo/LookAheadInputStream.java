@@ -12,7 +12,7 @@ public class LookAheadInputStream extends InputStream {
     private int cursor = -1;
     private int currentByte;
 
-    public LookAheadInputStream(InputStream stream) {
+    public LookAheadInputStream(final InputStream stream) {
         this.stream = stream;
     }
 

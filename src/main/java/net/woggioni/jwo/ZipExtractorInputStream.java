@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
  */
 public class ZipExtractorInputStream extends ZipInputStream {
 
-    public ZipExtractorInputStream(InputStream source, Path destination) {
+    public ZipExtractorInputStream(final InputStream source, final Path destination) {
         super(source);
         this.destination = destination;
     }
@@ -24,9 +24,9 @@ public class ZipExtractorInputStream extends ZipInputStream {
 
     @Override
     public ZipEntry getNextEntry() throws IOException {
-        ZipEntry entry = super.getNextEntry();
+        final ZipEntry entry = super.getNextEntry();
         if(entry != null) {
-            Path newFileSystemLocation = destination.resolve(entry.getName());
+            final Path newFileSystemLocation = destination.resolve(entry.getName());
             if(entry.isDirectory()) {
                 Files.createDirectories(newFileSystemLocation);
             } else {
@@ -39,14 +39,14 @@ public class ZipExtractorInputStream extends ZipInputStream {
 
     @Override
     public int read() throws IOException {
-        int result = super.read();
+        final int result = super.read();
         if(result != -1 && currentFile != null) currentFile.write(result);
         return result;
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int read = super.read(b, off, len);
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        final int read = super.read(b, off, len);
         if(read != -1 && currentFile != null) currentFile.write(b, off, read);
         return read;
     }

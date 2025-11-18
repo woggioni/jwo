@@ -31,11 +31,11 @@ public class Application {
     private static final String MAC_FOLDER_LIBRARY = "Library";
     private static final String MAC_FOLDER_APPLICATION_SUPPORT = "Application Support";
 
-    public static Builder builder(String name) {
+    public static Builder builder(final String name) {
         return new Builder().name(name);
     }
 
-    private static boolean validateDirectory(Path candidate, boolean writable) {
+    private static boolean validateDirectory(final Path candidate, final boolean writable) {
         try {
             if (!Files.exists(candidate)) {
                 Files.createDirectories(candidate);
@@ -51,7 +51,7 @@ public class Application {
                 log.trace("Selected existing directory '{}'", candidate);
                 return true;
             }
-        } catch (Exception ioe) {
+        } catch (final Exception ioe) {
             log.trace(
                     String.format("Directory '%s' discarded: %s", candidate.toString(), ioe.getMessage()),
                     ioe
@@ -61,7 +61,7 @@ public class Application {
     }
 
     @SneakyThrows
-    private Path selectDirectory(Stream<Path> candidates, boolean writable, String successMessage, String errorMessage) {
+    private Path selectDirectory(final Stream<Path> candidates, final boolean writable, final String successMessage, final String errorMessage) {
         return candidates
                 .filter(p -> validateDirectory(p, writable))
                 .peek(p -> log.debug(successMessage, p))
@@ -71,7 +71,7 @@ public class Application {
 
     @SneakyThrows
     public Path computeCacheDirectory() {
-        Stream<Path> commonCandidates = optional2Stream(
+        final Stream<Path> commonCandidates = optional2Stream(
                 Optional.ofNullable(cacheDirectoryPropertyKey).map(System::getProperty).map(Paths::get),
                 Optional.ofNullable(cacheDirectoryEnvVar).map(System::getenv).map(Paths::get)
         );
@@ -107,7 +107,7 @@ public class Application {
 
     @SneakyThrows
     public Path computeDataDirectory() {
-        Stream<Path> commonCandidates = optional2Stream(
+        final Stream<Path> commonCandidates = optional2Stream(
                 Optional.ofNullable(dataDirectoryPropertyKey).map(System::getProperty).map(Paths::get),
                 Optional.ofNullable(dataDirectoryEnvVar).map(System::getenv).map(Paths::get)
         );
@@ -142,8 +142,8 @@ public class Application {
     }
 
     @SneakyThrows
-    public Path computeConfigurationDirectory(boolean writable) {
-        Stream<Path> commonCandidates = optional2Stream(
+    public Path computeConfigurationDirectory(final boolean writable) {
+        final Stream<Path> commonCandidates = optional2Stream(
                 Optional.ofNullable(configurationDirectoryPropertyKey).map(System::getProperty).map(Paths::get),
                 Optional.ofNullable(configurationDirectoryEnvVar).map(System::getenv).map(Paths::get)
         );

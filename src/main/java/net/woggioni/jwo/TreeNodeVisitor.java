@@ -31,7 +31,7 @@ public interface TreeNodeVisitor<NODE extends TreeNodeVisitor.TreeNode<NODE>, T>
         /**
          * @param ctx the user object to set for this stack level
          */
-        void setContext(T ctx);
+        void setContext(final T ctx);
 
         /**
          * @return the current user object
@@ -55,7 +55,7 @@ public interface TreeNodeVisitor<NODE extends TreeNodeVisitor.TreeNode<NODE>, T>
      *              current node in the tree
      * @return a boolean that will be used to decide whether to traverse the subtree rooted in the current link or not
      */
-    default VisitOutcome visitPre(List<StackContext<NODE, T>> stack) { return VisitOutcome.CONTINUE; }
+    default VisitOutcome visitPre(final List<StackContext<NODE, T>> stack) { return VisitOutcome.CONTINUE; }
 
     /**
      * This method will be called for each node using
@@ -63,5 +63,5 @@ public interface TreeNodeVisitor<NODE extends TreeNodeVisitor.TreeNode<NODE>, T>
      * @param stack is a list of {@link StackContext} instances corresponding to the full path from the root to the
      *              current node in the tree
      */
-    default void visitPost(List<StackContext<NODE, T>> stack) {}
+    default void visitPost(final List<StackContext<NODE, T>> stack) {}
 }

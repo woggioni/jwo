@@ -16,12 +16,12 @@ public class CharFilterReader extends FilterReader {
 
     private final Set<Character> forbidden;
 
-    public CharFilterReader(Reader source, Iterable<Character> filteredChars) {
+    public CharFilterReader(final Reader source, final Iterable<Character> filteredChars) {
         super(source);
         forbidden = JWO.iterable2Stream(filteredChars).collect(CollectionUtils.toUnmodifiableTreeSet());
     }
 
-    public CharFilterReader(Reader source, Character ...filteredChars) {
+    public CharFilterReader(final Reader source, final Character ...filteredChars) {
         super(source);
         forbidden = Arrays.stream(filteredChars).collect(CollectionUtils.toUnmodifiableTreeSet());
     }
@@ -30,7 +30,7 @@ public class CharFilterReader extends FilterReader {
     @Override
     public int read() throws IOException {
         while(true) {
-            int res = super.read();
+            final int res = super.read();
             if(!forbidden.contains((char) res)) {
                 return res;
             }
@@ -38,12 +38,12 @@ public class CharFilterReader extends FilterReader {
     }
 
     @Override
-    public int read(char[] cbuf, int off, int len) throws IOException {
+    public int read(final char[] cbuf, final int off, final int len) throws IOException {
         if(finished) return -1;
         int i = 0;
-        int lim = Math.min(len, cbuf.length - off);
+        final int lim = Math.min(len, cbuf.length - off);
         while(i < lim) {
-            int c = read();
+            final int c = read();
             if(c < 0) {
                 break;
             }
@@ -55,12 +55,12 @@ public class CharFilterReader extends FilterReader {
     }
 
     @Override
-    public int read(CharBuffer target) throws IOException {
+    public int read(final CharBuffer target) throws IOException {
         return read(target.array());
     }
 
     @Override
-    public int read(char[] cbuf) throws IOException {
+    public int read(final char[] cbuf) throws IOException {
         return read(cbuf, 0, cbuf.length);
     }
 }

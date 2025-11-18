@@ -18,8 +18,8 @@ public class UnmodifiableDelegatingMap<K, V> implements Map<K, V> {
     private final List<Map<K, V>> delegates;
 
     public static <K, V> UnmodifiableDelegatingMap<K, V> of(
-        Supplier<Map<K, V>> mapFactory,
-        Map<K, V>... delegates
+            final Supplier<Map<K, V>> mapFactory,
+            final Map<K, V>... delegates
     ) {
         return new UnmodifiableDelegatingMap<>(mapFactory, Arrays.asList(delegates));
     }
@@ -31,7 +31,7 @@ public class UnmodifiableDelegatingMap<K, V> implements Map<K, V> {
 
     @Override
     public boolean isEmpty() {
-        for (Map<K, V> delegate : delegates) {
+        for (final Map<K, V> delegate : delegates) {
             if (!delegate.isEmpty()) {
                 return false;
             }
@@ -40,8 +40,8 @@ public class UnmodifiableDelegatingMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        for (Map<K, V> delegate : delegates) {
+    public boolean containsKey(final Object key) {
+        for (final Map<K, V> delegate : delegates) {
             if (delegate.containsKey(key)) {
                 return true;
             }
@@ -50,8 +50,8 @@ public class UnmodifiableDelegatingMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public boolean containsValue(Object value) {
-        for (Map<K, V> delegate : delegates) {
+    public boolean containsValue(final Object value) {
+        for (final Map<K, V> delegate : delegates) {
             if (delegate.containsValue(value)) {
                 return true;
             }
@@ -60,9 +60,9 @@ public class UnmodifiableDelegatingMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public V get(Object key) {
+    public V get(final Object key) {
         V result = null;
-        for (Map<K, V> delegate : delegates) {
+        for (final Map<K, V> delegate : delegates) {
             result = delegate.get(key);
             if (result != null) break;
         }
@@ -70,17 +70,17 @@ public class UnmodifiableDelegatingMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public V put(K key, V value) {
+    public V put(final K key, final V value) {
         throw newThrowable(UnsupportedOperationException.class);
     }
 
     @Override
-    public V remove(Object key) {
+    public V remove(final Object key) {
         throw newThrowable(UnsupportedOperationException.class);
     }
 
     @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
+    public void putAll(final Map<? extends K, ? extends V> m) {
         throw newThrowable(UnsupportedOperationException.class);
     }
 

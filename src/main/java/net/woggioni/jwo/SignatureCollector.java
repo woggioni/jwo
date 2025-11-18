@@ -27,13 +27,13 @@ class SignatureCollector {
     /**
      * @return if the [entry] [JarEntry] can be signed.
      */
-    static boolean isSignable(JarEntry entry) {
+    static boolean isSignable(final JarEntry entry) {
         return !entry.isDirectory() && !unsignableEntryName.matcher(entry.getName()).matches();
     }
 
-    private static Set<PublicKey> signers2OrderedPublicKeys(CodeSigner[] signers) {
-        Set<PublicKey> result = new LinkedHashSet<>();
-        for (CodeSigner signer : signers) {
+    private static Set<PublicKey> signers2OrderedPublicKeys(final CodeSigner[] signers) {
+        final Set<PublicKey> result = new LinkedHashSet<>();
+        for (final CodeSigner signer : signers) {
             result.add((signer.getSignerCertPath().getCertificates().get(0)).getPublicKey());
         }
         return Collections.unmodifiableSet(result);
@@ -47,13 +47,13 @@ class SignatureCollector {
         return Collections.unmodifiableSet(_certificates);
     }
 
-    public void addEntry(JarEntry jarEntry) {
+    public void addEntry(final JarEntry jarEntry) {
         if (isSignable(jarEntry)) {
-            CodeSigner[] entrySigners = jarEntry.getCodeSigners() != null ? jarEntry.getCodeSigners() : new CodeSigner[0];
+            final CodeSigner[] entrySigners = jarEntry.getCodeSigners() != null ? jarEntry.getCodeSigners() : new CodeSigner[0];
             if (codeSigners == null) {
                 codeSigners = entrySigners;
                 firstSignedEntry = jarEntry.getName();
-                for (CodeSigner signer : entrySigners) {
+                for (final CodeSigner signer : entrySigners) {
                     _certificates.add(signer.getSignerCertPath().getCertificates().get(0));
                 }
             }

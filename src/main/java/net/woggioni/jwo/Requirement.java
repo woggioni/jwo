@@ -12,12 +12,12 @@ import static net.woggioni.jwo.JWO.newThrowable;
 public class Requirement {
     private final Supplier<Boolean> booleanSupplier;
 
-    public static Requirement require(Supplier<Boolean> booleanSupplier) {
+    public static Requirement require(final Supplier<Boolean> booleanSupplier) {
         return new Requirement(booleanSupplier);
     }
 
     @SneakyThrows
-    public <T extends Throwable> void otherwise(Class<T> cls, String format, Object... args) {
+    public <T extends Throwable> void otherwise(final Class<T> cls, final String format, final Object... args) {
         if(!booleanSupplier.get()) {
             throw newThrowable(cls, format, args);
         }

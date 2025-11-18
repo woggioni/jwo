@@ -75,64 +75,64 @@ public class JWO {
     private static final String PROTOCOL_HANDLER = "java.protocol.handler.pkgs";
     private static final String HANDLERS_PACKAGE = "net.woggioni.jwo.url";
 
-    public static <T> Stream<T> iterable2Stream(Iterable<T> iterable) {
+    public static <T> Stream<T> iterable2Stream(final Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false);
     }
 
-    public static <T> Stream<T> iterable2ParallelStream(Iterable<T> iterable) {
+    public static <T> Stream<T> iterable2ParallelStream(final Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), true);
     }
 
-    public static <T> Stream<T> iterator2Stream(Iterator<T> it) {
+    public static <T> Stream<T> iterator2Stream(final Iterator<T> it) {
         return iterable2Stream(() -> it);
     }
 
-    public static <T> Stream<T> iterator2ParallelStream(Iterator<T> it) {
+    public static <T> Stream<T> iterator2ParallelStream(final Iterator<T> it) {
         return iterable2ParallelStream(() -> it);
     }
 
     @SneakyThrows
-    public static void writeObject2File(Path file, Object o) {
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file.toString()))) {
+    public static void writeObject2File(final Path file, final Object o) {
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file.toString()))) {
             writer.write(o.toString());
         }
     }
 
-    public static void writeObject2File(String fileName, Object o) {
+    public static void writeObject2File(final String fileName, final Object o) {
         writeObject2File(new File(fileName), o);
     }
 
     @SneakyThrows
-    public static void writeObject2File(File file, Object o) {
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file.getPath()))) {
+    public static void writeObject2File(final File file, final Object o) {
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file.getPath()))) {
             writer.write(o.toString());
         }
     }
 
     @SneakyThrows
-    public static void writeBytes2File(Path file, byte[] bytes) {
-        try (OutputStream os = Files.newOutputStream(file)) {
+    public static void writeBytes2File(final Path file, final byte[] bytes) {
+        try (final OutputStream os = Files.newOutputStream(file)) {
             os.write(bytes);
         }
     }
 
     @SneakyThrows
-    public static String readFile2String(File file) {
-        StringWriter writer = new StringWriter();
-        try (Reader reader = Files.newBufferedReader(file.toPath())) {
-            char[] buffer = new char[1024];
+    public static String readFile2String(final File file) {
+        final StringWriter writer = new StringWriter();
+        try (final Reader reader = Files.newBufferedReader(file.toPath())) {
+            final char[] buffer = new char[1024];
             JWO.copy(reader, writer, buffer);
         }
         return writer.toString();
     }
 
     @SneakyThrows
-    public static String readResource2String(String classpath) {
-        StringBuilder builder = new StringBuilder();
-        try (Reader reader = new InputStreamReader(JWO.class.getResourceAsStream(classpath))) {
-            char[] buffer = new char[1024];
+    public static String readResource2String(final String classpath) {
+        final StringBuilder builder = new StringBuilder();
+        try (final Reader reader = new InputStreamReader(JWO.class.getResourceAsStream(classpath))) {
+            final char[] buffer = new char[1024];
             while (true) {
-                int read = reader.read(buffer);
+                final int read = reader.read(buffer);
                 builder.append(buffer, 0, read);
                 if (read < buffer.length) break;
             }
@@ -141,37 +141,37 @@ public class JWO {
     }
 
     @SneakyThrows
-    public static <T extends Throwable> T newThrowable(Class<T> cls) {
-        Constructor<T> constructor = cls.getDeclaredConstructor();
+    public static <T extends Throwable> T newThrowable(final Class<T> cls) {
+        final Constructor<T> constructor = cls.getDeclaredConstructor();
         constructor.setAccessible(true);
         return constructor.newInstance();
     }
 
     @SneakyThrows
-    public static <T extends Throwable> T newThrowable(Class<T> cls, String format, Object... args) {
-        Constructor<T> constructor = cls.getDeclaredConstructor(String.class);
+    public static <T extends Throwable> T newThrowable(final Class<T> cls, final String format, final Object... args) {
+        final Constructor<T> constructor = cls.getDeclaredConstructor(String.class);
         constructor.setAccessible(true);
         return constructor.newInstance(String.format(format, args));
     }
 
     @SneakyThrows
-    public static <T extends Throwable> T newThrowable(Class<T> cls, Throwable throwable, String format, Object... args) {
-        Constructor<T> constructor = cls.getConstructor(String.class, Throwable.class);
+    public static <T extends Throwable> T newThrowable(final Class<T> cls, final Throwable throwable, final String format, final Object... args) {
+        final Constructor<T> constructor = cls.getConstructor(String.class, Throwable.class);
         return constructor.newInstance(String.format(format, args), throwable);
     }
 
     @SneakyThrows
-    public static <T extends Throwable> T raise(Class<T> cls) {
+    public static <T extends Throwable> T raise(final Class<T> cls) {
         throw newThrowable(cls);
     }
 
     @SneakyThrows
-    public static <T extends Throwable> void raise(Class<T> cls, Throwable throwable, String format, Object... args) {
+    public static <T extends Throwable> void raise(final Class<T> cls, final Throwable throwable, final String format, final Object... args) {
         throw newThrowable(cls, throwable, format, args);
     }
 
     @SneakyThrows
-    public static <T extends Throwable> void raise(Class<T> cls, String format, Object... args) {
+    public static <T extends Throwable> void raise(final Class<T> cls, final String format, final Object... args) {
         throw newThrowable(cls, format, args);
     }
 
@@ -179,12 +179,12 @@ public class JWO {
     private static HostnameVerifier defaultHostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
 
     @SneakyThrows
-    public static void setSSLVerifyPeerHostName(boolean verify) {
+    public static void setSSLVerifyPeerHostName(final boolean verify) {
         if (verify) {
             HttpsURLConnection.setDefaultHostnameVerifier(defaultHostnameVerifier);
         } else {
-            HostnameVerifier allHostsValid = new HostnameVerifier() {
-                public boolean verify(String hostname, SSLSession session) {
+            final HostnameVerifier allHostsValid = new HostnameVerifier() {
+                public boolean verify(final String hostname, final SSLSession session) {
                     return true;
                 }
             };
@@ -193,56 +193,56 @@ public class JWO {
     }
 
     @SneakyThrows
-    public static void setSSLVerifyPeerCertificate(boolean verify) {
+    public static void setSSLVerifyPeerCertificate(final boolean verify) {
         if (verify) {
             HttpsURLConnection.setDefaultSSLSocketFactory(defaultSSLSocketFactory);
         } else {
             // Create a trust manager that does not validate certificate chains
-            TrustManager[] trustAllCerts = new TrustManager[]{
+            final TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
                         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                             return null;
                         }
 
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        public void checkClientTrusted(final X509Certificate[] certs, final String authType) {
                         }
 
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        public void checkServerTrusted(final X509Certificate[] certs, final String authType) {
                         }
                     }
             };
             // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("SSL");
+            final SSLContext sc = SSLContext.getInstance("SSL");
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         }
     }
 
-    public static <T> Predicate<T> not(Pre<T> p) {
+    public static <T> Predicate<T> not(final Pre<T> p) {
         return p.negate();
     }
 
-    public static <V, T> Stream<V> flatMap(Stream<T> stream,
-                                           Fun<? super T, Optional<? extends V>> mappingFunction) {
+    public static <V, T> Stream<V> flatMap(final Stream<T> stream,
+                                           final Fun<? super T, Optional<? extends V>> mappingFunction) {
         return stream.map(mappingFunction).filter(Optional::isPresent).map(Optional::get);
     }
 
-    public static void setSystemPropertyIfNotDefined(String key, String value) {
+    public static void setSystemPropertyIfNotDefined(final String key, final String value) {
         if (System.getProperty(key) == null) {
             System.setProperty(key, value);
         }
     }
 
-    public static String bytesToHex(byte[] bytes) {
+    public static String bytesToHex(final byte[] bytes) {
         return Hash.bytesToHex(bytes);
     }
 
-    public static byte[] hexToBytes(String hexStr) {
+    public static byte[] hexToBytes(final String hexStr) {
         return Hash.hexToBytes(hexStr);
     }
 
     @SneakyThrows
-    public static void deletePath(Path path) {
+    public static void deletePath(final Path path) {
         Files.walk(path)
                 .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
@@ -261,7 +261,7 @@ public class JWO {
      * @throws IndexOutOfBoundsException if the negativeOffset is out of range
      *                                   (negativeOffset &ge; 0 || negativeOffset &lt; -size())
      */
-    public static <T> T tail(List<T> list, int negativeOffset) {
+    public static <T> T tail(final List<T> list, final int negativeOffset) {
         return list.get(list.size() + negativeOffset);
     }
 
@@ -271,7 +271,7 @@ public class JWO {
      * @return the last element of the input list
      * @throws IndexOutOfBoundsException if the list is empty
      */
-    public static <T> T tail(List<T> list) {
+    public static <T> T tail(final List<T> list) {
         return tail(list, -1);
     }
 
@@ -285,11 +285,11 @@ public class JWO {
      * @throws IndexOutOfBoundsException     if the list is empty
      * @throws UnsupportedOperationException if the remove operation is not supported by this list
      */
-    public static <T> T pop(List<T> list) {
+    public static <T> T pop(final List<T> list) {
         return list.remove(list.size() - 1);
     }
 
-    public static <T> Stream<T> streamCat(Stream<T>... streams) {
+    public static <T> Stream<T> streamCat(final Stream<T>... streams) {
         return Stream.of(streams).flatMap(Function.identity());
     }
 
@@ -307,11 +307,11 @@ public class JWO {
      * Example: <br>
      * "This template was created by John Doe."
      */
-    public static String renderTemplate(String template, Map<String, Object> valuesMap) {
+    public static String renderTemplate(final String template, final Map<String, Object> valuesMap) {
         return renderTemplate(template, valuesMap, null);
     }
 
-    public static int indexOfWithEscape(String haystack, char needle, char escape, int begin, int end) {
+    public static int indexOfWithEscape(final String haystack, final char needle, final char escape, final int begin, int end) {
         int result = -1;
         int cursor = begin;
         if(end == 0) {
@@ -319,7 +319,7 @@ public class JWO {
         }
         int escapeCount = 0;
         while(cursor < end) {
-            char c = haystack.charAt(cursor);
+            final char c = haystack.charAt(cursor);
             if(escapeCount > 0) {
                 --escapeCount;
                 if(c == escape) {
@@ -342,11 +342,11 @@ public class JWO {
     }
 
     public static String renderTemplate(
-            String template,
-            Map<String, Object> valuesMap,
-            Map<String, Map<String, Object>> dictMap) {
-        StringBuilder sb = new StringBuilder();
-        Object absent = new Object();
+            final String template,
+            final Map<String, Object> valuesMap,
+            final Map<String, Map<String, Object>> dictMap) {
+        final StringBuilder sb = new StringBuilder();
+        final Object absent = new Object();
 
         int cursor = 0;
         while(cursor < template.length()) {
@@ -359,7 +359,7 @@ public class JWO {
                 nextPlaceHolderWithEscape = template.length();
             }
             while (cursor < nextPlaceHolderWithEscape) {
-                char ch = template.charAt(cursor);
+                final char ch = template.charAt(cursor);
                 if (nextPlaceHolder == nextPlaceHolderWithEscape || cursor != nextPlaceHolder) {
                     sb.append(ch);
                 }
@@ -370,7 +370,7 @@ public class JWO {
                 String context = null;
                 String defaultValue = null;
                 Object value;
-                int end = template.indexOf('}', cursor + 1);
+                final int end = template.indexOf('}', cursor + 1);
                 int colon;
                 if (dictMap == null)
                     colon = -1;
@@ -383,7 +383,7 @@ public class JWO {
                     value = valuesMap.getOrDefault(key, absent);
                 } else {
                     context = template.substring(cursor + 2, colon);
-                    int secondColon = indexOfWithEscape(template, ':', '\\', colon + 1, end);
+                    final int secondColon = indexOfWithEscape(template, ':', '\\', colon + 1, end);
                     if(secondColon < 0) {
                         key = template.substring(colon + 1, end);
                     } else {
@@ -420,26 +420,26 @@ public class JWO {
      * "This template was created by John Doe."
      */
     @SneakyThrows
-    public static String renderTemplate(Reader reader,
-                                        Map<String, Object> valuesMap,
-                                        Map<String, Map<String, Object>> dictMap) {
-        StringBuilder sb = new StringBuilder();
-        char[] buf = new char[1024];
+    public static String renderTemplate(final Reader reader,
+                                        final Map<String, Object> valuesMap,
+                                        final Map<String, Map<String, Object>> dictMap) {
+        final StringBuilder sb = new StringBuilder();
+        final char[] buf = new char[1024];
         int read;
         while (!((read = reader.read(buf)) < 0)) {
             sb.append(buf, 0, read);
         }
         return renderTemplate(sb.toString(), valuesMap, dictMap);
     }
-    public static String renderTemplate(Reader reader,
-                                        Map<String, Object> valuesMap) {
+    public static String renderTemplate(final Reader reader,
+                                        final Map<String, Object> valuesMap) {
         return renderTemplate(reader, valuesMap, null);
     }
 
     @SneakyThrows
-    public static String readAll(Reader reader) {
-        char[] buffer = new char[1024];
-        StringBuilder sb = new StringBuilder();
+    public static String readAll(final Reader reader) {
+        final char[] buffer = new char[1024];
+        final StringBuilder sb = new StringBuilder();
         int read;
         while (!((read = reader.read(buffer, 0, buffer.length)) < 0)) {
             sb.append(buffer, 0, read);
@@ -447,7 +447,7 @@ public class JWO {
         return sb.toString();
     }
 
-    public static <T, U extends T> Optional<U> cast(T value, Class<U> cls) {
+    public static <T, U extends T> Optional<U> cast(final T value, final Class<U> cls) {
         if (cls.isInstance(value)) {
             return Optional.of((U) value);
         } else {
@@ -455,20 +455,20 @@ public class JWO {
         }
     }
 
-    public static <T extends Enum> Map<String, T> enumReverseMap(Class<T> cls) {
+    public static <T extends Enum> Map<String, T> enumReverseMap(final Class<T> cls) {
         return Arrays.stream(cls.getEnumConstants())
                 .collect(CollectionUtils.toUnmodifiableTreeMap(Object::toString, Function.identity()));
     }
 
-    public static <T extends Enum> T enumFromString(Class<T> cls, Map<String, T> reverseMap, String value) {
-        T result = reverseMap.get(value);
+    public static <T extends Enum> T enumFromString(final Class<T> cls, final Map<String, T> reverseMap, final String value) {
+        final T result = reverseMap.get(value);
         if (result == null)
             throw newThrowable(IllegalArgumentException.class,
                     "Unknown value '%s' for enum %s", value, cls.getName());
         return result;
     }
 
-    public static Optional<Path> which(String command) {
+    public static Optional<Path> which(final String command) {
         return Stream.of(System.getenv("PATH").split(Pattern.quote(File.pathSeparator)))
                 .map(path -> Paths.get(path, command))
                 .filter(Files::exists)
@@ -476,9 +476,9 @@ public class JWO {
                 .findFirst();
     }
 
-    public static Optional<Tuple2<String, String>> splitExtension(Path file) {
-        String fileName = file.getFileName().toString();
-        int index = fileName.lastIndexOf('.');
+    public static Optional<Tuple2<String, String>> splitExtension(final Path file) {
+        final String fileName = file.getFileName().toString();
+        final int index = fileName.lastIndexOf('.');
         if (index == -1) {
             return Optional.empty();
         } else {
@@ -487,7 +487,7 @@ public class JWO {
         }
     }
 
-    public static <T, U> T dynamicCast(U obj, Class<T> cls) {
+    public static <T, U> T dynamicCast(final U obj, final Class<T> cls) {
         if(obj == null) return null;
         else if(cls.isInstance(obj)) {
             return (T) obj;
@@ -499,13 +499,13 @@ public class JWO {
 
     @SneakyThrows
     private static void computeSizeAndCrc32(
-            ZipEntry zipEntry,
-            InputStream inputStream,
-            byte[] buffer) {
-        CRC32 crc32 = new CRC32();
+            final ZipEntry zipEntry,
+            final InputStream inputStream,
+            final byte[] buffer) {
+        final CRC32 crc32 = new CRC32();
         long sz = 0L;
         while (true) {
-            int read = inputStream.read(buffer);
+            final int read = inputStream.read(buffer);
             if (read < 0) break;
             sz += read;
             crc32.update(buffer, 0, read);
@@ -516,29 +516,29 @@ public class JWO {
     }
 
     @SneakyThrows
-    public static void write2Stream(OutputStream os,
-                           InputStream inputStream,
-                           byte[] buffer) {
+    public static void write2Stream(final OutputStream os,
+                                    final InputStream inputStream,
+                                    final byte[] buffer) {
         while (true) {
-            int read = inputStream.read(buffer);
+            final int read = inputStream.read(buffer);
             if (read < 0) break;
             os.write(buffer, 0, read);
         }
     }
 
-    public static void write2Stream(OutputStream os,
-                                    InputStream inputStream) {
+    public static void write2Stream(final OutputStream os,
+                                    final InputStream inputStream) {
         write2Stream(os, inputStream, new byte[0x10000]);
     }
 
     @SneakyThrows
     public static void writeZipEntry(
-        ZipOutputStream zip,
-        Sup<InputStream> source,
-        String destinationFileName,
-        int compressionMethod,
-        byte[] buffer) {
-        ZipEntry zipEntry = new ZipEntry(destinationFileName);
+            final ZipOutputStream zip,
+            final Sup<InputStream> source,
+            final String destinationFileName,
+            final int compressionMethod,
+            final byte[] buffer) {
+        final ZipEntry zipEntry = new ZipEntry(destinationFileName);
         switch(compressionMethod) {
             case ZipEntry.STORED:
                 // A stored ZipEntry requires computing the size and CRC32 in advance
@@ -554,38 +554,38 @@ public class JWO {
         }
         zipEntry.setMethod(compressionMethod);
         zip.putNextEntry(zipEntry);
-        try(InputStream is = source.get()) {
+        try(final InputStream is = source.get()) {
             write2Stream(zip, is, buffer);
         }
         zip.closeEntry();
     }
 
     public static void writeZipEntry(
-            ZipOutputStream zip,
-            Sup<InputStream> source,
-            String destinationFileName,
-            int compressionMethod) {
+            final ZipOutputStream zip,
+            final Sup<InputStream> source,
+            final String destinationFileName,
+            final int compressionMethod) {
         writeZipEntry(zip, source, destinationFileName, compressionMethod, new byte[0x10000]);
     }
 
     public static void writeZipEntry(
-            ZipOutputStream zip,
-            Sup<InputStream> source,
-            String destinationFileName) {
+            final ZipOutputStream zip,
+            final Sup<InputStream> source,
+            final String destinationFileName) {
         writeZipEntry(zip, source, destinationFileName, ZipEntry.DEFLATED);
     }
 
     @SneakyThrows
-    public static void extractZip(Path sourceArchive, Path destinationFolder) {
-        byte[] buffer = new byte[0x10000];
+    public static void extractZip(final Path sourceArchive, final Path destinationFolder) {
+        final byte[] buffer = new byte[0x10000];
         expandZip(sourceArchive, (BiCon<ZipInputStream, ZipEntry>)
                 (ZipInputStream zipInputStream, ZipEntry zipEntry) -> {
-            Path entryPath = destinationFolder.resolve(zipEntry.getName());
+                    final Path entryPath = destinationFolder.resolve(zipEntry.getName());
             if(zipEntry.isDirectory()) {
                 Files.createDirectories(entryPath);
             } else {
                 Files.createDirectories(entryPath.getParent());
-                try(OutputStream outputStream = Files.newOutputStream(entryPath)) {
+                try(final OutputStream outputStream = Files.newOutputStream(entryPath)) {
                     copy(zipInputStream, outputStream, buffer);
                 }
             }
@@ -593,8 +593,8 @@ public class JWO {
     }
 
     @SneakyThrows
-    public static void expandZip(Path sourceArchive, BiCon<ZipInputStream, ZipEntry> consumer) {
-        try(ZipInputStream zis = new ZipInputStream(Files.newInputStream(sourceArchive))) {
+    public static void expandZip(final Path sourceArchive, final BiCon<ZipInputStream, ZipEntry> consumer) {
+        try(final ZipInputStream zis = new ZipInputStream(Files.newInputStream(sourceArchive))) {
             ZipEntry zipEntry = zis.getNextEntry();
             while (zipEntry != null) {
                 consumer.accept(zis, zipEntry);
@@ -605,7 +605,7 @@ public class JWO {
     }
 
     @SneakyThrows
-    public static void installResource(String resourceName, Path destination, Class<?> cls) {
+    public static void installResource(final String resourceName, Path destination, final Class<?> cls) {
         Path outputFile;
         if (Files.isSymbolicLink(destination)) {
             destination = destination.toRealPath();
@@ -649,37 +649,37 @@ public class JWO {
     }
 
     @SafeVarargs
-    public static <T> Stream<T> optional2Stream(Optional<T>...opts) {
+    public static <T> Stream<T> optional2Stream(final Optional<T>...opts) {
         return Arrays.stream(opts).filter(Optional::isPresent).map(Optional::get);
     }
 
-    public static <T> Stream<T> optional2Stream(Iterable<Optional<T>> opts) {
+    public static <T> Stream<T> optional2Stream(final Iterable<Optional<T>> opts) {
         return iterable2Stream(opts).filter(Optional::isPresent).map(Optional::get);
     }
-    public static <T> Stream<T> optional2Stream(Optional<T> optional) {
+    public static <T> Stream<T> optional2Stream(final Optional<T> optional) {
         return optional.map(Stream::of).orElse(Stream.empty());
     }
 
-    public static String decapitalize(String s, Locale locale) {
+    public static String decapitalize(final String s, final Locale locale) {
         if (!s.isEmpty() && !Character.isLowerCase(s.charAt(0)))
             return s.substring(0, 1).toLowerCase(locale) + s.substring(1);
         else return s;
     }
 
-    public static String decapitalize(String s) {
+    public static String decapitalize(final String s) {
         return decapitalize(s, Locale.getDefault());
     }
 
-    public static String capitalize(String s) {
+    public static String capitalize(final String s) {
         return capitalize(s, Locale.getDefault());
     }
 
-    public static String capitalize(String s, Locale locale) {
+    public static String capitalize(final String s, final Locale locale) {
         if (!s.isEmpty()) {
-            char firstChar = s.charAt(0);
+            final char firstChar = s.charAt(0);
             if (Character.isLowerCase(firstChar)) {
-                StringBuilder sb = new StringBuilder();
-                char titleChar = Character.toTitleCase(firstChar);
+                final StringBuilder sb = new StringBuilder();
+                final char titleChar = Character.toTitleCase(firstChar);
                 if (titleChar != Character.toUpperCase(firstChar)) {
                     sb.append(titleChar);
                 } else {
@@ -693,62 +693,63 @@ public class JWO {
     }
 
     @SneakyThrows
-    public static void copy(InputStream is, OutputStream os, byte[] buffer) {
+    public static void copy(final InputStream is, final OutputStream os, final byte[] buffer) {
         while(true) {
-            int read = is.read(buffer);
+            final int read = is.read(buffer);
             if(read < 0) break;
             os.write(buffer, 0, read);
         }
     }
 
-    public static void copy(InputStream is, OutputStream os, int bufferSize) {
-        byte[] buffer = new byte[bufferSize];
+    public static void copy(final InputStream is, final OutputStream os, final int bufferSize) {
+        final byte[] buffer = new byte[bufferSize];
         copy(is, os, buffer);
     }
 
-    public static void copy(InputStream is, OutputStream os) {
-        byte[] buffer = new byte[0x10000];
+    public static void copy(final InputStream is, final OutputStream os) {
+        final byte[] buffer = new byte[0x10000];
         copy(is, os, buffer);
     }
 
     @SneakyThrows
-    public static void copy(Reader reader, Writer writer, char[] buffer) {
+    public static void copy(final Reader reader, final Writer writer, final char[] buffer) {
         while (true) {
-            int read = reader.read(buffer);
+            final int read = reader.read(buffer);
             if (read < 0) break;
             writer.write(buffer, 0, read);
         }
     }
 
-    public static void copy(Reader reader, Writer writer, int bufferSize) {
-        char[] buffer = new char[bufferSize];
+    public static void copy(final Reader reader, final Writer writer, final int bufferSize) {
+        final char[] buffer = new char[bufferSize];
         copy(reader, writer, buffer);
     }
 
-    public static void copy(Reader reader, Writer writer) {
-        char[] buffer = new char[0x10000];
+    public static void copy(final Reader reader, final Writer writer) {
+        final char[] buffer = new char[0x10000];
         copy(reader, writer, buffer);
     }
 
 
     public static void waitProcess(
-            List<String> cmd,
-            Path cwd,
-            Map<String, String> env) {
+            final List<String> cmd,
+            final Path cwd,
+            final Map<String, String> env) {
         waitProcess(cmd, cwd, env, 0, null);
     }
 
     @SneakyThrows
     public static Process startProcess(
-            List<String> cmd,
-            Path cwd, Map<String, String> env) {
-        ProcessBuilder pb = new ProcessBuilder();
+            final List<String> cmd,
+            final Path cwd,
+            final Map<String, String> env) {
+        final ProcessBuilder pb = new ProcessBuilder();
         pb.command(cmd);
         pb.inheritIO();
         pb.directory(cwd.toFile());
         pb.environment().putAll(env);
         if (log.isTraceEnabled()) {
-            String cmdLineListString = '[' + cmd.stream().map(s -> '\'' + s + '\'').collect(Collectors.joining(", ")) + ']';
+            final String cmdLineListString = '[' + cmd.stream().map(s -> '\'' + s + '\'').collect(Collectors.joining(", ")) + ']';
             log.trace("Starting child java process with command line: {}", cmdLineListString);
         }
         return pb.start();
@@ -756,15 +757,15 @@ public class JWO {
 
     @SneakyThrows
     public static void waitProcess(
-            List<String> cmd,
-            Path workingDirectory,
-            Map<String, String> env,
-            long tout,
-            TimeUnit tunit) {
-        Process process = startProcess(cmd, workingDirectory, env);
+            final List<String> cmd,
+            final Path workingDirectory,
+            final Map<String, String> env,
+            final long tout,
+            final TimeUnit tunit) {
+        final Process process = startProcess(cmd, workingDirectory, env);
         int rc;
         if (tout > 0) {
-            boolean finished = process.waitFor(tout, tunit);
+            final boolean finished = process.waitFor(tout, tunit);
             if (finished)
                 rc = process.exitValue();
             else
@@ -778,7 +779,7 @@ public class JWO {
         }
     }
 
-    public static <T> Iterator<T> enumeration2Iterator(Enumeration<T> enumeration) {
+    public static <T> Iterator<T> enumeration2Iterator(final Enumeration<T> enumeration) {
         return new Iterator<T>() {
             @Override
             public boolean hasNext() {
@@ -792,26 +793,26 @@ public class JWO {
         };
     }
 
-    public static <T> Optional<T> or(Optional<T> ...opts) {
-        for(Optional<T> opt : opts) {
+    public static <T> Optional<T> or(final Optional<T> ...opts) {
+        for(final Optional<T> opt : opts) {
             if(opt.isPresent()) return opt;
         }
         return Optional.empty();
     }
 
     @SneakyThrows
-    public static String sh(String... cmdLine) {
-        ProcessBuilder pb = new ProcessBuilder();
+    public static String sh(final String... cmdLine) {
+        final ProcessBuilder pb = new ProcessBuilder();
         pb.command(cmdLine);
         pb.redirectInput(ProcessBuilder.Redirect.PIPE);
-        Process process = pb.start();
-        int rc = process.waitFor();
+        final Process process = pb.start();
+        final int rc = process.waitFor();
         if (rc == 0) {
-            try (Reader reader = new CharFilterReader(new InputStreamReader(process.getInputStream()), '\n')) {
+            try (final Reader reader = new CharFilterReader(new InputStreamReader(process.getInputStream()), '\n')) {
                 return readAll(reader);
             }
         } else {
-            try (Reader reader = new InputStreamReader(process.getErrorStream())) {
+            try (final Reader reader = new InputStreamReader(process.getErrorStream())) {
                 throw new RuntimeException(readAll(reader));
             }
         }
@@ -823,35 +824,35 @@ public class JWO {
     }
 
     @SneakyThrows
-    public static void replaceFileIfDifferent(Supplier<InputStream> inputStreamSupplier, Path destination, FileAttribute<?>... attrs) {
+    public static void replaceFileIfDifferent(final Supplier<InputStream> inputStreamSupplier, final Path destination, final FileAttribute<?>... attrs) {
         Hash hash;
-        try (InputStream inputStream = inputStreamSupplier.get()) {
+        try (final InputStream inputStream = inputStreamSupplier.get()) {
             hash = Hash.md5(inputStream);
         }
         replaceFileIfDifferent(inputStreamSupplier, destination, hash, attrs);
     }
 
-    public static void replaceFileIfDifferent(InputStream inputStream, Path destination, FileAttribute<?>... attrs) {
+    public static void replaceFileIfDifferent(final InputStream inputStream, final Path destination, final FileAttribute<?>... attrs) {
         replaceFileIfDifferent(() -> inputStream, destination, null, attrs);
     }
 
     @SneakyThrows
     private static void replaceFileIfDifferent(
-            Supplier<InputStream> inputStreamSupplier,
-            Path destination,
+            final Supplier<InputStream> inputStreamSupplier,
+            final Path destination,
             Hash newFileHash,
-            FileAttribute<?>... attrs) {
+            final FileAttribute<?>... attrs) {
         if (Files.exists(destination)) {
             Hash existingFileHash;
-            try (InputStream existingFileStream = Files.newInputStream(destination)) {
+            try (final InputStream existingFileStream = Files.newInputStream(destination)) {
                 existingFileHash = Hash.md5(existingFileStream);
             }
             if (newFileHash == null) {
-                MessageDigest md = MessageDigest.getInstance(Hash.Algorithm.MD5.name());
-                Path tmpFile = Files.createTempFile(destination.getParent(), destination.getFileName().toString(), ".tmp", attrs);
+                final MessageDigest md = MessageDigest.getInstance(Hash.Algorithm.MD5.name());
+                final Path tmpFile = Files.createTempFile(destination.getParent(), destination.getFileName().toString(), ".tmp", attrs);
                 try {
-                    try (InputStream inputStream = inputStreamSupplier.get();
-                         OutputStream outputStream = new DigestOutputStream(Files.newOutputStream(tmpFile), md)) {
+                    try (final InputStream inputStream = inputStreamSupplier.get();
+                        final OutputStream outputStream = new DigestOutputStream(Files.newOutputStream(tmpFile), md)) {
                         copy(inputStream, outputStream);
                     }
                     newFileHash = new Hash(Hash.Algorithm.MD5, md.digest());
@@ -865,9 +866,9 @@ public class JWO {
                 }
             } else {
                 if (!Objects.equals(existingFileHash, newFileHash)) {
-                    EnumSet<StandardOpenOption> opts = EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
-                    try (InputStream inputStream = inputStreamSupplier.get();
-                         OutputStream outputStream = Channels.newOutputStream(Files.newByteChannel(destination, opts, attrs))) {
+                    final EnumSet<StandardOpenOption> opts = EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+                    try (final InputStream inputStream = inputStreamSupplier.get();
+                         final OutputStream outputStream = Channels.newOutputStream(Files.newByteChannel(destination, opts, attrs))) {
                         copy(inputStream, outputStream);
                     }
                     if (log.isTraceEnabled()) {
@@ -883,71 +884,71 @@ public class JWO {
             if (log.isTraceEnabled()) {
                 log.trace("Creating file '{}'", destination);
             }
-            EnumSet<StandardOpenOption> opts = EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-            try (InputStream inputStream = inputStreamSupplier.get();
-                 OutputStream outputStream = Channels.newOutputStream(Files.newByteChannel(destination, opts, attrs))) {
+            final EnumSet<StandardOpenOption> opts = EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            try (final InputStream inputStream = inputStreamSupplier.get();
+                final OutputStream outputStream = Channels.newOutputStream(Files.newByteChannel(destination, opts, attrs))) {
                 copy(inputStream, outputStream);
             }
         }
     }
 
-    public static <T, U> Runnable curry(Consumer<T> original, Supplier<T> sup) {
+    public static <T, U> Runnable curry(final Consumer<T> original, final Supplier<T> sup) {
         return () -> original.accept(sup.get());
     }
 
-    public static <T> Runnable curry(Consumer<T> original, T arg) {
+    public static <T> Runnable curry(final Consumer<T> original, final T arg) {
         return () -> original.accept(arg);
     }
 
-    public static <T, U> Supplier<U> curry(Fun<T, U> original, T arg) {
+    public static <T, U> Supplier<U> curry(final Fun<T, U> original, final T arg) {
         return () -> original.apply(arg);
     }
 
-    public static <T, U, V> Fun<U, V> curry1(BiFun<T, U, V> original, T arg) {
+    public static <T, U, V> Fun<U, V> curry1(final BiFun<T, U, V> original, final T arg) {
         return u -> original.apply(arg, u);
     }
 
-    public static <T, U, V> Fun<T, V> curry2(BiFun<T, U, V> original, U arg) {
+    public static <T, U, V> Fun<T, V> curry2(final BiFun<T, U, V> original, final U arg) {
         return t -> original.apply(t, arg);
     }
 
-    public static <T, U, V> Fun<U, V> curry1(BiFun<T, U, V> original, Supplier<T> sup) {
+    public static <T, U, V> Fun<U, V> curry1(final BiFun<T, U, V> original, final Supplier<T> sup) {
         return u -> original.apply(sup.get(), u);
     }
 
-    public static <T, U, V> Fun<T, V> curry2(BiFun<T, U, V> original, Supplier<U> sup) {
+    public static <T, U, V> Fun<T, V> curry2(final BiFun<T, U, V> original, final Supplier<U> sup) {
         return t -> original.apply(t, sup.get());
     }
 
-    public static <T> Stream<T> lazyValue(Supplier<T> valueSupplier) {
+    public static <T> Stream<T> lazyValue(final Supplier<T> valueSupplier) {
         return Stream.generate(valueSupplier).limit(1);
     }
 
-    public static <T, U> Supplier<U> compose(Supplier<T> sup, Function<? super T, ? extends U> fun) {
+    public static <T, U> Supplier<U> compose(final Supplier<T> sup, final Function<? super T, ? extends U> fun) {
         return () -> fun.apply(sup.get());
     }
 
-    public static <T, U, V> Function<T, V> compose(Function<T, U> fun1, Function<U, V> fun2) {
+    public static <T, U, V> Function<T, V> compose(final Function<T, U> fun1, final Function<U, V> fun2) {
         return param -> fun2.apply(fun1.apply(param));
     }
 
-    public static <T, U> Consumer<T> compose(Function<T, U> fun, Consumer<U> con) {
+    public static <T, U> Consumer<T> compose(final Function<T, U> fun, final Consumer<U> con) {
         return param -> con.accept(fun.apply(param));
     }
 
-    public static <T, U> Predicate<T> compose(Function<T, U> fun, Predicate<U> pred) {
+    public static <T, U> Predicate<T> compose(final Function<T, U> fun, final Predicate<U> pred) {
         return param -> pred.test(fun.apply(param));
     }
 
-    public static <T> Supplier<Boolean> compose(Supplier<T> fun, Predicate<T> pred) {
+    public static <T> Supplier<Boolean> compose(final Supplier<T> fun, final Predicate<T> pred) {
         return () -> pred.test(fun.get());
     }
 
-    public static <T> Runnable compose(Supplier<T> sup, Consumer<T> con) {
+    public static <T> Runnable compose(final Supplier<T> sup, final Consumer<T> con) {
         return () -> con.accept(sup.get());
     }
 
-    public static <T> T loadService(Class<T> serviceClass) {
+    public static <T> T loadService(final Class<T> serviceClass) {
         return StreamSupport.stream(ServiceLoader.load(serviceClass).spliterator(), false)
                 .findFirst()
                 .orElseThrow(
@@ -957,27 +958,27 @@ public class JWO {
                                 serviceClass.getName()));
     }
 
-    public static <T, U, R> Optional<R> zip(Optional<T> opt1, Optional<U> opt2, BiFun<T, U, R> cb) {
+    public static <T, U, R> Optional<R> zip(final Optional<T> opt1, final Optional<U> opt2, final BiFun<T, U, R> cb) {
         if (!opt1.isPresent() || !opt2.isPresent()) return Optional.empty();
         else return Optional.ofNullable(cb.apply(opt1.get(), opt2.get()));
     }
 
 
-    public static Executor delayedExecutor(long delay, TimeUnit unit,
-                                            Executor executor) {
+    public static Executor delayedExecutor(final long delay, final TimeUnit unit,
+                                           final Executor executor) {
         if (unit == null || executor == null)
             throw new NullPointerException();
         return new DelayedExecutor(delay, unit, executor);
     }
     private static final class Delayer {
-        private static ScheduledFuture<?> delay(Runnable command, long delay,
-                                                TimeUnit unit) {
+        private static ScheduledFuture<?> delay(final Runnable command, final long delay,
+                                                final TimeUnit unit) {
             return delayer.schedule(command, delay, unit);
         }
 
         private static final class DaemonThreadFactory implements ThreadFactory {
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r);
+            public Thread newThread(final Runnable r) {
+                final Thread t = new Thread(r);
                 t.setDaemon(true);
                 t.setName("CompletableFutureDelayScheduler");
                 return t;
@@ -996,10 +997,12 @@ public class JWO {
         final long delay;
         final TimeUnit unit;
         final Executor executor;
-        private DelayedExecutor(long delay, TimeUnit unit, Executor executor) {
+
+        private DelayedExecutor(final long delay, final TimeUnit unit, final Executor executor) {
             this.delay = delay; this.unit = unit; this.executor = executor;
         }
-        public void execute(Runnable r) {
+
+        public void execute(final Runnable r) {
             Delayer.delay(new TaskSubmitter(executor, r), delay, unit);
         }
     }
@@ -1007,14 +1010,15 @@ public class JWO {
     private static final class TaskSubmitter implements Runnable {
         final Executor executor;
         final Runnable action;
-        TaskSubmitter(Executor executor, Runnable action) {
+
+        TaskSubmitter(final Executor executor, final Runnable action) {
             this.executor = executor;
             this.action = action;
         }
         public void run() { executor.execute(action); }
     }
 
-    public static String toUnixPath(Path path) {
+    public static String toUnixPath(final Path path) {
         String result;
         if (OS.isUnix) {
             result = path.toString();
@@ -1028,7 +1032,7 @@ public class JWO {
     }
 
     public static void registerUrlProtocolHandler() {
-        String handlers = System.getProperty(PROTOCOL_HANDLER, "");
+        final String handlers = System.getProperty(PROTOCOL_HANDLER, "");
         System.setProperty(PROTOCOL_HANDLER,
             ((handlers == null || handlers.isEmpty()) ? HANDLERS_PACKAGE : handlers + "|" + HANDLERS_PACKAGE));
         resetCachedUrlHandlers();
@@ -1042,13 +1046,13 @@ public class JWO {
     private static void resetCachedUrlHandlers() {
         try {
             URL.setURLStreamHandlerFactory(null);
-        } catch (Error ex) {
+        } catch (final Error ex) {
             // Ignore
         }
     }
 
     @SneakyThrows
-    public static void deletePath(Logger log, Path path) {
+    public static void deletePath(final Logger log, final Path path) {
         if (Files.exists(path)) {
             if (log.isInfoEnabled()) {
                 log.info("Wiping '{}'", path);
@@ -1057,21 +1061,21 @@ public class JWO {
         }
     }
 
-    public static <T, U extends T> U downCast(T param) {
+    public static <T, U extends T> U downCast(final T param) {
         return (U) param;
     }
 
-    public static <T extends U, U> U upCast(T param) {
+    public static <T extends U, U> U upCast(final T param) {
         return param;
     }
 
-    public static <T, U extends T> Optional<U> asInstance(T param, Class<U> cls) {
+    public static <T, U extends T> Optional<U> asInstance(final T param, final Class<U> cls) {
         return Optional.ofNullable(param)
             .filter(cls::isInstance)
             .map(cls::cast);
     }
 
-    public static <K, V, U> Stream<Map.Entry<K, U>> mapValues(Map<K, V> map, Fun<V, U> xform) {
+    public static <K, V, U> Stream<Map.Entry<K, U>> mapValues(final Map<K, V> map, final Fun<V, U> xform) {
         return map
             .entrySet()
             .stream()
@@ -1080,14 +1084,14 @@ public class JWO {
 
     @SneakyThrows
     public static Process startJavaProcess(
-        Logger log,
-        Path javaHome,
-        List<String> args,
-        Path cwd,
-        Map<String, String> env) {
-        Path javaExecutable = javaHome.resolve("bin/java" + (OS.isWindows ? ".exe" : ""));
-        ProcessBuilder pb = new ProcessBuilder();
-        List<String> cmd = new ArrayList<>();
+            final Logger log,
+            final Path javaHome,
+            final List<String> args,
+            final Path cwd,
+            final Map<String, String> env) {
+        final Path javaExecutable = javaHome.resolve("bin/java" + (OS.isWindows ? ".exe" : ""));
+        final ProcessBuilder pb = new ProcessBuilder();
+        final List<String> cmd = new ArrayList<>();
         cmd.add(javaExecutable.toString());
         cmd.addAll(args);
         pb.command(cmd);
@@ -1095,17 +1099,17 @@ public class JWO {
         pb.directory(cwd.toFile());
         pb.environment().putAll(env);
         if (log.isTraceEnabled()) {
-            String cmdLineListString = '[' + cmd.stream().map(s -> '\'' + s + '\'').collect(Collectors.joining(", ")) + ']';
+            final String cmdLineListString = '[' + cmd.stream().map(s -> '\'' + s + '\'').collect(Collectors.joining(", ")) + ']';
             log.trace("Starting child java process with command line: {}", cmdLineListString);
         }
         return pb.start();
     }
 
-    public static <T, U> U let(T object, Function<T, U> cb) {
+    public static <T, U> U let(final T object, final Function<T, U> cb) {
         return cb.apply(object);
     }
 
-    public static <T> T also(T object, Consumer<T> cb) {
+    public static <T> T also(final T object, final Consumer<T> cb) {
         cb.accept(object);
         return object;
     }

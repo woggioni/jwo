@@ -64,7 +64,7 @@ public class JavaVersionTest {
 
     @MethodSource
     @ParameterizedTest
-    public void comparatorTest(TestCase<Tuple2<JavaVersion, JavaVersion>, Integer> testCase) {
+    public void comparatorTest(final TestCase<Tuple2<JavaVersion, JavaVersion>, Integer> testCase) {
         final var comparator = Comparator.<JavaVersion>naturalOrder();
         final var pair = testCase.input();
         final var comparisonResult = Optional.of(comparator.compare(pair.get_1(), pair.get_2()))

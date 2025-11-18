@@ -1,9 +1,22 @@
+import javax.tools.Diagnostic
+
 plugins {
     id 'java-library'
     id 'maven-publish'
     id 'jacoco'
     alias(catalog.plugins.lombok)
     alias(catalog.plugins.sambal)
+    alias(catalog.plugins.finalguard)
+}
+
+finalGuard {
+//    defaultLevel = Diagnostic.Kind.ERROR
+    methodParameterLevel = Diagnostic.Kind.ERROR
+//    lambdaParameterLevel = Diagnostic.Kind.ERROR
+    tryWithResourceLevel = Diagnostic.Kind.ERROR
+    catchParameterLevel = Diagnostic.Kind.ERROR
+    forLoopParameterLevel = Diagnostic.Kind.ERROR
+    localVariableLevel = Diagnostic.Kind.ERROR
 }
 
 allprojects {
@@ -11,6 +24,11 @@ allprojects {
     version = getProperty('jwo.version')
 
     repositories {
+        mavenLocal {
+            content {
+                includeGroup 'net.woggioni.finalguard'
+            }
+        }
         maven {
             url = getProperty('gitea.maven.url')
         }
@@ -31,6 +49,7 @@ allprojects {
             testImplementation catalog.junit.jupiter.api
             testImplementation catalog.junit.jupiter.params
             testRuntimeOnly catalog.junit.jupiter.engine
+            testRuntimeOnly catalog.junit.platform.launcher
         }
 
         test {

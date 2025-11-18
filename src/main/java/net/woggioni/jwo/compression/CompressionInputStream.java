@@ -12,20 +12,20 @@ public class CompressionInputStream extends InputStream {
     private final Thread writer;
     private final InputStream processOutput;
 
-    public CompressionInputStream(InputStream is, CompressionFormat compressionFormat) {
+    public CompressionInputStream(final InputStream is, final CompressionFormat compressionFormat) {
         this(is, compressionFormat, StreamMode.COMPRESSION);
     }
 
-    public CompressionInputStream(InputStream is, CompressionFormat compressionFormat, Integer level) {
+    public CompressionInputStream(final InputStream is, final CompressionFormat compressionFormat, final Integer level) {
         this(is, compressionFormat, StreamMode.COMPRESSION, level);
     }
 
-    public CompressionInputStream(InputStream is, CompressionFormat compressionFormat, StreamMode mode) {
+    public CompressionInputStream(final InputStream is, final CompressionFormat compressionFormat, final StreamMode mode) {
         this(is, compressionFormat, mode, null);
     }
 
     @SneakyThrows
-    public CompressionInputStream(InputStream is, CompressionFormat compressionFormat, StreamMode mode, Integer level) {
+    public CompressionInputStream(final InputStream is, final CompressionFormat compressionFormat, final StreamMode mode, final Integer level) {
         inputStream = is;
         String[] cliArgs;
         switch(mode) {
@@ -42,10 +42,10 @@ public class CompressionInputStream extends InputStream {
             default:
                 throw new NullPointerException();
         }
-        ProcessBuilder pb = new ProcessBuilder(cliArgs);
+        final ProcessBuilder pb = new ProcessBuilder(cliArgs);
         process = pb.start();
         processOutput = process.getInputStream();
-        StreamWriter streamWriter = new StreamWriter(inputStream, process.getOutputStream());
+        final StreamWriter streamWriter = new StreamWriter(inputStream, process.getOutputStream());
         writer = new Thread(streamWriter);
         writer.start();
     }
@@ -56,7 +56,7 @@ public class CompressionInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] bytes, int i, int i1) throws IOException {
+    public int read(final byte[] bytes, final int i, final int i1) throws IOException {
         return processOutput.read(bytes, i, i1);
     }
 

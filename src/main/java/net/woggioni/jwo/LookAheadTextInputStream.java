@@ -14,7 +14,7 @@ public class LookAheadTextInputStream extends InputStream {
     private int currentChar;
 
 
-    public LookAheadTextInputStream(Reader reader) {
+    public LookAheadTextInputStream(final Reader reader) {
         this.reader = reader;
     }
 

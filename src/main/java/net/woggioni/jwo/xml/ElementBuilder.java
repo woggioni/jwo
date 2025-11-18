@@ -19,59 +19,57 @@ public class ElementBuilder {
     @Getter
     private final Element root;
 
-    public ElementBuilder node(String name) {
+    public ElementBuilder node(final String name) {
         return node(name, eb -> {
         });
     }
 
-    public ElementBuilder node(String name, Consumer<ElementBuilder> cb) {
-        Element child = doc.createElement(name);
+    public ElementBuilder node(final String name, final Consumer<ElementBuilder> cb) {
+        final Element child = doc.createElement(name);
         if(root == null) {
             doc.appendChild(child);
         } else {
             root.appendChild(child);
         }
-        ElementBuilder eb = new ElementBuilder(doc, child);
+        final ElementBuilder eb = new ElementBuilder(doc, child);
         cb.accept(eb);
         return eb;
     }
 
-    public final ElementBuilder node(String name, String textContent, Map<String, String> attrs) {
+    public final ElementBuilder node(final String name, final String textContent, final Map<String, String> attrs) {
         return node(name, eb -> {
             if(textContent != null) eb.text(textContent);
-            for(Map.Entry<String, String> attr : attrs.entrySet()) {
+            for(final Map.Entry<String, String> attr : attrs.entrySet()) {
                 eb.attr(attr.getKey(), attr.getValue());
             }
         });
     }
 
     @SafeVarargs
-    public final ElementBuilder node(String name, String textContent, Tuple2<String, String>...attrs) {
-        MapBuilder<String, String> mapBuilder = new MapBuilder<>();
-        for(Tuple2<String, String> attr : attrs) {
+    public final ElementBuilder node(final String name, final String textContent, final Tuple2<String, String>...attrs) {
+        final MapBuilder<String, String> mapBuilder = new MapBuilder<>();
+        for(final Tuple2<String, String> attr : attrs) {
             mapBuilder.entry(attr.get_1(), attr.get_2());
         }
         return node(name, textContent, mapBuilder.build(TreeMap::new));
     }
 
     @SafeVarargs
-    public final ElementBuilder node(String name, Tuple2<String, String>...attrs) {
+    public final ElementBuilder node(final String name, final Tuple2<String, String>...attrs) {
         return node(name, null, attrs);
     }
 
-    public final ElementBuilder node(String name, Map<String, String> attrs) {
+    public final ElementBuilder node(final String name, final Map<String, String> attrs) {
         return node(name, null, attrs);
     }
 
-    public ElementBuilder text(String textContent) {
+    public ElementBuilder text(final String textContent) {
         root.setTextContent(textContent);
         return this;
     }
 
-    public ElementBuilder attr(String name, String value) {
+    public ElementBuilder attr(final String name, final String value) {
         root.setAttribute(name, value);
         return this;
     }
-
-
 }

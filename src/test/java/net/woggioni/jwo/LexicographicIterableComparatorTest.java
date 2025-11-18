@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class LexicographicIterableComparatorTest {
 
     private final static Comparator<Integer> DESCENDING_INTEGER_COMPARATOR = new Comparator<Integer>() {
-        public int compare(Integer o1, Integer o2) {
+        public int compare(final Integer o1, final Integer o2) {
             return -o1.compareTo(o2);
         }
     };

@@ -8,9 +8,9 @@ import java.util.function.Predicate;
 public interface Pre<T> extends Predicate<T> {
     @Override
     @SneakyThrows
-    default boolean test(T t) {
+    default boolean test(final T t) {
         return exec(t);
     }
 
-    boolean exec(T t) throws Throwable;
+    boolean exec(final T t) throws Throwable;
 }

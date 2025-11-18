@@ -14,7 +14,7 @@ public class ByteFilterInputStream extends FilterInputStream {
 
     private final Set<Byte> forbidden;
 
-    public ByteFilterInputStream(InputStream source, Iterable<Byte> filteredChars) {
+    public ByteFilterInputStream(final InputStream source, final Iterable<Byte> filteredChars) {
         super(source);
         forbidden = JWO.iterable2Stream(filteredChars).collect(CollectionUtils.toUnmodifiableTreeSet());
     }
@@ -23,7 +23,7 @@ public class ByteFilterInputStream extends FilterInputStream {
     @Override
     public int read() throws IOException {
         while(true) {
-            int res = super.read();
+            final int res = super.read();
             if(!forbidden.contains(res)) {
                 return res;
             }
@@ -31,17 +31,17 @@ public class ByteFilterInputStream extends FilterInputStream {
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(final byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException {
         if(finished) return -1;
         int i = 0;
-        int lim = Math.min(len, b.length - off);
+        final int lim = Math.min(len, b.length - off);
         while(i < lim) {
-            int c = read();
+            final int c = read();
             if(c < 0) {
                 break;
             }

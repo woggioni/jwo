@@ -37,115 +37,115 @@ public class RetryExecutor {
     }
 
     public interface ExceptionHandler {
-        ExceptionHandlerOutcome handleError(Throwable t);
+        ExceptionHandlerOutcome handleError(final Throwable t);
     }
 
-    public CompletableFuture<Void> submit(Runnable cb) {
+    public CompletableFuture<Void> submit(final Runnable cb) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executor);
     }
 
     public CompletableFuture<Void> submit(
-        Runnable cb,
-        ExecutorService executorService) {
+            final Runnable cb,
+        final ExecutorService executorService) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executorService);
     }
 
     public CompletableFuture<Void> submit(
-        Runnable cb,
-        ExceptionHandler exceptionHandler,
-        ExecutorService executorService) {
+            final Runnable cb,
+            final ExceptionHandler exceptionHandler,
+            final ExecutorService executorService) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executorService);
     }
 
     public CompletableFuture<Void> submit(
-        Runnable cb,
-        Double exp,
-        ExceptionHandler exceptionHandler,
-        ExecutorService executorService) {
+            final Runnable cb,
+            final Double exp,
+            final ExceptionHandler exceptionHandler,
+            final ExecutorService executorService) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executorService);
     }
 
     public CompletableFuture<Void> submit(
-        Runnable cb,
-        Duration initialDelay,
-        Double exp,
-        ExceptionHandler exceptionHandler,
-        ExecutorService executorService) {
+            final Runnable cb,
+            final Duration initialDelay,
+            final Double exp,
+            final ExceptionHandler exceptionHandler,
+            final ExecutorService executorService) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executorService);
     }
     public static CompletableFuture<Void> submit(
-        Runnable cb,
-        int maxAttempts,
-        Duration initialDelay,
-        Double exp,
-        ExceptionHandler exceptionHandler,
-        Executor executor) {
+            final Runnable cb,
+            final int maxAttempts,
+            final Duration initialDelay,
+            final Double exp,
+            final ExceptionHandler exceptionHandler,
+            final Executor executor) {
         return submit(() -> {
             cb.run();
             return null;
         }, maxAttempts, initialDelay, exp, exceptionHandler, executor);
     }
 
-    public <T> CompletableFuture<T> submit(Callable<T> cb) {
+    public <T> CompletableFuture<T> submit(final Callable<T> cb) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executor);
     }
 
     public <T> CompletableFuture<T> submit(
-        Callable<T> cb,
-        Executor executor) {
+            final Callable<T> cb,
+            final Executor executor) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executor);
     }
 
     public <T> CompletableFuture<T> submit(
-        Callable<T> cb,
-        ExceptionHandler exceptionHandler,
-        Executor executor) {
+            final Callable<T> cb,
+            final ExceptionHandler exceptionHandler,
+            final Executor executor) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executor);
     }
 
     public <T> CompletableFuture<T> submit(
-        Callable<T> cb,
-        Double exp,
-        ExceptionHandler exceptionHandler,
-        ExecutorService executor) {
+            final Callable<T> cb,
+            final Double exp,
+            final ExceptionHandler exceptionHandler,
+            final ExecutorService executor) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executor);
     }
 
     public <T> CompletableFuture<T> submit(
-        Callable<T> cb,
-        Duration initialDelay,
-        Double exp,
-        ExceptionHandler exceptionHandler,
-        ExecutorService executor) {
+            final Callable<T> cb,
+            final Duration initialDelay,
+            final Double exp,
+            final ExceptionHandler exceptionHandler,
+            final ExecutorService executor) {
         return submit(cb, maxAttempts, initialDelay, exp, exceptionHandler, executor);
     }
 
     public static <T> CompletableFuture<T> submit(
-        Callable<T> cb,
-        int maxAttempts,
-        Duration initialDelay,
-        Double exp,
-        ExceptionHandler exceptionHandler,
-        Executor executor) {
+            final Callable<T> cb,
+            final int maxAttempts,
+            final Duration initialDelay,
+            final Double exp,
+            final ExceptionHandler exceptionHandler,
+            final Executor executor) {
         CompletableFuture<T> result = CompletableFuture.supplyAsync((Sup<T>) cb::call, executor);
         double delay = initialDelay.toMillis();
         for(int i = 1; i <= maxAttempts; i++) {
-            int attempt = i;
-            double thisAttemptDelay = delay;
+            final int attempt = i;
+            final double thisAttemptDelay = delay;
             result = result.handleAsync((BiFun<T, Throwable, CompletableFuture<T>>) (value, err) -> {
-                Optional<Throwable> causeOpt = Optional.ofNullable(err).map(Throwable::getCause);
+                final Optional<Throwable> causeOpt = Optional.ofNullable(err).map(Throwable::getCause);
                 if(!causeOpt.isPresent()) {
                     return CompletableFuture.completedFuture(value);
                 } else if(attempt == maxAttempts) {
                     throw causeOpt.get();
                 } else {
-                    Throwable cause = causeOpt.get();
-                    ExceptionHandlerOutcome eho = exceptionHandler.handleError(cause);
+                    final Throwable cause = causeOpt.get();
+                    final ExceptionHandlerOutcome eho = exceptionHandler.handleError(cause);
                     switch (eho) {
                         case THROW:
                             throw cause;
                         case CONTINUE:
-                            Executor delayedExecutor = delayedExecutor(
+                            final Executor delayedExecutor = delayedExecutor(
                                 (long) thisAttemptDelay,
                                 TimeUnit.MILLISECONDS,
                                 executor

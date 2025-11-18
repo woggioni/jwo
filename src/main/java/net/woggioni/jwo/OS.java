@@ -17,7 +17,7 @@ public enum OS {
 
     private final String value;
 
-    OS(String value) {
+    OS(final String value) {
         this.value = value;
     }
 

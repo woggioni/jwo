@@ -19,7 +19,7 @@ public interface Bucket {
      * @return false if the bucket did not contain enough token for the operation to complete,
      * true otherwise (in the latter case nTokens are actually consumed)
      */
-    default boolean removeTokens(long nTokens) {
+    default boolean removeTokens(final long nTokens) {
         return removeTokens(nTokens, System.nanoTime());
     }
 
@@ -32,7 +32,7 @@ public interface Bucket {
      * @return false if the bucket did not contain enough token for the operation to complete,
      * true otherwise (in the latter case nTokens are actually consumed)
      */
-    boolean removeTokens(long nTokens, long currentTimestamp);
+    boolean removeTokens(final long nTokens, final long currentTimestamp);
 
     /**
      * Tries to consume nTokens from the bucket, returning -1 if the operation was successful or the amount of time
@@ -44,7 +44,7 @@ public interface Bucket {
      * {@link #removeTokensWithEstimate(long)} or {@link #removeTokens(long)} invocation with the same {@param nTokens} parameter
      * will succeed
      */
-    default long removeTokensWithEstimate(long nTokens) {
+    default long removeTokensWithEstimate(final long nTokens) {
         return removeTokensWithEstimate(nTokens, System.nanoTime());
     }
 
@@ -59,13 +59,13 @@ public interface Bucket {
      * {@link #removeTokensWithEstimate(long)} or {@link #removeTokens(long)} invocation with the same {@param nTokens} parameter
      * will succeed
      */
-    long removeTokensWithEstimate(long nTokens, long currentTimestamp);
+    long removeTokensWithEstimate(final long nTokens, final long currentTimestamp);
 
-    static Bucket local(long maxCapacity, long fillAmount, Duration fillPeriod) {
+    static Bucket local(final long maxCapacity, final long fillAmount, final Duration fillPeriod) {
         return local(maxCapacity, fillAmount, fillPeriod, maxCapacity);
     }
 
-    static Bucket local(long maxCapacity, long fillAmount, Duration fillPeriod, long initialAmount) {
+    static Bucket local(final long maxCapacity, final long fillAmount, final Duration fillPeriod, final long initialAmount) {
         return new LocalBucket(maxCapacity, fillAmount, fillPeriod.toNanos(), initialAmount);
     }
 }

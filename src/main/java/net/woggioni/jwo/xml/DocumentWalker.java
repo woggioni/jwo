@@ -18,7 +18,7 @@ class StackElement {
     private final Node node;
     private final NodeListIterator iterator;
 
-    StackElement(Node node) {
+    StackElement(final Node node) {
         this.resultPre = null;
         this.node = node;
         this.iterator = new NodeListIterator(node.getChildNodes());
@@ -32,7 +32,7 @@ class Stack {
     private final List<Node> nodes = Collections.unmodifiableList(nodeStack);
 
 
-    public void push(Node node) {
+    public void push(final Node node) {
         stack.add(new StackElement(node));
         nodeStack.add(node);
     }
@@ -58,21 +58,21 @@ class Stack {
 @RequiredArgsConstructor
 public class DocumentWalker {
 
-    public static void walk(Node root, XMLNodeVisitor visitor) {
+    public static void walk(final Node root, final XMLNodeVisitor visitor) {
         new DocumentWalker(root).walk(visitor);
     }
 
     private final Node root;
 
-    public void walk(XMLNodeVisitor visitor) {
-        Stack stack = new Stack();
+    public void walk(final XMLNodeVisitor visitor) {
+        final Stack stack = new Stack();
         stack.push(root);
 
         loop:
         while(stack.isNotEmpty()) {
-            StackElement se = stack.last();
+            final StackElement se = stack.last();
             if(se.getIterator().hasNext()) {
-                Node childNode = se.getIterator().next();
+                final Node childNode = se.getIterator().next();
                 XMLNodeVisitor.NodeVisitResultPre result = se.getResultPre();
                 if(result == null) {
                     result = visitor.visitNodePre(stack.nodes());
@@ -88,7 +88,7 @@ public class DocumentWalker {
                         break loop;
                 }
             } else {
-                XMLNodeVisitor.NodeVisitResultPost result = visitor.visitNodePost(stack.nodes());
+                final XMLNodeVisitor.NodeVisitResultPost result = visitor.visitNodePost(stack.nodes());
                 stack.pop();
                 switch (result) {
                     case CONTINUE:

@@ -18,12 +18,12 @@ public class SynchronizedLazyValue<T> implements LazyValue<T> {
     private final Consumer<T> finalizer;
     private final MutableTuple2<T, Boolean> instance = MutableTuple2.newInstance(null, false);
 
-    public SynchronizedLazyValue(Supplier<T> valueSupplier) {
+    public SynchronizedLazyValue(final Supplier<T> valueSupplier) {
         this(valueSupplier, null);
     }
 
     @Override
-    public <U> LazyValue<U> map(Function<T, U> fun) {
+    public <U> LazyValue<U> map(final Function<T, U> fun) {
         return new SynchronizedLazyValue<>(() -> fun.apply(get()));
     }
 
@@ -37,7 +37,7 @@ public class SynchronizedLazyValue<T> implements LazyValue<T> {
         synchronized (instance) {
             if(instance.get_2()) return instance.get_1();
             else {
-                T value = valueSupplier.get();
+                final T value = valueSupplier.get();
                 instance.set_1(value);
                 instance.set_2(true);
                 return value;
@@ -46,11 +46,11 @@ public class SynchronizedLazyValue<T> implements LazyValue<T> {
     }
 
     @Override
-    public <U> SynchronizedLazyValue<U> handle(BiFunction<T, Throwable, U> bicon) {
+    public <U> SynchronizedLazyValue<U> handle(final BiFunction<T, Throwable, U> bicon) {
         return new SynchronizedLazyValue<>(() -> {
             try {
                 return bicon.apply(get(), null);
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 return bicon.apply(null, t);
             }
         });

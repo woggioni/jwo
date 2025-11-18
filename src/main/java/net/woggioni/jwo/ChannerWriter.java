@@ -15,14 +15,13 @@ public class ChannerWriter extends Writer {
 
     private final Charset charset;
 
-
     @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
+    public void write(final char[] cbuf, final int off, final int len) throws IOException {
         write(new String(cbuf, off, len));
     }
 
     @Override
-    public void write(String str) throws IOException {
+    public void write(final String str) throws IOException {
         ch.write(ByteBuffer.wrap(str.getBytes(charset)));
     }
 
@@ -34,3 +33,5 @@ public class ChannerWriter extends Writer {
         ch.close();
     }
 }
+
+

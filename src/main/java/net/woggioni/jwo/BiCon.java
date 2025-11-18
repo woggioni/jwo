@@ -8,9 +8,9 @@ import java.util.function.BiConsumer;
 public interface BiCon<T, U> extends BiConsumer<T, U> {
     @Override
     @SneakyThrows
-    default void accept(T t, U u) {
+    default void accept(final T t, final U u) {
         exec(t, u);
     }
 
-    void exec(T t, U u) throws Throwable;
+    void exec(final T t, final U u) throws Throwable;
 }

@@ -45,8 +45,8 @@ public class HttpClient {
     }
 
     @SneakyThrows
-    public HttpURLConnection call(HttpRequest httpRequest) {
-        HttpURLConnection conn = (HttpURLConnection) httpRequest.url.openConnection();
+    public HttpURLConnection call(final HttpRequest httpRequest) {
+        final HttpURLConnection conn = (HttpURLConnection) httpRequest.url.openConnection();
 
         if (socketFactory != null && conn instanceof HttpsURLConnection) {
             ((HttpsURLConnection) conn).setSSLSocketFactory(socketFactory);
@@ -60,7 +60,7 @@ public class HttpClient {
                 entry.getValue()
                     .forEach(headerValue ->
                         conn.addRequestProperty(entry.getKey(), headerValue)));
-        List<HttpCookie> cookies = cookieStore.get(httpRequest.getUrl().toURI());
+        final List<HttpCookie> cookies = cookieStore.get(httpRequest.getUrl().toURI());
         if (!cookies.isEmpty()) {
             conn.setRequestProperty("Cookie",
                 cookies.stream()
@@ -74,10 +74,10 @@ public class HttpClient {
             case DELETE:
                 if (httpRequest.body != null) {
                     conn.setDoOutput(true);
-                    byte[] buffer = new byte[1024];
-                    OutputStream os = conn.getOutputStream();
+                    final byte[] buffer = new byte[1024];
+                    final OutputStream os = conn.getOutputStream();
                     while (true) {
-                        int read = httpRequest.body.read(buffer, 0, buffer.length);
+                        final int read = httpRequest.body.read(buffer, 0, buffer.length);
                         if (read < 0) break;
                         os.write(buffer, 0, read);
                     }
@@ -89,10 +89,10 @@ public class HttpClient {
                 break;
         }
         conn.getResponseCode();
-        Map<String, List<String>> headerFields = conn.getHeaderFields();
-        List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
+        final Map<String, List<String>> headerFields = conn.getHeaderFields();
+        final List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
         if (cookiesHeader != null) {
-            for (String cookie : cookiesHeader) {
+            for (final String cookie : cookiesHeader) {
                 cookieStore.add(httpRequest.url.toURI(), HttpCookie.parse(cookie).get(0));
             }
         }
@@ -109,7 +109,7 @@ public class HttpClient {
 
         public final String text;
 
-        HttpMethod(String text) {
+        HttpMethod(final String text) {
             this.text = text;
         }
     }
@@ -130,11 +130,11 @@ public class HttpClient {
 
         public final int code;
 
-        HttpStatus(int code) {
+        HttpStatus(final int code) {
             this.code = code;
         }
 
-        public static HttpStatus of(int code) {
+        public static HttpStatus of(final int code) {
             return Arrays.stream(values())
                 .filter(it -> it.code == code)
                 .findFirst()
@@ -161,7 +161,7 @@ public class HttpClient {
         @Builder.Default
         private final InputStream body = null;
 
-        public static HttpRequestBuilder builder(URL url) {
+        public static HttpRequestBuilder builder(final URL url) {
             return HttpRequest.privateBuilder().url(url);
         }
     }

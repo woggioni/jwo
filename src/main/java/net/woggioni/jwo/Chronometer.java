@@ -18,7 +18,7 @@ public class Chronometer {
 
         public final long nanoseconds;
 
-        UnitOfMeasure(long nanoseconds) {
+        UnitOfMeasure(final long nanoseconds) {
             this.nanoseconds = nanoseconds;
         }
     }
@@ -38,7 +38,7 @@ public class Chronometer {
         return System.nanoTime() - start;
     }
 
-    public double elapsed(UnitOfMeasure unitOfMeasure) {
+    public double elapsed(final UnitOfMeasure unitOfMeasure) {
         return ((double) (System.nanoTime() - start)) / unitOfMeasure.nanoseconds;
     }
 }

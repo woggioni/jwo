@@ -63,7 +63,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         int STRING_ITEM = 1;
         int LIST_ITEM = 2;
 
-        int compareTo(Item item);
+        int compareTo(final Item item);
 
         int getType();
 
@@ -82,7 +82,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
             this.value = 0;
         }
 
-        IntItem(String str) {
+        IntItem(final String str) {
             this.value = Integer.parseInt(str);
         }
 
@@ -97,14 +97,14 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
 
         @Override
-        public int compareTo(Item item) {
+        public int compareTo(final Item item) {
             if (item == null) {
                 return (value == 0) ? 0 : 1; // 1.0 == 1, 1.1 > 1
             }
 
             switch (item.getType()) {
                 case INT_ITEM:
-                    int itemValue = ((IntItem) item).value;
+                    final int itemValue = ((IntItem) item).value;
                     return Integer.compare(value, itemValue);
                 case LONG_ITEM:
                 case BIGINTEGER_ITEM:
@@ -122,7 +122,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
@@ -130,7 +130,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
                 return false;
             }
 
-            IntItem intItem = (IntItem) o;
+            final IntItem intItem = (IntItem) o;
 
             return value == intItem.value;
         }
@@ -152,7 +152,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
     private static class LongItem implements Item {
         private final long value;
 
-        LongItem(String str) {
+        LongItem(final String str) {
             this.value = Long.parseLong(str);
         }
 
@@ -167,7 +167,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
 
         @Override
-        public int compareTo(Item item) {
+        public int compareTo(final Item item) {
             if (item == null) {
                 return (value == 0) ? 0 : 1; // 1.0 == 1, 1.1 > 1
             }
@@ -176,7 +176,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
                 case INT_ITEM:
                     return 1;
                 case LONG_ITEM:
-                    long itemValue = ((LongItem) item).value;
+                    final long itemValue = ((LongItem) item).value;
                     return Long.compare(value, itemValue);
                 case BIGINTEGER_ITEM:
                     return -1;
@@ -193,7 +193,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
@@ -201,7 +201,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
                 return false;
             }
 
-            LongItem longItem = (LongItem) o;
+            final LongItem longItem = (LongItem) o;
 
             return value == longItem.value;
         }
@@ -223,7 +223,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
     private static class BigIntegerItem implements Item {
         private final BigInteger value;
 
-        BigIntegerItem(String str) {
+        BigIntegerItem(final String str) {
             this.value = new BigInteger(str);
         }
 
@@ -238,7 +238,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
 
         @Override
-        public int compareTo(Item item) {
+        public int compareTo(final Item item) {
             if (item == null) {
                 return BigInteger.ZERO.equals(value) ? 0 : 1; // 1.0 == 1, 1.1 > 1
             }
@@ -263,7 +263,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
@@ -271,7 +271,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
                 return false;
             }
 
-            BigIntegerItem that = (BigIntegerItem) o;
+            final BigIntegerItem that = (BigIntegerItem) o;
 
             return value.equals(that.value);
         }
@@ -310,7 +310,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
 
         private final String value;
 
-        StringItem(String value, boolean followedByDigit) {
+        StringItem(String value, final boolean followedByDigit) {
             if (followedByDigit && value.length() == 1) {
                 // a1 = alpha-1, b1 = beta-1, m1 = milestone-1
                 switch (value.charAt(0)) {
@@ -352,14 +352,14 @@ public class MavenVersion implements Comparable<MavenVersion> {
          * @param qualifier
          * @return an equivalent value that can be used with lexical comparison
          */
-        public static String comparableQualifier(String qualifier) {
-            int i = QUALIFIERS.indexOf(qualifier);
+        public static String comparableQualifier(final String qualifier) {
+            final int i = QUALIFIERS.indexOf(qualifier);
 
             return i == -1 ? (QUALIFIERS.size() + "-" + qualifier) : String.valueOf(i);
         }
 
         @Override
-        public int compareTo(Item item) {
+        public int compareTo(final Item item) {
             if (item == null) {
                 // 1-rc < 1, 1-ga > 1
                 return comparableQualifier(value).compareTo(RELEASE_VERSION_INDEX);
@@ -382,7 +382,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
@@ -390,7 +390,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
                 return false;
             }
 
-            StringItem that = (StringItem) o;
+            final StringItem that = (StringItem) o;
 
             return value.equals(that.value);
         }
@@ -422,7 +422,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
 
         void normalize() {
             for (int i = size() - 1; i >= 0; i--) {
-                Item lastItem = get(i);
+                final Item lastItem = get(i);
 
                 if (lastItem.isNull()) {
                     // remove null trailing items: 0, "", empty list
@@ -434,14 +434,14 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
 
         @Override
-        public int compareTo(Item item) {
+        public int compareTo(final Item item) {
             if (item == null) {
                 if (size() == 0) {
                     return 0; // 1-0 = 1- (normalize) = 1
                 }
                 // Compare the entire list of items with null - not just the first one, MNG-6964
-                for (Item i : this) {
-                    int result = i.compareTo(null);
+                for (final Item i : this) {
+                    final int result = i.compareTo(null);
                     if (result != 0) {
                         return result;
                     }
@@ -458,15 +458,15 @@ public class MavenVersion implements Comparable<MavenVersion> {
                     return 1; // 1-1 > 1-sp
 
                 case LIST_ITEM:
-                    Iterator<Item> left = iterator();
-                    Iterator<Item> right = ((ListItem) item).iterator();
+                    final Iterator<Item> left = iterator();
+                    final Iterator<Item> right = ((ListItem) item).iterator();
 
                     while (left.hasNext() || right.hasNext()) {
-                        Item l = left.hasNext() ? left.next() : null;
-                        Item r = right.hasNext() ? right.next() : null;
+                        final Item l = left.hasNext() ? left.next() : null;
+                        final Item r = right.hasNext() ? right.next() : null;
 
                         // if this is shorter, then invert the compare and mul with -1
-                        int result = l == null ? (r == null ? 0 : -1 * r.compareTo(l)) : l.compareTo(r);
+                        final int result = l == null ? (r == null ? 0 : -1 * r.compareTo(l)) : l.compareTo(r);
 
                         if (result != 0) {
                             return result;
@@ -482,8 +482,8 @@ public class MavenVersion implements Comparable<MavenVersion> {
 
         @Override
         public String toString() {
-            StringBuilder buffer = new StringBuilder();
-            for (Item item : this) {
+            final StringBuilder buffer = new StringBuilder();
+            for (final Item item : this) {
                 if (buffer.length() > 0) {
                     buffer.append((item instanceof ListItem) ? '-' : '.');
                 }
@@ -496,9 +496,9 @@ public class MavenVersion implements Comparable<MavenVersion> {
          * Return the contents in the same format that is used when you call toString() on a List.
          */
         private String toListString() {
-            StringBuilder buffer = new StringBuilder();
+            final StringBuilder buffer = new StringBuilder();
             buffer.append("[");
-            for (Item item : this) {
+            for (final Item item : this) {
                 if (buffer.length() > 1) {
                     buffer.append(", ");
                 }
@@ -513,7 +513,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
     }
 
-    public MavenVersion(String version) {
+    public MavenVersion(final String version) {
         parseVersion(version);
     }
 
@@ -527,7 +527,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
 
         ListItem list = items;
 
-        Deque<Item> stack = new ArrayDeque<>();
+        final Deque<Item> stack = new ArrayDeque<>();
         stack.push(list);
 
         boolean isDigit = false;
@@ -535,7 +535,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         int startIndex = 0;
 
         for (int i = 0; i < version.length(); i++) {
-            char c = version.charAt(i);
+            final char c = version.charAt(i);
 
             if (c == '.') {
                 if (i == startIndex) {
@@ -601,7 +601,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
         }
     }
 
-    private static Item parseItem(boolean isDigit, String buf) {
+    private static Item parseItem(final boolean isDigit, String buf) {
         if (isDigit) {
             buf = stripLeadingZeroes(buf);
             if (buf.length() <= MAX_INTITEM_LENGTH) {
@@ -616,12 +616,12 @@ public class MavenVersion implements Comparable<MavenVersion> {
         return new StringItem(buf, false);
     }
 
-    private static String stripLeadingZeroes(String buf) {
+    private static String stripLeadingZeroes(final String buf) {
         if (buf == null || buf.isEmpty()) {
             return "0";
         }
         for (int i = 0; i < buf.length(); ++i) {
-            char c = buf.charAt(i);
+            final char c = buf.charAt(i);
             if (c != '0') {
                 return buf.substring(i);
             }
@@ -630,7 +630,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
     }
 
     @Override
-    public int compareTo(MavenVersion o) {
+    public int compareTo(final MavenVersion o) {
         return items.compareTo(o.items);
     }
 
@@ -647,7 +647,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         return (o instanceof MavenVersion) && items.equals(((MavenVersion) o).items);
     }
 
@@ -674,7 +674,7 @@ public class MavenVersion implements Comparable<MavenVersion> {
      * two adjacent will be compared
      */
     // CHECKSTYLE_ON: LineLength
-    public static void main(String... args) {
+    public static void main(final String... args) {
         System.out.println("Display parameters as parsed by Maven (in canonical form and as a list of tokens) and"
             + " comparison result:");
         if (args.length == 0) {
@@ -683,11 +683,11 @@ public class MavenVersion implements Comparable<MavenVersion> {
 
         MavenVersion prev = null;
         int i = 1;
-        for (String version : args) {
-            MavenVersion c = new MavenVersion(version);
+        for (final String version : args) {
+            final MavenVersion c = new MavenVersion(version);
 
             if (prev != null) {
-                int compare = prev.compareTo(c);
+                final int compare = prev.compareTo(c);
                 System.out.println("   " + prev.toString() + ' ' + ((compare == 0) ? "==" : ((compare < 0) ? "<" : ">"))
                     + ' ' + version);
             }

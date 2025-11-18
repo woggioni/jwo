@@ -8,9 +8,9 @@ import java.util.function.Consumer;
 public interface Con<T> extends Consumer<T> {
     @Override
     @SneakyThrows
-    default void accept(T t) {
+    default void accept(final T t) {
         exec(t);
     }
 
-    void exec(T t) throws Throwable;
+    void exec(final T t) throws Throwable;
 }

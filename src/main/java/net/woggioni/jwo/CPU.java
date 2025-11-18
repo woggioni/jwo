@@ -13,15 +13,15 @@ public enum CPU {
 
     private final String value;
 
-    CPU(String value) {
+    CPU(final String value) {
         this.value = value;
     }
 
     public static CPU current;
 
     static {
-        String archName = System.getProperty("os.arch").toLowerCase();
-        for(CPU cpu : values()) {
+        final String archName = System.getProperty("os.arch").toLowerCase();
+        for(final CPU cpu : values()) {
             if(archName.startsWith(cpu.value)) {
                 current = cpu;
             }

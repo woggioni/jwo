@@ -30,10 +30,10 @@ class RandomObject implements Serializable {
     String md5half2 = md5.substring(16);
 
     @SneakyThrows
-    private String md5(String source) {
-        MessageDigest md = MessageDigest.getInstance("MD5");
+    private String md5(final String source) {
+        final MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(source.getBytes());
-        byte[] digest = md.digest();
+        final byte[] digest = md.digest();
         return JWO.bytesToHex(digest);
     }
 }
@@ -94,7 +94,7 @@ public class LruCacheTest {
 
     @Test
     public void cacheWithFallback() {
-        Map<String, RandomObject> fallback = new HashMap<>();
+        final Map<String, RandomObject> fallback = new HashMap<>();
         lruCache = new LruCache<>(CACHE_MAX_SIZE, true, null, fallback);
         objects = new ArrayList<>();
         for (int i = 0; i < NUMBER_OF_ENTRIES; i++) {
@@ -110,7 +110,7 @@ public class LruCacheTest {
         Assertions.assertEquals(NUMBER_OF_ENTRIES, lruCache.size());
 
         //Removing the first inserted element should return it and decrease the cache size by 1
-        RandomObject randomObject = objects.get(0);
+        final RandomObject randomObject = objects.get(0);
         Assertions.assertEquals(randomObject, lruCache.remove(randomObject.name));
         Assertions.assertFalse(lruCache.containsKey(randomObject.name));
         Assertions.assertEquals(NUMBER_OF_ENTRIES - 1, lruCache.size());
@@ -122,12 +122,12 @@ public class LruCacheTest {
 
     @Test
     public void cacheWithLoader() {
-        Function<String, RandomObject> loader = key -> {
+        final Function<String, RandomObject> loader = key -> {
             loaderInvocations++;
             return objects.stream().filter(o -> Objects.equals(key, o.name)).findFirst().get();
         };
         lruCache = new LruCache<>(CACHE_MAX_SIZE, true, loader);
-        LruCache<String, RandomObject>.Stats stats = lruCache.getStats();
+        final LruCache<String, RandomObject>.Stats stats = lruCache.getStats();
         objects = new ArrayList<>();
         for (int i = 0; i < NUMBER_OF_ENTRIES; i++) {
             RandomObject randomObject = new RandomObject();
@@ -150,7 +150,7 @@ public class LruCacheTest {
         Assertions.assertEquals(loaderInvocations, this.loaderInvocations);
 
         // The cache should not contain any of the first NUMBER_OF_ENTRIES - CACHE_MAX_SIZE elements
-        int evictedElements = NUMBER_OF_ENTRIES - CACHE_MAX_SIZE;
+        final int evictedElements = NUMBER_OF_ENTRIES - CACHE_MAX_SIZE;
         objects.stream().limit(evictedElements)
             .forEach(value -> Assertions.assertFalse(lruCache.containsKey(value.name)));
 

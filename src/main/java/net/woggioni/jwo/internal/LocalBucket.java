@@ -16,15 +16,15 @@ public class LocalBucket implements Bucket {
     private final AtomicLong availableTokens;
     private final AtomicLong lastFill;
 
-    public LocalBucket(long maxCapacity, long fillAmount, long fillPeriod) {
+    public LocalBucket(final long maxCapacity, final long fillAmount, final long fillPeriod) {
         this(maxCapacity, fillAmount, fillPeriod, maxCapacity);
     }
 
-    public LocalBucket(long maxCapacity, long fillAmount, long fillPeriod, long initialAmount) {
+    public LocalBucket(final long maxCapacity, final long fillAmount, final long fillPeriod, final long initialAmount) {
         this(maxCapacity, fillAmount, fillPeriod, initialAmount, System.nanoTime());
     }
 
-    public LocalBucket(long maxCapacity, long fillAmount, long fillPeriod, long initialAmount, long currentTimestamp) {
+    public LocalBucket(final long maxCapacity, final long fillAmount, final long fillPeriod, final long initialAmount, final long currentTimestamp) {
         if (maxCapacity <= 0 || fillAmount <= 0 || fillPeriod <= 0) {
             throw new IllegalArgumentException("maxCapacity, fillAmount and fillPeriod must all be positive");
         }
@@ -35,7 +35,7 @@ public class LocalBucket implements Bucket {
         this.lastFill = new AtomicLong(currentTimestamp);
     }
 
-    private long getTokenPrivate(long nTokens, long now, long previousFillTime, long currentFillTime) {
+    private long getTokenPrivate(final long nTokens, final long now, final long previousFillTime, final long currentFillTime) {
         final LongBinaryOperator tickCalculator = (lf, currentTimestamp) -> (currentTimestamp - lf) / fillPeriod;
         if (currentFillTime != previousFillTime) {
             final long ticks = tickCalculator.applyAsLong(previousFillTime, now);
@@ -65,34 +65,34 @@ public class LocalBucket implements Bucket {
 
 
     @Override
-    public boolean removeTokens(long nTokens) {
+    public boolean removeTokens(final long nTokens) {
         return removeTokens(nTokens, System.nanoTime());
     }
 
     @Override
-    public boolean removeTokens(long nTokens, long now) {
+    public boolean removeTokens(final long nTokens, final long now) {
         if(nTokens > maxCapacity) throw new IllegalArgumentException("The requested number of tokens exceeds the bucket max capacity");
         final LongBinaryOperator tickCalculator = (lf, currentTimestamp) -> (currentTimestamp - lf) / fillPeriod;
         final LongBinaryOperator timestampCalculator = (lf, currentTimestamp) -> lf + tickCalculator.applyAsLong(lf, currentTimestamp) * fillPeriod;
         final long previousFillTime = lastFill.getAndAccumulate(now, timestampCalculator);
         final long currentFillTime = timestampCalculator.applyAsLong(previousFillTime, now);
-        long result = getTokenPrivate(nTokens, now, previousFillTime, currentFillTime);
+        final long result = getTokenPrivate(nTokens, now, previousFillTime, currentFillTime);
         return result >= nTokens;
     }
 
     @Override
-    public long removeTokensWithEstimate(long nTokens) {
+    public long removeTokensWithEstimate(final long nTokens) {
         return removeTokensWithEstimate(nTokens, System.nanoTime());
     }
 
     @Override
-    public long removeTokensWithEstimate(long nTokens, long now) {
+    public long removeTokensWithEstimate(final long nTokens, final long now) {
         if(nTokens > maxCapacity) throw new IllegalArgumentException("The requested number of tokens exceeds the bucket max capacity");
         final LongBinaryOperator tickCalculator = (lf, currentTimestamp) -> (currentTimestamp - lf) / fillPeriod;
         final LongBinaryOperator timestampCalculator = (lf, currentTimestamp) -> lf + tickCalculator.applyAsLong(lf, currentTimestamp) * fillPeriod;
         final long previousFillTime = lastFill.getAndAccumulate(now, timestampCalculator);
         final long currentFillTime = timestampCalculator.applyAsLong(previousFillTime, now);
-        long previousTokenAmount = getTokenPrivate(nTokens, now, previousFillTime, currentFillTime);
+        final long previousTokenAmount = getTokenPrivate(nTokens, now, previousFillTime, currentFillTime);
         if(previousTokenAmount >= nTokens) {
             return -1;
         } else {

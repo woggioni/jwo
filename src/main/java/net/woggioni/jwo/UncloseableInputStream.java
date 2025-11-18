@@ -10,7 +10,7 @@ import java.io.InputStream;
  */
 public class UncloseableInputStream extends FilterInputStream {
 
-    public UncloseableInputStream(InputStream source) {
+    public UncloseableInputStream(final InputStream source) {
         super(source);
     }
 

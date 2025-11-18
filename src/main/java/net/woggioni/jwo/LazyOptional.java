@@ -15,14 +15,14 @@ public class LazyOptional<T> {
     private final Supplier<T> producer;
     private final MutableTuple2<T, Boolean> instance = MutableTuple2.newInstance(null, false);
 
-    public static <U> LazyOptional<U> of(Supplier<U> producer) {
+    public static <U> LazyOptional<U> of(final Supplier<U> producer) {
         return new LazyOptional<>(producer);
     }
 
-    public static <U> LazyOptional<U> or(LazyOptional<U>... opts) {
+    public static <U> LazyOptional<U> or(final LazyOptional<U>... opts) {
         return LazyOptional.of(() -> {
-                for (LazyOptional<U> opt : opts) {
-                    U value = opt.get();
+                for (final LazyOptional<U> opt : opts) {
+                    final U value = opt.get();
                     if (value != null) return value;
                 }
                 return null;
@@ -34,17 +34,17 @@ public class LazyOptional<T> {
         return (LazyOptional<U>) empty;
     }
 
-    public <U> LazyOptional<U> map(Function<T, U> mapping) {
+    public <U> LazyOptional<U> map(final Function<T, U> mapping) {
         return LazyOptional.of(() -> {
-            T prevValue = producer.get();
+            final T prevValue = producer.get();
             if (prevValue == null) return null;
             else return mapping.apply(prevValue);
         });
     }
 
-    public LazyOptional<T> filter(Predicate<T> predicate) {
+    public LazyOptional<T> filter(final Predicate<T> predicate) {
         return LazyOptional.of(() -> {
-            T prevValue = producer.get();
+            final T prevValue = producer.get();
             if (predicate.test(prevValue)) return prevValue;
             else return null;
         });
@@ -55,7 +55,7 @@ public class LazyOptional<T> {
         synchronized (instance) {
             if (instance.get_2()) return instance.get_1();
             else {
-                T value = producer.get();
+                final T value = producer.get();
                 instance.set_1(value);
                 instance.set_2(true);
                 return value;
@@ -63,9 +63,9 @@ public class LazyOptional<T> {
         }
     }
 
-    public <U> LazyOptional<U> flatMap(Function<T, LazyOptional<U>> mapping) {
+    public <U> LazyOptional<U> flatMap(final Function<T, LazyOptional<U>> mapping) {
         return new LazyOptional<>(() -> {
-            T prevValue = producer.get();
+            final T prevValue = producer.get();
             if (prevValue == null) return null;
             else return mapping.apply(prevValue).get();
         });

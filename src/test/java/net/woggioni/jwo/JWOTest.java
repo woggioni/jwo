@@ -67,8 +67,8 @@ public class JWOTest {
 
     @Test
     public void flatMapTest() {
-        Stream<Integer> s = Stream.of(3, 4);
-        List<Integer> l = JWO.flatMap(s, (n) -> {
+        final Stream<Integer> s = Stream.of(3, 4);
+        final List<Integer> l = JWO.flatMap(s, (n) -> {
             if (n > 3) return Optional.of(n);
             else return Optional.empty();
         }).collect(Collectors.toList());
@@ -77,7 +77,7 @@ public class JWOTest {
 
     @Test
     public void optional2StreamTest() {
-        Integer integer = 3;
+        final Integer integer = 3;
         Optional<Integer> s = Optional.of(integer);
         JWO.optional2Stream(s).forEach(n -> assertEquals(integer, n));
         s = Optional.empty();
@@ -88,10 +88,10 @@ public class JWOTest {
 
     @Test
     public void optional2StreamTest2() {
-        Integer integer = 3;
-        Optional<Integer> o1 = Optional.of(integer);
-        Integer integer2 = 3;
-        Optional<Integer> o2 = Optional.of(integer2);
+        final Integer integer = 3;
+        final Optional<Integer> o1 = Optional.of(integer);
+        final Integer integer2 = 3;
+        final Optional<Integer> o2 = Optional.of(integer2);
         final var values = JWO.optional2Stream(o1, Optional.empty(), o2)
             .collect(Collectors.toList());
         assertEquals(Arrays.asList(integer, integer2), values);
@@ -99,9 +99,9 @@ public class JWOTest {
 
     @Test
     public void optionalOrTest() {
-        Integer integer = 3;
-        Optional<Integer> o1 = Optional.of(integer);
-        Optional<Integer> o2 = Optional.of(integer);
+        final Integer integer = 3;
+        final Optional<Integer> o1 = Optional.of(integer);
+        final Optional<Integer> o2 = Optional.of(integer);
         assertEquals(o2, JWO.or(Optional.empty(), o2));
         assertEquals(o1, JWO.or(o1, Optional.empty()));
         assertEquals(Optional.empty(), JWO.or(Optional.empty(), Optional.empty()));
@@ -133,9 +133,9 @@ public class JWOTest {
 
     @ParameterizedTest
     @EnumSource(IndexOfWithEscapeTestCase.class)
-    public void testIndexOfWithEscape(IndexOfWithEscapeTestCase testCase) {
-        String haystack = testCase.haystack;
-        List<Integer> solution = newArrayList();
+    public void testIndexOfWithEscape(final IndexOfWithEscapeTestCase testCase) {
+        final String haystack = testCase.haystack;
+        final List<Integer> solution = newArrayList();
         int i = 0;
         while (true) {
             i = JWO.indexOfWithEscape(haystack, testCase.needle, testCase.escape, i, haystack.length());
@@ -149,18 +149,18 @@ public class JWOTest {
     @Test
     @SneakyThrows
     public void testRenderTemplate() {
-        Map<String, Object> valuesMap = new HashMap<>();
+        final Map<String, Object> valuesMap = new HashMap<>();
         valuesMap.put("author", "John Doe");
         valuesMap.put("date", "2020-03-25 16:22");
         valuesMap.put("adjective", "simple");
-        String expected = """
+        final String expected = """
             This is a simple test made by John Doe on 2020-03-25 16:22. It's really simple!
             /home/user
             /home/user
             defaultValue
             ;=%x$!~L+LJr?50l.^{veaS'zLHo=!}wT
             """;
-        Map<String, Map<String, Object>> contextMap = new MapBuilder<String, Map<String, Object>>()
+        final Map<String, Map<String, Object>> contextMap = new MapBuilder<String, Map<String, Object>>()
             .entry("env",
                 new MapBuilder<String, String>()
                     .entry("HOME", "/home/user")
@@ -171,39 +171,39 @@ public class JWOTest {
                     .entry("user.home", "/home/user")
                     .build(TreeMap::new, Collections::unmodifiableMap)
             ).build(TreeMap::new, Collections::unmodifiableMap);
-        try (Reader reader = new InputStreamReader(
+        try (final Reader reader = new InputStreamReader(
             JWOTest.class.getResourceAsStream("/render_template_test.txt"))) {
-            String rendered = JWO.renderTemplate(reader, valuesMap, contextMap);
+            final String rendered = JWO.renderTemplate(reader, valuesMap, contextMap);
             assertEquals(expected, rendered);
         }
-        try (Reader reader = new InputStreamReader(
+        try (final Reader reader = new InputStreamReader(
             JWOTest.class.getResourceAsStream("/render_template_test.txt"))) {
-            String rendered = JWO.renderTemplate(JWO.readAll(reader), valuesMap, contextMap);
+            final String rendered = JWO.renderTemplate(JWO.readAll(reader), valuesMap, contextMap);
             assertEquals(expected, rendered);
         }
     }
 
 
-    public static String renderTemplateNaive(String template, Map<String, Object> valuesMap) {
-        StringBuilder formatter = new StringBuilder(template);
-        Object absent = new Object();
+    public static String renderTemplateNaive(final String template, final Map<String, Object> valuesMap) {
+        final StringBuilder formatter = new StringBuilder(template);
+        final Object absent = new Object();
 
-        Matcher matcher = Pattern.compile("\\$\\{(\\w+)}").matcher(template);
+        final Matcher matcher = Pattern.compile("\\$\\{(\\w+)}").matcher(template);
 
         while (matcher.find()) {
-            String key = matcher.group(1);
+            final String key = matcher.group(1);
 
-            String formatKey = String.format("${%s}", key);
-            int index = formatter.indexOf(formatKey);
+            final String formatKey = String.format("${%s}", key);
+            final int index = formatter.indexOf(formatKey);
 
             // If the key is present:
             //  - If the value is not null, then replace the variable for the value
             //  - If the value is null, replace the variable for empty string
             // If the key is not present, leave the variable untouched.
             if (index != -1) {
-                Object value = valuesMap.getOrDefault(key, absent);
+                final Object value = valuesMap.getOrDefault(key, absent);
                 if (value != absent) {
-                    String valueStr = value != null ? value.toString() : "";
+                    final String valueStr = value != null ? value.toString() : "";
                     formatter.replace(index, index + formatKey.length(), valueStr);
                 }
             }
@@ -214,14 +214,14 @@ public class JWOTest {
     @Test
     @SneakyThrows
     @EnabledOnOs(OS.LINUX)
-    public void uidTest(@TempDir Path testDir) {
-        PosixFileAttributes pfa = Files.readAttributes(testDir, PosixFileAttributes.class);
-        UserPrincipal expectedUser = pfa.owner();
-        Class<? extends UserPrincipal> userClass = expectedUser.getClass();
-        Method m = userClass.getDeclaredMethod("uid");
+    public void uidTest(final @TempDir Path testDir) {
+        final PosixFileAttributes pfa = Files.readAttributes(testDir, PosixFileAttributes.class);
+        final UserPrincipal expectedUser = pfa.owner();
+        final Class<? extends UserPrincipal> userClass = expectedUser.getClass();
+        final Method m = userClass.getDeclaredMethod("uid");
         m.setAccessible(true);
-        int expectedUserId = (Integer) m.invoke(expectedUser);
-        int uid = (int) JWO.uid();
+        final int expectedUserId = (Integer) m.invoke(expectedUser);
+        final int uid = (int) JWO.uid();
         assertEquals(expectedUserId, uid);
     }
 
@@ -230,9 +230,9 @@ public class JWOTest {
 
         private interface CommonInterface {
             void replaceFileIfDifferent(
-                Supplier<InputStream> inputStreamSupplier,
-                Path destination,
-                FileAttribute<?>... attrs
+                    final Supplier<InputStream> inputStreamSupplier,
+                    final Path destination,
+                    final FileAttribute<?>... attrs
             );
         }
 
@@ -249,9 +249,9 @@ public class JWOTest {
             private final CommonInterface xface;
 
             public void replaceFileIfDifferent(
-                Supplier<InputStream> inputStreamSupplier,
-                Path destination,
-                FileAttribute<?>... attrs
+                    final Supplier<InputStream> inputStreamSupplier,
+                    final Path destination,
+                    final FileAttribute<?>... attrs
             ) {
                 xface.replaceFileIfDifferent(inputStreamSupplier, destination, attrs);
             }
@@ -267,10 +267,10 @@ public class JWOTest {
         @SneakyThrows
         @ParameterizedTest
         @EnumSource(MethodToTest.class)
-        public void ensureFileCopy(MethodToTest methodToTest) {
+        public void ensureFileCopy(final MethodToTest methodToTest) {
             final var dest = testDir.resolve("cracklib-small");
             methodToTest.replaceFileIfDifferent(source, dest);
-            Hash newFileHash, newContentHash;
+            final Hash newFileHash, newContentHash;
             try (final var inputStream = source.get()) {
                 newContentHash = Hash.md5(inputStream);
             }
@@ -283,7 +283,7 @@ public class JWOTest {
         @SneakyThrows
         @ParameterizedTest
         @EnumSource(MethodToTest.class)
-        public void ensureNoWriteWithNoChange(MethodToTest methodToTest) {
+        public void ensureNoWriteWithNoChange(final MethodToTest methodToTest) {
             final var dest = testDir.resolve("cracklib-small");
             try (final var inputStream = source.get()) {
                 Files.copy(inputStream, dest);
@@ -297,7 +297,7 @@ public class JWOTest {
         @SneakyThrows
         @ParameterizedTest
         @EnumSource(MethodToTest.class)
-        public void ensureWriteWithContentChange(MethodToTest methodToTest) {
+        public void ensureWriteWithContentChange(final MethodToTest methodToTest) {
             final var dest = testDir.resolve("cracklib-small");
             try (final var inputStream = source.get()) {
                 Files.copy(inputStream, dest);
@@ -338,7 +338,7 @@ public class JWOTest {
 
         @ParameterizedTest
         @MethodSource("testCases")
-        public void capitalizeTest(TestCase<String, String> testCase) {
+        public void capitalizeTest(final TestCase<String, String> testCase) {
             if (testCase.error() == null) {
                 assertEquals(testCase.expectedOutput(), JWO.capitalize(testCase.input()));
             } else {
@@ -370,7 +370,7 @@ public class JWOTest {
 
         @ParameterizedTest
         @MethodSource("testCases")
-        public void decapitalizeTest(TestCase<String, String> testCase) {
+        public void decapitalizeTest(final TestCase<String, String> testCase) {
             if (testCase.error() == null) {
                 assertEquals(testCase.expectedOutput(), JWO.decapitalize(testCase.input()));
             } else {
@@ -418,10 +418,10 @@ public class JWOTest {
 
         @MethodSource
         @ParameterizedTest
-        public void test(TestCase<Integer[], Void> testCase) {
+        public void test(final TestCase<Integer[], Void> testCase) {
             final var it = JWO.iterator(testCase.input());
 
-            for (Integer n : testCase.input()) {
+            for (final Integer n : testCase.input()) {
                 final var m = it.next();
                 assertEquals(n, m);
             }
@@ -432,7 +432,7 @@ public class JWOTest {
     @Test
     @SneakyThrows
     public void copyTest() {
-        MessageDigest md1 = Hash.Algorithm.MD5.newMessageDigest();
+        final MessageDigest md1 = Hash.Algorithm.MD5.newMessageDigest();
         final Supplier<Reader> source = JWO.compose(
             JWO.compose(
                 () -> getClass().getResourceAsStream(CRACKLIB_RESOURCE),
@@ -440,7 +440,7 @@ public class JWOTest {
             ),
             (InputStream is) -> new InputStreamReader(is)
         );
-        MessageDigest md2 = Hash.Algorithm.MD5.newMessageDigest();
+        final MessageDigest md2 = Hash.Algorithm.MD5.newMessageDigest();
         final Supplier<Writer> destination = JWO.compose(
             JWO.compose(
                 NullOutputStream::new,
@@ -450,7 +450,7 @@ public class JWOTest {
         );
 
         try (final var reader = source.get()) {
-            try (Writer writer = destination.get()) {
+            try (final Writer writer = destination.get()) {
                 JWO.copy(reader, writer);
             }
         }
@@ -497,12 +497,12 @@ public class JWOTest {
         JWO.extractZip(reassembledBundle, destination3);
         final var visitor = new FileVisitor<Path>() {
             @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+            public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) {
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+            public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
                 final var relativePath = destination1.relativize(file);
                 final var hashes = Stream.of(
                     destination1.resolve(relativePath),
@@ -520,12 +520,12 @@ public class JWOTest {
             }
 
             @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) {
+            public FileVisitResult visitFileFailed(final Path file, final IOException exc) {
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+            public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) {
                 return FileVisitResult.CONTINUE;
             }
         };
@@ -560,11 +560,11 @@ public class JWOTest {
                 super();
             }
 
-            public SomeWeirdException(String msg) {
+            public SomeWeirdException(final String msg) {
                 super(msg);
             }
 
-            public SomeWeirdException(String msg, Throwable cause) {
+            public SomeWeirdException(final String msg, final Throwable cause) {
                 super(msg, cause);
             }
         }
@@ -634,7 +634,7 @@ public class JWOTest {
                     "some message with placeholder %d",
                     25
                 );
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 assertTrue(t.getCause() == cause);
                 throw t;
             }
@@ -653,7 +653,7 @@ public class JWOTest {
 
     @Test
     @SneakyThrows
-    public void readFile(@TempDir Path testDir) {
+    public void readFile(final @TempDir Path testDir) {
         final var destination = testDir.resolve("cracklib-small");
         final var dis = Hash.Algorithm.MD5.newInputStream(getClass().getResourceAsStream(CRACKLIB_RESOURCE));
         final var md = dis.getMessageDigest();

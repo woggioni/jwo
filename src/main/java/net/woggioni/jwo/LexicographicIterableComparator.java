@@ -13,7 +13,7 @@ public class LexicographicIterableComparator<T> implements Comparator<Iterable<T
     }
 
     @Override
-    public int compare(Iterable<T> iterable1, Iterable<T> iterable2) {
+    public int compare(final Iterable<T> iterable1, final Iterable<T> iterable2) {
         final Iterator<T> it1 = iterable1.iterator(), it2 = iterable2.iterator();
         while (it1.hasNext() && it2.hasNext()) {
             final int cmp = elementComparator.compare(it1.next(),it2.next());
@@ -24,7 +24,7 @@ public class LexicographicIterableComparator<T> implements Comparator<Iterable<T
         return 0;
     }
 
-    public static <S extends Comparable<S>> LexicographicIterableComparator<S> forClass(Class<S> cls) {
+    public static <S extends Comparable<S>> LexicographicIterableComparator<S> forClass(final Class<S> cls) {
         return new LexicographicIterableComparator<S>(Comparator.naturalOrder());
     }
 }

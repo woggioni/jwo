@@ -11,20 +11,20 @@ public class CompressionOutputStream extends OutputStream {
     private final Thread writer;
     private final OutputStream processInput;
 
-    public CompressionOutputStream(OutputStream os, CompressionFormat compressionFormat) {
+    public CompressionOutputStream(final OutputStream os, final CompressionFormat compressionFormat) {
         this(os, compressionFormat, StreamMode.COMPRESSION);
     }
 
-    public CompressionOutputStream(OutputStream os, CompressionFormat compressionFormat, Integer level) {
+    public CompressionOutputStream(final OutputStream os, final CompressionFormat compressionFormat, final Integer level) {
         this(os, compressionFormat, StreamMode.COMPRESSION, level);
     }
 
-    public CompressionOutputStream(OutputStream os, CompressionFormat compressionFormat, StreamMode mode) {
+    public CompressionOutputStream(final OutputStream os, final CompressionFormat compressionFormat, final StreamMode mode) {
         this(os, compressionFormat, mode, null);
     }
 
     @SneakyThrows
-    public CompressionOutputStream(OutputStream os, CompressionFormat compressionFormat, StreamMode mode, Integer level) {
+    public CompressionOutputStream(final OutputStream os, final CompressionFormat compressionFormat, final StreamMode mode, final Integer level) {
         outputStream = os;
         String[] cliArgs;
         switch(mode) {
@@ -41,23 +41,23 @@ public class CompressionOutputStream extends OutputStream {
             default:
                 throw new NullPointerException();
         }
-        ProcessBuilder pb = new ProcessBuilder(cliArgs);
+        final ProcessBuilder pb = new ProcessBuilder(cliArgs);
         process = pb.start();
         processInput = process.getOutputStream();
-        StreamWriter streamWriter = new StreamWriter(process.getInputStream(), outputStream);
+        final StreamWriter streamWriter = new StreamWriter(process.getInputStream(), outputStream);
         writer = new Thread(streamWriter);
         writer.start();
     }
 
     @Override
     @SneakyThrows
-    public void write(byte[] buffer, int offset, int size) {
+    public void write(final byte[] buffer, final int offset, final int size) {
         processInput.write(buffer, offset, size);
     }
 
     @Override
     @SneakyThrows
-    public void write(int i) {
+    public void write(final int i) {
         processInput.write(i);
     }
 

@@ -31,7 +31,7 @@ public abstract class LockFile implements AutoCloseable {
         @Setter
         private FileLock fileLock;
 
-        public LockFileMapValue(Path path) {
+        public LockFileMapValue(final Path path) {
             threadLock = new ReentrantReadWriteLock();
             readerCount = new AtomicInteger(0);
             fileLock = null;
@@ -40,7 +40,7 @@ public abstract class LockFile implements AutoCloseable {
 
     private static Map<Path, LockFileMapValue> map = Collections.synchronizedMap(new HashMap<>());
 
-    private static FileChannel openFileChannel(Path path) throws IOException {
+    private static FileChannel openFileChannel(final Path path) throws IOException {
         Files.createDirectories(path.getParent());
         return FileChannel.open(path, EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE));
     }
@@ -72,9 +72,9 @@ public abstract class LockFile implements AutoCloseable {
             return new LockFile() {
                 @Override
                 public void close() throws IOException {
-                    int remainingReaders = lockFileMapValue.getReaderCount().decrementAndGet();
+                    final int remainingReaders = lockFileMapValue.getReaderCount().decrementAndGet();
                     if(remainingReaders == 0) {
-                        FileLock fileLock = lockFileMapValue.getFileLock();
+                        final FileLock fileLock = lockFileMapValue.getFileLock();
                         fileLock.release();
                         fileLock.channel().close();
                         lockFileMapValue.setFileLock(null);
@@ -116,11 +116,11 @@ public abstract class LockFile implements AutoCloseable {
         }
     }
 
-    public static LockFile tryAcquire(Path path, boolean shared) throws IOException {
+    public static LockFile tryAcquire(final Path path, final boolean shared) throws IOException {
         return acquireInternal(path, shared, false);
     }
 
-    public static LockFile acquire(Path path, boolean shared) throws IOException {
+    public static LockFile acquire(final Path path, final boolean shared) throws IOException {
         return acquireInternal(path, shared, true);
     }
 }

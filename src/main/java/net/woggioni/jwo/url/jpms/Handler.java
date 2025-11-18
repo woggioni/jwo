@@ -11,7 +11,7 @@ import java.util.Optional;
 public class Handler extends URLStreamHandler {
 
     @Override
-    protected URLConnection openConnection(URL u) throws IOException {
+    protected URLConnection openConnection(final URL u) throws IOException {
         final Module thisModule = getClass().getModule();
         final Module sourceModule = Optional.ofNullable(thisModule)
                 .map(Module::getLayer)
@@ -25,7 +25,7 @@ public class Handler extends URLStreamHandler {
     private static class ModuleResourceURLConnection extends URLConnection {
         private final Module module;
 
-        private ModuleResourceURLConnection(URL url, Module module) {
+        private ModuleResourceURLConnection(final URL url, final Module module) {
             super(url);
             this.module = module;
         }

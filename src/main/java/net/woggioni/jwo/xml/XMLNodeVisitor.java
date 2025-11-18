@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Objects;
 
 public interface XMLNodeVisitor {
-    default NodeVisitResultPre visitNodePre(List<Node> stack) {
+    default NodeVisitResultPre visitNodePre(final List<Node> stack) {
         return NodeVisitResultPre.CONTINUE;
     }
 
-    default NodeVisitResultPost visitNodePost(List<Node> stack) {
+    default NodeVisitResultPost visitNodePost(final List<Node> stack) {
         return NodeVisitResultPost.CONTINUE;
     }
 
@@ -22,23 +22,23 @@ public interface XMLNodeVisitor {
         CONTINUE, END_TRAVERSAL
     }
 
-    static boolean stackMatches(List<Node> nodes, String... names) {
+    static boolean stackMatches(final List<Node> nodes, final String... names) {
         return stackMatches(nodes, false, names);
     }
 
-    static boolean stackSame(List<Node> nodes, String... names) {
+    static boolean stackSame(final List<Node> nodes, final String... names) {
         return stackMatches(nodes, true, names);
     }
 
-    static boolean stackMatches(List<Node> nodes, boolean strict, String... names) {
+    static boolean stackMatches(final List<Node> nodes, final boolean strict, final String... names) {
         if(nodes.size() < names.length) return false;
         int nameIndex = 0;
         int nodeIndex = 0;
         while(nameIndex < names.length) {
             if(nodeIndex >= nodes.size()) return false;
-            Node node = nodes.get(nodeIndex++);
+            final Node node = nodes.get(nodeIndex++);
             if(!strict && node.getNodeType() != Node.ELEMENT_NODE) continue;
-            String name = names[nameIndex++];
+            final String name = names[nameIndex++];
             if(name != null &&
                 node.getNodeType() == Node.ELEMENT_NODE &&
                 !Objects.equals(name, node.getNodeName())) return false;

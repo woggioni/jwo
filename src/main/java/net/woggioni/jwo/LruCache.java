@@ -23,19 +23,19 @@ public class LruCache<K, V> implements Map<K, V> {
 
     private final Chronometer chronometer = new Chronometer();
 
-    public LruCache(int maxSize) {
+    public LruCache(final int maxSize) {
         this(maxSize, false);
     }
 
-    public LruCache(int maxSize, boolean threadSafe) {
+    public LruCache(final int maxSize, final boolean threadSafe) {
         this(maxSize, threadSafe, null, null);
     }
 
-    public LruCache(int maxSize, boolean threadSafe, Function<? super K, ? extends V> loader) {
+    public LruCache(final int maxSize, final boolean threadSafe, final Function<? super K, ? extends V> loader) {
         this(maxSize, threadSafe, loader, null);
     }
 
-    public LruCache(int maxSize, boolean threadSafe, Function<? super K, ? extends V> loader, Map<K,V> fallback) {
+    public LruCache(final int maxSize, final boolean threadSafe, final Function<? super K, ? extends V> loader, final Map<K,V> fallback) {
         this.linkedHashMap = new LinkedHashMap<>();
         this.mtx = threadSafe ? linkedHashMap : null;
         this.maxSize = maxSize;
@@ -48,7 +48,7 @@ public class LruCache<K, V> implements Map<K, V> {
             } else {
                 this.loader = (K key) -> {
                     this.stats.miss++;
-                    V value = fallback.get(key);
+                    final V value = fallback.get(key);
                     if (value == null) {
                         return loader.apply(key);
                     } else {
@@ -62,7 +62,7 @@ public class LruCache<K, V> implements Map<K, V> {
         this.fallback = fallback;
     }
 
-    private <T> T withMutex(Supplier<T> supplier) {
+    private <T> T withMutex(final Supplier<T> supplier) {
         if(mtx != null) {
             synchronized (mtx) {
                 return supplier.get();
@@ -87,11 +87,11 @@ public class LruCache<K, V> implements Map<K, V> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         K k;
         try {
             k = (K) key;
-        } catch (ClassCastException cce) {
+        } catch (final ClassCastException cce) {
             return false;
         }
         return withMutex(() -> {
@@ -104,7 +104,7 @@ public class LruCache<K, V> implements Map<K, V> {
     }
 
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         return withMutex(() -> {
             boolean result = linkedHashMap.containsValue(value);
             if(!result && fallback != null) {
@@ -114,7 +114,7 @@ public class LruCache<K, V> implements Map<K, V> {
         });
     }
 
-    private V getOrFallback(K key) {
+    private V getOrFallback(final K key) {
         V value = linkedHashMap.get(key);
         if(value == null) {
             stats.miss++;
@@ -129,11 +129,11 @@ public class LruCache<K, V> implements Map<K, V> {
     }
 
     @Override
-    public V get(Object key) {
+    public V get(final Object key) {
         K k;
         try {
             k = (K) key;
-        } catch (ClassCastException cce) {
+        } catch (final ClassCastException cce) {
             return null;
         }
         return withMutex(() -> {
@@ -141,7 +141,7 @@ public class LruCache<K, V> implements Map<K, V> {
             if (loader != null) {
                 try {
                     chronometer.reset();
-                    V result = getOrFallback(k);
+                    final V result = getOrFallback(k);
                     if (result == null) {
                         V newValue;
                         if ((newValue = loader.apply(k)) != null) {
@@ -151,7 +151,7 @@ public class LruCache<K, V> implements Map<K, V> {
                     }
                     stats.loadingTime += chronometer.elapsed();
                     return result;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     stats.exceptions++;
                     throw e;
                 }
@@ -162,12 +162,12 @@ public class LruCache<K, V> implements Map<K, V> {
     }
 
     @Override
-    public V put(K k, V v) {
+    public V put(final K k, final V v) {
         return withMutex(() -> {
             if (linkedHashMap.size() == maxSize) {
-                Iterator<Entry<K, V>> it = linkedHashMap.entrySet().iterator();
+                final Iterator<Entry<K, V>> it = linkedHashMap.entrySet().iterator();
                 if (it.hasNext()) {
-                    Map.Entry<K, V> entry = it.next();
+                    final Map.Entry<K, V> entry = it.next();
                     remove(entry.getKey());
                     stats.evictions++;
                 }
@@ -181,10 +181,10 @@ public class LruCache<K, V> implements Map<K, V> {
     }
 
     @Override
-    public V remove(Object key) {
+    public V remove(final Object key) {
         return withMutex( () -> {
             if(fallback != null) {
-                V result = fallback.remove(key);
+                final V result = fallback.remove(key);
                 if(result != null) {
                     linkedHashMap.remove(key);
                 }
@@ -196,8 +196,8 @@ public class LruCache<K, V> implements Map<K, V> {
     }
 
     @Override
-    public void putAll(Map<? extends K, ? extends V> map) {
-        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+    public void putAll(final Map<? extends K, ? extends V> map) {
+        for (final Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
     }
@@ -280,11 +280,11 @@ public class LruCache<K, V> implements Map<K, V> {
             return (calls - miss) / (float) calls;
         }
 
-        public float getAverageLoadingTime(Chronometer.UnitOfMeasure unitOfMeasure) {
+        public float getAverageLoadingTime(final Chronometer.UnitOfMeasure unitOfMeasure) {
             return (float) stats.loadingTime / calls / unitOfMeasure.nanoseconds;
         }
 
-        public float getTotalLoadingTime(Chronometer.UnitOfMeasure unitOfMeasure) {
+        public float getTotalLoadingTime(final Chronometer.UnitOfMeasure unitOfMeasure) {
             return (float) stats.loadingTime / unitOfMeasure.nanoseconds;
         }
 

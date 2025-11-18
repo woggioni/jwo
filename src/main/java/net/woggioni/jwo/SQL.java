@@ -26,12 +26,12 @@ public class SQL {
 
         private final Map<String, Tuple2<Object, Class<?>>> fields = new TreeMap<>();
 
-        public QueryBuilder field(String name, Object value, Class<?> cls) {
+        public QueryBuilder field(final String name, final Object value, final Class<?> cls) {
             fields.put(name, Tuple2.newInstance(value, cls));
             return this;
         }
 
-        public QueryBuilder field(String name, Object value) {
+        public QueryBuilder field(final String name, final Object value) {
             if(value == null) {
                 throw newThrowable(IllegalArgumentException.class, "Class argument required for null value");
             }
@@ -39,15 +39,15 @@ public class SQL {
         }
 
         @SneakyThrows
-        public PreparedStatement buildStatement(Connection conn) {
-            StringBuilder sb = new StringBuilder();
+        public PreparedStatement buildStatement(final Connection conn) {
+            final StringBuilder sb = new StringBuilder();
             switch (operation) {
                 case INSERT:
                     sb.append("INSERT INTO ");
                     sb.append(tableName);
                     sb.append(" (");
                     int i = 0;
-                    List<Map.Entry<String, Tuple2<Object, Class<?>>>> entries = new ArrayList<>(fields.entrySet());
+                    final List<Map.Entry<String, Tuple2<Object, Class<?>>>> entries = new ArrayList<>(fields.entrySet());
                     for(Map.Entry<String, Tuple2<Object, Class<?>>> entry : entries) {
                         if(i++ > 0) sb.append(',');
                         sb.append(entry.getKey());
@@ -58,12 +58,12 @@ public class SQL {
                         if(i > 0) sb.append(',');
                     }
                     sb.append(");");
-                    PreparedStatement stmt = conn.prepareStatement(sb.toString());
+                    final PreparedStatement stmt = conn.prepareStatement(sb.toString());
                     i = 1;
-                    for(Map.Entry<String, Tuple2<Object, Class<?>>> entry : entries) {
-                        Tuple2<Object, Class<?>> tuple2 = entry.getValue();
-                        Object value = tuple2.get_1();
-                        Class<?> cls = tuple2.get_2();
+                    for(final Map.Entry<String, Tuple2<Object, Class<?>>> entry : entries) {
+                        final Tuple2<Object, Class<?>> tuple2 = entry.getValue();
+                        final Object value = tuple2.get_1();
+                        final  Class<?> cls = tuple2.get_2();
                         if(cls.isAssignableFrom(String.class)) {
                             stmt.setString(i, (String) value);
                         } else if(cls.isAssignableFrom(Integer.class)) {

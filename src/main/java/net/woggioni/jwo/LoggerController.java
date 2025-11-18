@@ -22,13 +22,13 @@ public class LoggerController {
     private static final Queue<SubstituteLoggingEvent> eventQueue = new LinkedBlockingQueue<>();
     private static final List<SubstituteLogger> substituteLoggers = new ArrayList<>();
 
-    public static Logger lazyLogger(String className) {
+    public static Logger lazyLogger(final String className) {
         synchronized (lock) {
             Logger result;
             if (initialized) {
                 result = LoggerFactory.getLogger(className);
             } else {
-                SubstituteLogger substituteLogger = new SubstituteLogger(className, eventQueue, false);
+                final SubstituteLogger substituteLogger = new SubstituteLogger(className, eventQueue, false);
                 substituteLoggers.add(substituteLogger);
                 result = substituteLogger;
             }
@@ -36,20 +36,20 @@ public class LoggerController {
         }
     }
 
-    public static Logger lazyLogger(Class<?> cls) {
+    public static Logger lazyLogger(final Class<?> cls) {
         return lazyLogger(cls.getName());
     }
 
     public static void initializeLoggers() {
         synchronized (lock) {
             SubstituteLogger firstLogger = null;
-            for (SubstituteLogger log : substituteLoggers) {
+            for (final SubstituteLogger log : substituteLoggers) {
                 if (firstLogger == null) firstLogger = log;
-                Logger realLogger = LoggerFactory.getLogger(log.getName());
+                final Logger realLogger = LoggerFactory.getLogger(log.getName());
                 log.setDelegate(realLogger);
             }
             if (firstLogger != null) {
-                for (LoggingEvent evt : eventQueue) {
+                for (final LoggingEvent evt : eventQueue) {
                     firstLogger.log(evt);
                 }
             }

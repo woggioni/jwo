@@ -28,11 +28,11 @@ public class SortedProperties extends Properties {
 
     @Override
     public Set<Object> keySet() {
-        Enumeration<Object> enumeration = super.keys();
+        final Enumeration<Object> enumeration = super.keys();
 
-        TreeSet<String> sortedSet = new TreeSet<>();
+        final TreeSet<String> sortedSet = new TreeSet<>();
         while(enumeration.hasMoreElements()) {
-            String key = (String) enumeration.nextElement();
+            final String key = (String) enumeration.nextElement();
             sortedSet.add(key);
         }
         return (Set) sortedSet;
@@ -40,11 +40,11 @@ public class SortedProperties extends Properties {
 
     @Override
     public Set<Map.Entry<Object, Object>> entrySet() {
-        Enumeration<Object> enumeration = keys();
+        final Enumeration<Object> enumeration = keys();
 
-        TreeMap<String, Object> sortedMap = new TreeMap<>();
+        final TreeMap<String, Object> sortedMap = new TreeMap<>();
         while(enumeration.hasMoreElements()) {
-            String key = (String) enumeration.nextElement();
+            final String key = (String) enumeration.nextElement();
             sortedMap.put(key, get(key));
         }
         return (Set) sortedMap.entrySet();

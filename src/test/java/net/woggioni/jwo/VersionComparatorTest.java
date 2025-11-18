@@ -15,7 +15,7 @@ public class VersionComparatorTest {
     private static class TestCaseProvider implements ArgumentsProvider {
         @Override
         @SneakyThrows
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+        public Stream<? extends Arguments> provideArguments(final ExtensionContext context) {
             return Stream.of(
                     Arguments.of("", "", 0),
                     Arguments.of("asdfg-2019", "asdfg-2019", 0),
@@ -34,7 +34,7 @@ public class VersionComparatorTest {
 
     @ParameterizedTest(name="version1: \"{0}\", version2: \"{1}\", expected outcome: {2}")
     @ArgumentsSource(TestCaseProvider.class)
-    public void test(String version1, String version2, int expectedOutcome) {
+    public void test(final String version1, final String version2, final int expectedOutcome) {
         Assertions.assertEquals(expectedOutcome, VersionComparator.cmp(version1, version2));
     }
 }

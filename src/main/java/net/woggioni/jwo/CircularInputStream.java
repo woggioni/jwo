@@ -11,7 +11,7 @@ public class CircularInputStream extends InputStream {
     int loops = 0;
     int cursor = 0;
 
-    public CircularInputStream(byte[] monomer) {
+    public CircularInputStream(final byte[] monomer) {
         this(monomer, -1);
     }
 
@@ -20,18 +20,18 @@ public class CircularInputStream extends InputStream {
         if (cursor < 0) {
             return cursor;
         } else {
-            int result = monomer[cursor];
+            final int result = monomer[cursor];
             incrementCursor();
             return result;
         }
     }
 
     @Override
-    public int read(byte[] b, int off, int len) {
+    public int read(final byte[] b, final int off, final int len) {
         int read = 0;
         while (read < len) {
             if(cursor < 0) break;
-            int toBeRead = Math.min(monomer.length - cursor, len - read);
+            final int toBeRead = Math.min(monomer.length - cursor, len - read);
             System.arraycopy(monomer, cursor, b, off + read, toBeRead);
             incrementCursor(toBeRead);
             read += toBeRead;
@@ -43,7 +43,7 @@ public class CircularInputStream extends InputStream {
         return incrementCursor(1);
     }
 
-    int incrementCursor(int increment) {
+    int incrementCursor(final int increment) {
         loops = (loops * monomer.length + increment) / monomer.length;
         if (maxLoops < 0 || loops < maxLoops) {
             cursor = (cursor + increment) % monomer.length;

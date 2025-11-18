@@ -19,9 +19,9 @@ public interface LazyValue<T> {
 
     T get();
 
-    <U> LazyValue<U> handle(BiFunction<T, Throwable, U> bifun);
+    <U> LazyValue<U> handle(final BiFunction<T, Throwable, U> bifun);
 
-    <U> LazyValue<U> map(Function<T, U> fun);
+    <U> LazyValue<U> map(final Function<T, U> fun);
 
     Stream<T> stream();
 
@@ -32,7 +32,7 @@ public interface LazyValue<T> {
      */
     Optional<T> close();
 
-    static <T> LazyValue<T> of(Supplier<T> supplier, ThreadSafetyMode locking, Consumer<T> finalizer) {
+    static <T> LazyValue<T> of(final Supplier<T> supplier, final ThreadSafetyMode locking, final Consumer<T> finalizer) {
         LazyValue<T> result;
         switch (locking) {
             case SYNCHRONIZED:
@@ -47,7 +47,7 @@ public interface LazyValue<T> {
         return result;
     }
 
-    static <T> LazyValue<T> of(Supplier<T> supplier, ThreadSafetyMode locking) {
+    static <T> LazyValue<T> of(final Supplier<T> supplier, final ThreadSafetyMode locking) {
         return of(supplier, locking, null);
     }
 }

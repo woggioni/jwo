@@ -17,7 +17,7 @@ public class ListView<T> implements List<T> {
     private final int start;
     private final int end;
 
-    public ListView(List<T> delegate, int start) {
+    public ListView(final List<T> delegate, final int start) {
         this(delegate, start, -1);
     }
 
@@ -32,8 +32,8 @@ public class ListView<T> implements List<T> {
     }
 
     @Override
-    public boolean contains(Object o) {
-        Iterator<T> it = iterator();
+    public boolean contains(final Object o) {
+        final Iterator<T> it = iterator();
         while (it.hasNext()) {
             if(Objects.equals(o, it.next())) {
                 return true;
@@ -60,8 +60,8 @@ public class ListView<T> implements List<T> {
 
     @Override
     public Object[] toArray() {
-        int size = size();
-        Object[] result = new Object[size];
+        final int size = size();
+        final Object[] result = new Object[size];
         for(int i = 0; i < size; i++) {
             result[i] = get(i);
         }
@@ -69,9 +69,9 @@ public class ListView<T> implements List<T> {
     }
 
     @Override
-    public <T1> T1[] toArray(T1[] t1s) {
-        int size = size();
-        T1[] result = Arrays.copyOf(t1s, size);
+    public <T1> T1[] toArray(final T1[] t1s) {
+        final int size = size();
+        final T1[] result = Arrays.copyOf(t1s, size);
         for(int i = 0; i < size; i++) {
             result[i] = (T1) get(i);
         }
@@ -79,37 +79,37 @@ public class ListView<T> implements List<T> {
     }
 
     @Override
-    public boolean add(T t) {
+    public boolean add(final T t) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean remove(Object o) {
+    public boolean remove(final Object o) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean containsAll(Collection<?> collection) {
+    public boolean containsAll(final Collection<?> collection) {
         return false;
     }
 
     @Override
-    public boolean addAll(Collection<? extends T> collection) {
+    public boolean addAll(final Collection<? extends T> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean addAll(int i, Collection<? extends T> collection) {
+    public boolean addAll(final int i, final Collection<? extends T> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeAll(Collection<?> collection) {
+    public boolean removeAll(final Collection<?> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean retainAll(Collection<?> collection) {
+    public boolean retainAll(final Collection<?> collection) {
         throw new UnsupportedOperationException();
     }
 
@@ -119,8 +119,8 @@ public class ListView<T> implements List<T> {
     }
 
     @Override
-    public T get(int i) {
-        int index = start + i;
+    public T get(final int i) {
+        final int index = start + i;
         if(end >= 0 && index < end) {
             throw new IndexOutOfBoundsException(Integer.toString(i));
         }
@@ -128,23 +128,23 @@ public class ListView<T> implements List<T> {
     }
 
     @Override
-    public T set(int i, T t) {
+    public T set(final int i, final T t) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void add(int i, T t) {
+    public void add(final int i, final T t) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public T remove(int i) {
+    public T remove(final int i) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int indexOf(Object o) {
-        int size = size();
+    public int indexOf(final Object o) {
+        final int size = size();
         for(int i = 0; i < size; i++) {
             if(Objects.equals(o, get(i))) {
                 return i;
@@ -154,8 +154,8 @@ public class ListView<T> implements List<T> {
     }
 
     @Override
-    public int lastIndexOf(Object o) {
-        int size = size();
+    public int lastIndexOf(final Object o) {
+        final int size = size();
         for(int i = size - 1; i >= 0; i--) {
             if(Objects.equals(o, get(i))) {
                 return i;
@@ -170,7 +170,7 @@ public class ListView<T> implements List<T> {
     }
 
     @Override
-    public ListIterator<T> listIterator(int i) {
+    public ListIterator<T> listIterator(final int i) {
         if(i < 0 || i > size()) {
             throw new IndexOutOfBoundsException(Integer.toString(0));
         } else {
@@ -179,7 +179,7 @@ public class ListView<T> implements List<T> {
     }
 
     @Override
-    public List<T> subList(int i, int i1) {
+    public List<T> subList(final int i, final int i1) {
         if(i < 0) {
             throw new IndexOutOfBoundsException(Integer.toString(0));
         } else if(i1 > size()) {
@@ -195,7 +195,7 @@ public class ListView<T> implements List<T> {
         int size;
         int i;
 
-        public ListViewIterator(ListView<T> listView, int start) {
+        public ListViewIterator(final ListView<T> listView, final int start) {
             this.listView = listView;
             size = listView.size();
             i = start;
@@ -237,12 +237,12 @@ public class ListView<T> implements List<T> {
         }
 
         @Override
-        public void set(T t) {
+        public void set(final T t) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void add(T t) {
+        public void add(final T t) {
             throw new UnsupportedOperationException();
         }
     }

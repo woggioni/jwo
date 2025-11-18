@@ -9,21 +9,21 @@ import java.io.OutputStream;
 
 public class Leb128 {
 
-    public static long reverse(long n) {
+    public static long reverse(final long n) {
         long res = 0;
         for(int i = 0; i < 8; i++) {
-            long b = (n & (0xFFL << (i * 8))) >>> (i * 8);
+            final long b = (n & (0xFFL << (i * 8))) >>> (i * 8);
             res |= b << ((7 - i) * 8);
         }
         return res;
     }
 
-    public static int encode(OutputStream os, double input) {
+    public static int encode(final OutputStream os, final double input) {
         return encode(os, reverse(Double.doubleToLongBits(input)));
     }
 
     @SneakyThrows
-    public static int encode(OutputStream os, long input) {
+    public static int encode(final OutputStream os, final long input) {
         int bytes_written = 0;
         long number = input >= 0 ? (input << 1) : (-(input + 1)) << 1 | 1;
         while((number & 127L) != number) {
@@ -62,7 +62,7 @@ public class Leb128 {
         public long decode() {
             long res = 0;
             for(int i = 0; i < (8 * 8 + 6) / 7; i++) {
-                int c = is.read();
+                final int c = is.read();
                 bytesRead++;
                 if(c < 0) {
                     throw new IllegalArgumentException("Unexpected end of file");

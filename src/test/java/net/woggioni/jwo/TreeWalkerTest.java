@@ -43,7 +43,7 @@ public class TreeWalkerTest {
             .map(entry -> newNode(entry.getKey(), entry.getValue()))
             .collect(Collectors.toMap(Node::getId, Function.identity()));
 
-    private Node newNode(int id, List<Integer> children) {
+    private Node newNode(final int id, final List<Integer> children) {
         if(children == null) {
             return new Node(id, Collections.emptyList());
         } else {
@@ -63,7 +63,7 @@ public class TreeWalkerTest {
         Iterator<Integer> it_post = expected_post_sequence.iterator();
         TreeNodeVisitor<Node, Void> nodeVisitor = new TreeNodeVisitor<Node, Void>() {
             @Override
-            public VisitOutcome visitPre(List<StackContext<Node, Void>> stackContextList) {
+            public VisitOutcome visitPre(final List<StackContext<Node, Void>> stackContextList) {
                 Assertions.assertTrue(it_pre.hasNext());
                 Assertions.assertEquals(it_pre.next(),
                         stackContextList.get(stackContextList.size() - 1).getNode().getId());
@@ -71,13 +71,13 @@ public class TreeWalkerTest {
             }
 
             @Override
-            public void visitPost(List<StackContext<Node, Void>> stackContextList) {
+            public void visitPost(final List<StackContext<Node, Void>> stackContextList) {
                 Assertions.assertTrue(it_post.hasNext());
                 Assertions.assertEquals(it_post.next(),
                         stackContextList.get(stackContextList.size() - 1).getNode().getId());
             }
         };
-        TreeWalker<Node, Void> walker =
+        final TreeWalker<Node, Void> walker =
                 new TreeWalker<>(nodeVisitor);
         walker.walk(testNodeMap.get(1));
         Assertions.assertFalse(it_pre.hasNext());
@@ -86,14 +86,14 @@ public class TreeWalkerTest {
 
     @Test
     public void filterTest() {
-        List<Integer> expected_pre_sequence = Stream.of(1, 2, 3, 4, 5, 8)
+        final List<Integer> expected_pre_sequence = Stream.of(1, 2, 3, 4, 5, 8)
                 .collect(Collectors.toList());
-        Iterator<Integer> it = expected_pre_sequence.iterator();
-        TreeNodeVisitor<Node, Void> linkVisitor = new TreeNodeVisitor<Node, Void>() {
+        final Iterator<Integer> it = expected_pre_sequence.iterator();
+        final TreeNodeVisitor<Node, Void> linkVisitor = new TreeNodeVisitor<Node, Void>() {
             @Override
-            public VisitOutcome visitPre(List<StackContext<Node, Void>> nodePath) {
+            public VisitOutcome visitPre(final List<StackContext<Node, Void>> nodePath) {
                 Assertions.assertTrue(it.hasNext());
-                Integer id = nodePath.get(nodePath.size() - 1).getNode().getId();
+                final Integer id = nodePath.get(nodePath.size() - 1).getNode().getId();
                 Assertions.assertEquals(it.next(), id);
                 if(Objects.equals(4, nodePath.get(nodePath.size() - 1).getNode().getId())) {
                     return VisitOutcome.SKIP;
@@ -102,7 +102,7 @@ public class TreeWalkerTest {
                 }
             }
         };
-        TreeWalker<Node, Void> walker =
+        final TreeWalker<Node, Void> walker =
                 new TreeWalker<>(linkVisitor);
         walker.walk(testNodeMap.get(1));
         Assertions.assertFalse(it.hasNext());

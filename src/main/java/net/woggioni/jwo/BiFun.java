@@ -8,9 +8,9 @@ import java.util.function.BiFunction;
 public interface BiFun<T, U, V> extends BiFunction<T, U, V> {
     @Override
     @SneakyThrows
-    default V apply(T t, U u) {
+    default V apply(final T t, final U u) {
         return exec(t, u);
     }
 
-    V exec(T t, U u) throws Throwable;
+    V exec(final T t, final U u) throws Throwable;
 }

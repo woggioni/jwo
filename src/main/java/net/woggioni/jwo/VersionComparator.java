@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class VersionComparator implements Comparator<String> {
 
-    private static int indexOf(char[] haystack, char needle, int start) {
+    private static int indexOf(final char[] haystack, final char needle, final int start) {
         int result = -1;
         for (int i = start; i < haystack.length; ++i) {
             if (haystack[i] == needle) {
@@ -17,12 +17,12 @@ public class VersionComparator implements Comparator<String> {
         return result;
     }
 
-    private static int indexOf(char[] haystack, char needle) {
+    private static int indexOf(final char[] haystack, final char needle) {
         return indexOf(haystack, needle, 0);
     }
 
-    private static char[] cstring(String s) {
-        char[] result = new char[s.length() + 1];
+    private static char[] cstring(final String s) {
+        final char[] result = new char[s.length() + 1];
         for(int i=0; i<s.length(); i++) {
             result[i] = s.charAt(i);
         }
@@ -30,11 +30,11 @@ public class VersionComparator implements Comparator<String> {
         return result;
     }
 
-    private static boolean cstringEquals(char[] cstring1, int begin1, char[] cstring2, int begin2) {
+    private static boolean cstringEquals(final char[] cstring1, final int begin1, final char[] cstring2, final int begin2) {
         int i=0;
         while(i < cstring1.length + begin1 || i < cstring2.length + begin2) {
-            char c1 = cstring1[begin1 + i];
-            char c2 = cstring2[begin2 + i];
+            final char c1 = cstring1[begin1 + i];
+            final char c2 = cstring2[begin2 + i];
             if(c1 != c2) return false;
             else if(c1 == '\0') break;
             i++;
@@ -42,7 +42,7 @@ public class VersionComparator implements Comparator<String> {
         return true;
     }
 
-    private static int strlen(char[] cstring, int begin) {
+    private static int strlen(final char[] cstring, final int begin) {
         int i = begin;
         while(i < cstring.length) {
             if(cstring[i] == '\0') break;
@@ -51,16 +51,16 @@ public class VersionComparator implements Comparator<String> {
         return i - begin;
     }
 
-    private static int strlen(char[] cstring) {
+    private static int strlen(final char[] cstring) {
         return strlen(cstring, 0);
     }
 
-    private static int strcmp(char[] cstring1, int begin1, char[] cstring2, int begin2) {
+    private static int strcmp(final char[] cstring1, final int begin1, final char[] cstring2, final int begin2) {
         int i = 0;
-        int lim = Math.min(strlen(cstring1, begin1), strlen(cstring2, begin2));
+        final int lim = Math.min(strlen(cstring1, begin1), strlen(cstring2, begin2));
         while(i < lim) {
-            char c1 = cstring1[begin1 + i];
-            char c2 = cstring2[begin2 + i];
+            final char c1 = cstring1[begin1 + i];
+            final char c2 = cstring2[begin2 + i];
             if(c1 < c2) {
                 return -1;
             } else if(c1 > c2) {
@@ -76,7 +76,7 @@ public class VersionComparator implements Comparator<String> {
      * @param text		[epoch:]version[-release] string
      * @param evr		array that will contain starting indexes of epoch, version, and release
      */
-    private static void parseEVR(char[] text, int[] evr) {
+    private static void parseEVR(final char[] text, final int[] evr) {
         int epoch;
         int version;
         int release;
@@ -111,11 +111,11 @@ public class VersionComparator implements Comparator<String> {
     }
 
 
-    private static int rpmvercmp(char[] chars1, int start1, char[] chars2, int start2) {
+    private static int rpmvercmp(final char[] chars1, final int start1, final char[] chars2, final int start2) {
         // easy comparison to see if versions are identical
         if(strcmp(chars1, start1, chars2, start2) == 0) return 0;
-        char[] str1 = Arrays.copyOfRange(chars1, start1, start1 + strlen(chars1, start1) + 1);
-        char[] str2 = Arrays.copyOfRange(chars2, start2, start2 + strlen(chars2, start2) + 1);
+        final char[] str1 = Arrays.copyOfRange(chars1, start1, start1 + strlen(chars1, start1) + 1);
+        final char[] str2 = Arrays.copyOfRange(chars2, start2, start2 + strlen(chars2, start2) + 1);
         int one = 0, two = 0;
         int ptr1 = 0, ptr2 = 0;
         boolean isNum;
@@ -207,8 +207,8 @@ public class VersionComparator implements Comparator<String> {
                 while (str2[two] == '0') two++;
 
                 /* whichever number has more digits wins */
-                int len1 = strlen(str1, one);
-                int len2 = strlen(str2, two);
+                final int len1 = strlen(str1, one);
+                final int len2 = strlen(str2, two);
                 if (len1 > len2) {
                     return 1;
                 } else if (len2 > len1) {
@@ -219,7 +219,7 @@ public class VersionComparator implements Comparator<String> {
             // segments are alpha or if they are numeric.  don't return
             // if they are equal because there might be more segments to
             // compare
-            int rc = strcmp(str1, one, str2, two);
+            final int rc = strcmp(str1, one, str2, two);
             if (rc != 0) return rc;
 
             // restore character that was replaced by null above
@@ -252,26 +252,26 @@ public class VersionComparator implements Comparator<String> {
 
     private static char[] defaultEpoch = new char[] {'0'};
 
-    public static int cmp(String v1, String v2) {
+    public static int cmp(final String v1, final String v2) {
         if(v1 == null && v2 == null) return 0;
         else if(v1 == null) return -1;
         else if(v2 == null) return 1;
         else if(Objects.equals(v1, v2)) return 0;
 
-        char[] chars1 = cstring(v1);
-        char[] chars2 = cstring(v2);
-        int[] evr = new int[3];
+        final char[] chars1 = cstring(v1);
+        final char[] chars2 = cstring(v2);
+        final int[] evr = new int[3];
         parseEVR(chars1, evr);
-        int epoch1 = evr[0];
-        int version1 = evr[1];
-        int release1 = evr[2];
+        final int epoch1 = evr[0];
+        final int version1 = evr[1];
+        final int release1 = evr[2];
         parseEVR(chars2, evr);
-        int epoch2 = evr[0];
-        int version2 = evr[1];
-        int release2 = evr[2];
+        final int epoch2 = evr[0];
+        final int version2 = evr[1];
+        final int release2 = evr[2];
 
-        char[] seq1 = epoch1 == -1 ? defaultEpoch : chars1;
-        char[] seq2 = epoch2 == -1 ? defaultEpoch : chars2;
+        final char[] seq1 = epoch1 == -1 ? defaultEpoch : chars1;
+        final char[] seq2 = epoch2 == -1 ? defaultEpoch : chars2;
         int ret = rpmvercmp(seq1, epoch1 == -1 ? 0 : epoch1, seq2, epoch2 == -1 ? 0 : epoch2);
         if(ret == 0) {
             ret = rpmvercmp(chars1, version1, chars2, version2);
@@ -283,7 +283,7 @@ public class VersionComparator implements Comparator<String> {
     }
 
     @Override
-    public int compare(String v1, String v2) {
+    public int compare(final String v1, final String v2) {
         return cmp(v1, v2);
     }
 }

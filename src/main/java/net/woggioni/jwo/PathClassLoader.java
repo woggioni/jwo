@@ -34,26 +34,26 @@ public final class PathClassLoader extends ClassLoader {
         registerAsParallelCapable();
     }
 
-    public PathClassLoader(Path ...path) {
+    public PathClassLoader(final Path ...path) {
         this(Arrays.asList(path), null);
     }
 
-    public PathClassLoader(Iterable<Path> paths) {
+    public PathClassLoader(final Iterable<Path> paths) {
         this(paths, null);
     }
 
-    public PathClassLoader(Iterable<Path> paths, ClassLoader parent) {
+    public PathClassLoader(final Iterable<Path> paths, final ClassLoader parent) {
         super(parent);
         this.paths = paths;
     }
 
     @Override
     @SneakyThrows
-    protected Class<?> findClass(String name) {
-        for(Path path : paths) {
-            Path classPath = path.resolve(name.replace('.', '/').concat(".class"));
+    protected Class<?> findClass(final String name) {
+        for(final Path path : paths) {
+            final Path classPath = path.resolve(name.replace('.', '/').concat(".class"));
             if (Files.exists(classPath)) {
-                byte[] byteCode = Files.readAllBytes(classPath);
+                final byte[] byteCode = Files.readAllBytes(classPath);
                 return defineClass(name, byteCode, 0, byteCode.length);
             }
         }
@@ -62,9 +62,9 @@ public final class PathClassLoader extends ClassLoader {
 
     @Override
     @SneakyThrows
-    protected URL findResource(String name) {
-        for(Path path : paths) {
-            Path resolved = path.resolve(name);
+    protected URL findResource(final String name) {
+        for(final Path path : paths) {
+            final Path resolved = path.resolve(name);
             if (Files.exists(resolved)) {
                 return toURL(resolved);
             }
@@ -75,10 +75,10 @@ public final class PathClassLoader extends ClassLoader {
     @Override
     protected Enumeration<URL> findResources(final String name) throws IOException {
         final List<URL> resources = new ArrayList<>(1);
-        for(Path path : paths) {
+        for(final Path path : paths) {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
                     if (!name.isEmpty()) {
                         this.addIfMatches(resources, file);
                     }
@@ -86,14 +86,14 @@ public final class PathClassLoader extends ClassLoader {
                 }
 
                 @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
                     if (!name.isEmpty() || path.equals(dir)) {
                         this.addIfMatches(resources, dir);
                     }
                     return super.preVisitDirectory(dir, attrs);
                 }
 
-                void addIfMatches(List<URL> resources, Path file) throws IOException {
+                void addIfMatches(final List<URL> resources, final Path file) throws IOException {
                     if (path.relativize(file).toString().equals(name)) {
                         resources.add(toURL(file));
                     }
@@ -103,7 +103,7 @@ public final class PathClassLoader extends ClassLoader {
         return Collections.enumeration(resources);
     }
 
-    private static URL toURL(Path path) throws IOException {
+    private static URL toURL(final Path path) throws IOException {
         return new URL(null, path.toUri().toString(), PathURLStreamHandler.INSTANCE);
     }
 
@@ -111,7 +111,7 @@ public final class PathClassLoader extends ClassLoader {
 
         private final Path path;
 
-        PathURLConnection(URL url, Path path) {
+        PathURLConnection(final URL url, final Path path) {
             super(url);
             this.path = path;
         }
@@ -123,7 +123,7 @@ public final class PathClassLoader extends ClassLoader {
         public long getContentLengthLong() {
             try {
                 return Files.size(this.path);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException("could not get size of: " + this.path, e);
             }
         }
@@ -147,7 +147,7 @@ public final class PathClassLoader extends ClassLoader {
         @Override
         @SneakyThrows
         public long getLastModified() {
-            BasicFileAttributes attributes = Files.readAttributes(this.path, BasicFileAttributes.class);
+            final BasicFileAttributes attributes = Files.readAttributes(this.path, BasicFileAttributes.class);
             return attributes.lastModifiedTime().toMillis();
         }
     }
@@ -159,9 +159,9 @@ public final class PathClassLoader extends ClassLoader {
 
         @Override
         @SneakyThrows
-        protected URLConnection openConnection(URL url) {
-            URI uri = url.toURI();
-            Path path = Paths.get(uri);
+        protected URLConnection openConnection(final URL url) {
+            final URI uri = url.toURI();
+            final Path path = Paths.get(uri);
             return new PathURLConnection(url, path);
         }
     }

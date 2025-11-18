@@ -18,16 +18,16 @@ public class JarExtractorInputStream extends JarInputStream {
     private final Path destination;
     private OutputStream currentFile = null;
 
-    public JarExtractorInputStream(InputStream source,
-                                   Path destination,
-                                   boolean verify,
-                                   String sourceLocation) throws IOException {
+    public JarExtractorInputStream(final InputStream source,
+                                   final Path destination,
+                                   final boolean verify,
+                                   final String sourceLocation) throws IOException {
         super(source, verify);
         this.destination = destination;
-        Path newFileSystemLocation = destination.resolve(JarFile.MANIFEST_NAME);
+        final Path newFileSystemLocation = destination.resolve(JarFile.MANIFEST_NAME);
         Files.createDirectories(newFileSystemLocation.getParent());
-        try(OutputStream outputStream = Files.newOutputStream(newFileSystemLocation)) {
-            Manifest manifest = getManifest();
+        try(final OutputStream outputStream = Files.newOutputStream(newFileSystemLocation)) {
+            final Manifest manifest = getManifest();
             if(manifest == null) {
                 String location;
                 if(sourceLocation == null) {
@@ -44,9 +44,9 @@ public class JarExtractorInputStream extends JarInputStream {
 
     @Override
     public ZipEntry getNextEntry() throws IOException {
-        ZipEntry entry = super.getNextEntry();
+        final ZipEntry entry = super.getNextEntry();
         if(entry != null) {
-            Path newFileSystemLocation = destination.resolve(entry.getName());
+            final Path newFileSystemLocation = destination.resolve(entry.getName());
             if(entry.isDirectory()) {
                 Files.createDirectories(newFileSystemLocation);
             } else {
@@ -59,14 +59,14 @@ public class JarExtractorInputStream extends JarInputStream {
 
     @Override
     public int read() throws IOException {
-        int result = super.read();
+        final int result = super.read();
         if(result != -1 && currentFile != null) currentFile.write(result);
         return result;
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int read = super.read(b, off, len);
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        final int read = super.read(b, off, len);
         if(read != -1 && currentFile != null) currentFile.write(b, off, read);
         return read;
     }

@@ -65,11 +65,11 @@ public class JavaProcessBuilder {
      * @param strings list of command line arguments to be passed to the spawned JVM
      * @return the Java argument file content as a string
      */
-    static String generateArgumentFileString(List<String> strings) {
-        StringBuilder sb = new StringBuilder();
+    static String generateArgumentFileString(final List<String> strings) {
+        final StringBuilder sb = new StringBuilder();
         int i = 0;
         while(i < strings.size()) {
-            CharacterIterator it = new StringCharacterIterator(strings.get(i));
+            final CharacterIterator it = new StringCharacterIterator(strings.get(i));
             sb.append('"');
             for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
                 switch (c) {
@@ -103,20 +103,20 @@ public class JavaProcessBuilder {
 
     @SneakyThrows
     public ProcessBuilder build() {
-        ArrayList<String> cmd = new ArrayList<>();
-        Path javaBin = Paths.get(javaHome, "bin", "java");
+        final ArrayList<String> cmd = new ArrayList<>();
+        final Path javaBin = Paths.get(javaHome, "bin", "java");
         cmd.add(javaBin.toString());
         cmd.addAll(jvmArgs);
         if(!classpath.isEmpty()) {
             cmd.add("-cp");
             cmd.add(String.join(PATH_SEPARATOR, classpath));
         }
-        for(Map.Entry<Object, Object> entry : properties.entrySet()) {
+        for(final Map.Entry<Object, Object> entry : properties.entrySet()) {
             cmd.add(String.format("-D%s=%s", entry.getKey(), entry.getValue()));
         }
-        for(JavaAgent javaAgent : javaAgents) {
-            StringBuilder sb = new StringBuilder("-javaagent:").append(javaAgent.jar.toString());
-            String agentArguments = javaAgent.args;
+        for(final JavaAgent javaAgent : javaAgents) {
+            final StringBuilder sb = new StringBuilder("-javaagent:").append(javaAgent.jar.toString());
+            final String agentArguments = javaAgent.args;
             if(agentArguments != null) {
                 sb.append('=');
                 sb.append(agentArguments);
@@ -135,7 +135,7 @@ public class JavaProcessBuilder {
         cmd.addAll(cliArgs);
 
         int cmdLength = 0;
-        for(String part : cmd) {
+        for(final String part : cmd) {
             cmdLength += part.length();
         }
         //Add space between arguments
@@ -145,20 +145,20 @@ public class JavaProcessBuilder {
             log.debug("Spawning new process with command line: [{}]",
                     cmd.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
         }
-        int jvmVersion = Integer.parseInt(System.getProperty("java.vm.specification.version"));
+        final int jvmVersion = Integer.parseInt(System.getProperty("java.vm.specification.version"));
         if(jvmVersion < 9 /* Java versions 8 and earlier do not support argument files */ || cmdLength < COMMAND_LINE_MAX_SIZE || cmd.size() == 1) {
             return new ProcessBuilder(cmd);
         } else {
-            Path argumentFile = Files.createTempFile(PROCESS_BUILDER_PREFIX, ".arg");
+            final Path argumentFile = Files.createTempFile(PROCESS_BUILDER_PREFIX, ".arg");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
                     Files.delete(argumentFile);
-                } catch (IOException ioe) {
+                } catch (final IOException ioe) {
                     ioe.printStackTrace();
                 }
             }));
             log.trace("Using Java argument file '{}'", argumentFile);
-            try(Writer writer = Files.newBufferedWriter(argumentFile)) {
+            try(final Writer writer = Files.newBufferedWriter(argumentFile)) {
                 writer.write(generateArgumentFileString(cmd.subList(1, cmd.size())));
             }
             return new ProcessBuilder(cmd.get(0), "@" + argumentFile);

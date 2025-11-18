@@ -10,7 +10,7 @@ public class CircularBuffer {
     private Reader reader;
     private int delta = 0, cursor = 0;
 
-    public CircularBuffer(Reader reader, int size) {
+    public CircularBuffer(final Reader reader, final int size) {
         this.reader = reader;
         buffer = new int[size];
     }
@@ -20,7 +20,7 @@ public class CircularBuffer {
         if (delta < 0)
             return buffer[Math.floorMod(cursor + delta++, buffer.length)];
         else {
-            int result = reader.read();
+            final int result = reader.read();
             if (result < 0) return result;
             buffer[cursor] = result;
             cursor = (cursor + 1) % buffer.length;

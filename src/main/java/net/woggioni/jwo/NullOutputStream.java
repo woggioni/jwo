@@ -4,8 +4,8 @@ import java.io.OutputStream;
 
 public class NullOutputStream extends OutputStream {
     @Override
-    public void write(int i) {}
+    public void write(final int i) {}
 
     @Override
-    public void write(byte[] bytes) {}
+    public void write(final byte[] bytes) {}
 }

@@ -8,9 +8,9 @@ import java.util.function.Function;
 public interface Fun<T, U> extends Function<T, U> {
     @Override
     @SneakyThrows
-    default U apply(T t) {
+    default U apply(final T t) {
         return exec(t);
     }
 
-    U exec(T t) throws Throwable;
+    U exec(final T t) throws Throwable;
 }

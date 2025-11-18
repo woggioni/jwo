@@ -12,11 +12,11 @@ public class ElementIterator implements Iterator<Element> {
     private final String name;
     private Element next;
 
-    public ElementIterator(Element parent) {
+    public ElementIterator(final Element parent) {
         this(parent, null);
     }
 
-    public ElementIterator(Element parent, String name) {
+    public ElementIterator(final Element parent, final String name) {
         it = new NodeListIterator(parent.getChildNodes());
         this.name = name;
         next = getNext();
@@ -30,7 +30,7 @@ public class ElementIterator implements Iterator<Element> {
     @Override
     public Element next() {
         if(next == null) throw new NoSuchElementException();
-        Element result = next;
+        final Element result = next;
         next = getNext();
         return result;
     }
@@ -38,7 +38,7 @@ public class ElementIterator implements Iterator<Element> {
     private Element getNext() {
         Element result = null;
         while(it.hasNext()) {
-            Node node = it.next();
+            final Node node = it.next();
             if(node instanceof Element && (name == null || Objects.equals(name, ((Element) node).getTagName()))) {
                 result = (Element) node;
                 break;
