@@ -12,17 +12,17 @@ import net.woggioni.gradle.envelope.EnvelopePlugin
 
 
 configurations {
-    testImplementation {
-        attributes {
-            attribute(LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements.class, JAR))
-        }
-    }
+//    testImplementation {
+//        attributes {
+//            attribute(LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements.class, JAR))
+//        }
+//    }
 
-    testRuntimeClasspath {
-        attributes {
-            attribute(LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements.class, JAR))
-        }
-    }
+//    testRuntimeClasspath {
+//        attributes {
+//            attribute(LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements.class, JAR))
+//        }
+//    }
 }
 
 java {

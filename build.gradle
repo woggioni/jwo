@@ -9,7 +9,7 @@ plugins {
     alias(catalog.plugins.finalguard)
 }
 
-finalGuard {
+finalguard {
 //    defaultLevel = Diagnostic.Kind.ERROR
     methodParameterLevel = Diagnostic.Kind.ERROR
 //    lambdaParameterLevel = Diagnostic.Kind.ERROR
