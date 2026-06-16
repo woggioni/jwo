@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [ dev ]
+env:
+  JAVA_VERSION: '21'
+  GRADLE_VERSION: '8.14.5'
+  RUNNER_TOOL_CACHE: /var/lib/gitea-runner/.toolcache
+  GRADLE_USER_HOME: /var/lib/gitea-runner/.gradle
+jobs:
+  build:
+    name: Build and Test
+    runs-on: hostinger
+    timeout-minutes: 30
+    container:
+      image: gitea.woggioni.net/woggioni/gitea-runner/java:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'oracle'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+          # Only the main branch writes to the cache; PRs/feature branches read-only
+          cache-read-only: false
+
+      - name: Run Gradle build
+        run: ./gradlew build --no-daemon
