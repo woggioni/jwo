@@ -3,24 +3,20 @@ on:
   push:
     branches: [ dev ]
 env:
-  JAVA_VERSION: '21'
+  JAVA_VERSION: '25'
   GRADLE_VERSION: '8.14.5'
-  RUNNER_TOOL_CACHE: /var/lib/gitea-runner/.toolcache
-  GRADLE_USER_HOME: /var/lib/gitea-runner/.gradle
 jobs:
   build:
     name: Build and Test
     runs-on: hostinger
     timeout-minutes: 30
     container:
-      image: gitea.woggioni.net/woggioni/gitea-runner/java:latest
-
+      image: gitea.woggioni.net/woggioni/gitea-runner/debian:latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -36,3 +32,8 @@ jobs:
 
       - name: Run Gradle build
         run: ./gradlew build --no-daemon
+
+#      - name: Publish artifacts
+#        env:
+#          PUBLISHER_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
+#        run: ./gradlew --no-daemon publish
