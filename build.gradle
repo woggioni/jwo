@@ -9,7 +9,7 @@ plugins {
     alias(catalog.plugins.finalguard)
 }
 
-finalGuard {
+finalguard {
 //    defaultLevel = Diagnostic.Kind.ERROR
     methodParameterLevel = Diagnostic.Kind.ERROR
 //    lambdaParameterLevel = Diagnostic.Kind.ERROR
@@ -38,8 +38,7 @@ allprojects {
 
         java {
             toolchain {
-                languageVersion = JavaLanguageVersion.of(21)
-                vendor = JvmVendorSpec.ORACLE
+                languageVersion = JavaLanguageVersion.of(25)
             }
             modularity.inferModulePath = true
         }
